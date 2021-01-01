@@ -10,9 +10,6 @@ typedef struct array{
   int shape[2];
 }dARRAY;
 
-double cache;
-int return_cache;
-
 dARRAY * zeros(int * dims);
 dARRAY * ones(int * dims);
 dARRAY * eye(int * dims);

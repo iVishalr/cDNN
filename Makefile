@@ -6,6 +6,8 @@ BUILD=build
 SRC=src
 UTILS=utils
 TEST=test
+ACTIVATIONS=Activations
+RELU=relu
 all: 
 	@if ! test -d $(BUILD); \
 		then echo "\033[93msetting up build directory...\033[0m"; mkdir -p build;\
@@ -13,14 +15,17 @@ all:
 	@if ! test -d bin; \
 		then echo "\033[93msetting up bin directory...\033[0m"; mkdir -p bin; \
   	fi;
-	@$(MAKE) start	
-start: $(BUILD)/test_utils.o $(BUILD)/utils.o
-	$(CC) $(ATTR) $(BUILD)/test_utils.o $(BUILD)/utils.o
+	@$(MAKE) start
+# $(BUILD)/test_utils.o	
+start:  $(BUILD)/utils.o $(BUILD)/relu.o
+	$(CC) $(ATTR) $(BUILD)/utils.o $(BUILD)/relu.o
 	@echo "\033[92mBuild Successful\033[0m"
-$(BUILD)/test_utils.o: $(SRC)/$(TEST)/test_utils.c
-	$(CC) $(CFLAGS) -o $@ $<
-	@echo "\033[92mCompiled Test\033[0m"
+# $(BUILD)/test_utils.o: $(SRC)/$(TEST)/test_utils.c
+# 	$(CC) $(CFLAGS) -o $@ $<
+# 	@echo "\033[92mCompiled Test\033[0m"
 $(BUILD)/utils.o: $(SRC)/$(UTILS)/utils.c
+	$(CC) $(CFLAGS) $(ATTR) -o $@ $<
+$(BUILD)/relu.o: $(SRC)/$(UTILS)/$(ACTIVATIONS)/$(RELU)/relu.c
 	$(CC) $(CFLAGS) $(ATTR) -o $@ $<
 clean:
 	@rm -rf $(BUILD) a.out a.exe

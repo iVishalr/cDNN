@@ -1,5 +1,8 @@
 #include "./utils.h"
 
+double cache;
+int return_cache;
+
 /**!
  * Creates a matrix filled with zeros. 
  * @param dims An array of matrix dimensions (int)[rows,columns] 
