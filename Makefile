@@ -7,7 +7,7 @@ SRC=src
 UTILS=utils
 TEST=test
 ACTIVATIONS=Activations
-RELU=relu
+RELU=sigmoid
 all: 
 	@if ! test -d $(BUILD); \
 		then echo "\033[93msetting up build directory...\033[0m"; mkdir -p build;\
@@ -25,7 +25,7 @@ start:  $(BUILD)/utils.o $(BUILD)/relu.o
 # 	@echo "\033[92mCompiled Test\033[0m"
 $(BUILD)/utils.o: $(SRC)/$(UTILS)/utils.c
 	$(CC) $(CFLAGS) $(ATTR) -o $@ $<
-$(BUILD)/relu.o: $(SRC)/$(UTILS)/$(ACTIVATIONS)/$(RELU)/relu.c
+$(BUILD)/relu.o: $(SRC)/$(UTILS)/$(ACTIVATIONS)/$(RELU)/sigmoid.c
 	$(CC) $(CFLAGS) $(ATTR) -o $@ $<
 clean:
 	@rm -rf $(BUILD) a.out a.exe

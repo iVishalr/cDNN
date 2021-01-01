@@ -139,10 +139,10 @@ dARRAY * multiply(dARRAY * restrict MatrixA, dARRAY * restrict MatrixB){
     temp = b_cast(MatrixB,MatrixA);
     totalLen = y*y;
   }
-  if(temp==NULL){
-    printf("\033[1;31mError:\033[93m Could not perform multiply(). Please check shape of input matrices.\033[0m\n");
-    return NULL;
-  }
+  // if(temp==NULL){
+  //   printf("\033[1;31mError:\033[93m Could not perform multiply(). Please check shape of input matrices.\033[0m\n");
+  //   return NULL;
+  // }
   //since both the matrices must have the same dimensions, we can use shape of any matrix
   dARRAY * result = (dARRAY*)malloc(sizeof(dARRAY));
   double * res = (double*)malloc(sizeof(double)*totalLen);
@@ -394,10 +394,10 @@ dARRAY * b_cast(dARRAY * MatrixA, dARRAY * MatrixB){
     b_castArr->shape[0] = MatrixA->shape[0];
     b_castArr->shape[1] = MatrixA->shape[1];
   }
-  else{
-    printf("\033[1;31mError:\033[93m Matrices of shape (%d,%d) and (%d,%d) could not be broadcasted! Please input matrices with broadcastable dims.\n\033[1;36m(Refer www.numpy.org for more information on broadcasting)\033[0m\n",MatrixA->shape[0],MatrixA->shape[1],MatrixB->shape[0],MatrixB->shape[1]);
-    return NULL;
-  }
+  // else{
+  //   printf("\033[1;31mError:\033[93m Matrices of shape (%d,%d) and (%d,%d) could not be broadcasted! Please input matrices with broadcastable dims.\n\033[1;36m(Refer www.numpy.org for more information on broadcasting)\033[0m\n",MatrixA->shape[0],MatrixA->shape[1],MatrixB->shape[0],MatrixB->shape[1]);
+  //   return NULL;
+  // }
   return b_castArr;
 }
 
