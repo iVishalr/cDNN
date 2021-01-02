@@ -130,25 +130,33 @@ dARRAY * multiply(dARRAY * restrict MatrixA, dARRAY * restrict MatrixB){
   dARRAY * temp = NULL;
   int x = size(MatrixA);
   int y = size(MatrixB);
-  int totalLen = 0;
+  int flag = 0;
   if(x>y){ 
     temp = b_cast(MatrixA,MatrixB); 
-    totalLen = x*x;
+    flag=1;
   }
   else if(x<y){
     temp = b_cast(MatrixB,MatrixA);
-    totalLen = y*y;
+    flag=1;
   }
-  // if(temp==NULL){
-  //   printf("\033[1;31mError:\033[93m Could not perform multiply(). Please check shape of input matrices.\033[0m\n");
-  //   return NULL;
-  // }
+  if(temp==NULL && flag){
+    printf("\033[1;31mError:\033[93m Could not perform multiply(). Please check shape of input matrices.\033[0m\n");
+    return NULL;
+  }
   //since both the matrices must have the same dimensions, we can use shape of any matrix
   dARRAY * result = (dARRAY*)malloc(sizeof(dARRAY));
-  double * res = (double*)malloc(sizeof(double)*totalLen);
-  for(int i=0;i<totalLen;i++)
-      res[i] = x>y ? MatrixA->matrix[i] * temp->matrix[i] : temp->matrix[i] * MatrixB->matrix[i];
-  result->shape[0] = result->shape[1] = MatrixA->shape[0];
+  result->matrix = (double*)malloc(sizeof(double)*MatrixA->shape[0]*MatrixA->shape[1]);
+  if(x==y){
+    for(int i=0;i<MatrixA->shape[0]*MatrixA->shape[1];i++){
+      result->matrix[i] = MatrixA->matrix[i] * MatrixB->matrix[i];
+    }
+  }
+  else{
+    for(int i=0;i<MatrixA->shape[0]*MatrixA->shape[1];i++)
+        result->matrix[i] = x>y ? MatrixA->matrix[i] * temp->matrix[i] : temp->matrix[i] * MatrixB->matrix[i];
+  }
+  result->shape[0] = MatrixA->shape[0];
+  result->shape[1] = MatrixA->shape[1];
   return result;
 }
 
@@ -167,25 +175,33 @@ dARRAY * divison(dARRAY * restrict MatrixA, dARRAY * restrict MatrixB){
   dARRAY * temp = NULL;
   int x = size(MatrixA);
   int y = size(MatrixB);
-  int totalLen = 0;
+  int flag=0;
   if(x>y){ 
-    temp = b_cast(MatrixA,MatrixB); 
-    totalLen = x*x;
+    temp = b_cast(MatrixA,MatrixB);
+    flag=1; 
   }
   else if(x<y){
     temp = b_cast(MatrixB,MatrixA);
-    totalLen = y*y;
+    flag=1;
   }
-  if(temp==NULL){
+  if(temp==NULL && flag){
     printf("\033[1;31mError:\033[93m Could not perform divison(). Please check shape of input matrices.\033[0m\n");
     return NULL;
   }
   //since both the matrices must have the same dimensions, we can use shape of any matrix
   dARRAY * result = (dARRAY*)malloc(sizeof(dARRAY));
-  double * res = (double*)malloc(sizeof(double)*totalLen);
-  for(int i=0;i<totalLen;i++)
-      res[i] = x>y ? MatrixA->matrix[i] / temp->matrix[i] : temp->matrix[i] / MatrixB->matrix[i];
-  result->shape[0] = result->shape[1] = MatrixA->shape[0];
+  result->matrix = (double*)malloc(sizeof(double)*MatrixA->shape[0]*MatrixA->shape[1]);
+  if(x==y){
+    for(int i=0;i<MatrixA->shape[0]*MatrixA->shape[1];i++){
+      result->matrix[i] = MatrixA->matrix[i] / MatrixB->matrix[i];
+    }
+  }
+  else{
+    for(int i=0;i<MatrixA->shape[0]*MatrixA->shape[1];i++)
+        result->matrix[i] = x>y ? MatrixA->matrix[i] / temp->matrix[i] : temp->matrix[i] / MatrixB->matrix[i];
+  }
+  result->shape[0] = MatrixA->shape[0];
+  result->shape[1] = MatrixA->shape[1];
   return result;
 }
 
@@ -204,25 +220,33 @@ dARRAY * add(dARRAY * MatrixA, dARRAY * MatrixB){
   dARRAY * temp = NULL;
   int x = size(MatrixA);
   int y = size(MatrixB);
-  int totalLen = 0;
+  int flag=0;
   if(x>y){ 
     temp = b_cast(MatrixA,MatrixB); 
-    totalLen = x*x;
+    flag=1;
   }
   else if(x<y){
     temp = b_cast(MatrixB,MatrixA);
-    totalLen = y*y;
+    flag=1;
   }
-  if(temp==NULL){
+  if(temp==NULL && flag){
     printf("\033[1;31mError:\033[93m Could not perform add(). Please check shape of input matrices.\033[0m\n");
     return NULL;
   }
   //since both the matrices must have the same dimensions, we can use shape of any matrix
   dARRAY * result = (dARRAY*)malloc(sizeof(dARRAY));
-  double * res = (double*)malloc(sizeof(double)*totalLen);
-  for(int i=0;i<totalLen;i++)
-      res[i] = x>y ? MatrixA->matrix[i] + temp->matrix[i] : temp->matrix[i] + MatrixB->matrix[i];
-  result->shape[0] = result->shape[1] = MatrixA->shape[0];
+  result->matrix = (double*)malloc(sizeof(double)*MatrixA->shape[0]*MatrixA->shape[1]);
+  if(x==y){
+    for(int i=0;i<MatrixA->shape[0]*MatrixA->shape[1];i++){
+      result->matrix[i] = MatrixA->matrix[i] + MatrixB->matrix[i];
+    }
+  }
+  else{
+    for(int i=0;i<MatrixA->shape[0]*MatrixA->shape[1];i++)
+        result->matrix[i] = x>y ? MatrixA->matrix[i] + temp->matrix[i] : temp->matrix[i] + MatrixB->matrix[i];
+  }
+  result->shape[0] = MatrixA->shape[0];
+  result->shape[1] = MatrixA->shape[1];
   return result;
 }
 
@@ -241,25 +265,33 @@ dARRAY * subtract(dARRAY * MatrixA, dARRAY * MatrixB){
   dARRAY * temp = NULL;
   int x = size(MatrixA);
   int y = size(MatrixB);
-  int totalLen = 0;
+  int flag=0;
   if(x>y){ 
     temp = b_cast(MatrixA,MatrixB); 
-    totalLen = x*x;
+    flag=1;
   }
   else if(x<y){
     temp = b_cast(MatrixB,MatrixA);
-    totalLen = y*y;
+    flag=1;
   }
-  if(temp==NULL){
+  if(temp==NULL && flag==1){
     printf("\033[1;31mError:\033[93m Could not perform subtract(). Please check shape of input matrices.\033[0m\n");
     return NULL;
   }
   //since both the matrices must have the same dimensions, we can use shape of any matrix
   dARRAY * result = (dARRAY*)malloc(sizeof(dARRAY));
-  double * res = (double*)malloc(sizeof(double)*totalLen);
-  for(int i=0;i<totalLen;i++)
-      res[i] = x>y ? MatrixA->matrix[i] - temp->matrix[i] : temp->matrix[i] - MatrixB->matrix[i];
-  result->shape[0] = result->shape[1] = MatrixA->shape[0];
+  result->matrix = (double*)malloc(sizeof(double)*MatrixA->shape[0]*MatrixA->shape[1]);
+  if(x==y){
+    for(int i=0;i<MatrixA->shape[0]*MatrixA->shape[1];i++){
+      result->matrix[i] = MatrixA->matrix[i] - MatrixB->matrix[i];
+    }
+  }
+  else{
+    for(int i=0;i<MatrixA->shape[0]*MatrixA->shape[1];i++)
+        result->matrix[i] = x>y ? MatrixA->matrix[i] - temp->matrix[i] : temp->matrix[i] - MatrixB->matrix[i];
+  }
+  result->shape[0] = MatrixA->shape[0];
+  result->shape[1] = MatrixA->shape[1];
   return result;
 }
 

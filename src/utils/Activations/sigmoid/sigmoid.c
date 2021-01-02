@@ -15,20 +15,10 @@ dARRAY * forward_pass(dARRAY * linear_matrix){
 dARRAY * backward_pass(dARRAY * linear_matrix){
   dARRAY * sigmoid_out;
   omp_set_num_threads(4);
-  int dims[] = {1,5};
-  dARRAY * sub_res = NULL;
-  dARRAY * temp = NULL;
-  #pragma omp parallel shared(linear_matrix,sigmoid_out)
-  sub_res = subScalar(linear_matrix,1);
-  temp = mulScalar(sub_res,-1);
-  shape(temp);
-  shape(linear_matrix);
-  shape(temp);
-  sigmoid_out = multiply(linear_matrix,temp);
+  int dims[] = {linear_matrix->shape[0],linear_matrix->shape[1]};
+  sigmoid_out = multiply(linear_matrix,subtract(ones(dims),linear_matrix));
   sigmoid_out->shape[0] = linear_matrix->shape[0];
   sigmoid_out->shape[1] = linear_matrix->shape[1];
-  // free2d(sub_res);
-  // free2d(temp);
   return sigmoid_out;
 }
 
@@ -43,13 +33,13 @@ Sigmoid * Sigmoid__init__(dARRAY * layer_matrix, int layer){
 }
 
 int main(){
-  int dims[] = {5,10};
+  int dims[] = {2,4};
   dARRAY * linear_matrix = randn(dims);
   Sigmoid * relu = Sigmoid__init__(linear_matrix,1);
   dARRAY * relu_op1 = NULL;
   dARRAY * relu_op2 = NULL;
   relu_op1 = relu->forward_prop(linear_matrix);
-  relu_op2 = relu->back_prop(relu_op1);
+  
   printf("Input : \n");
   for(int i=0;i<linear_matrix->shape[0];i++){
     for(int j=0;j<linear_matrix->shape[1];j++){
@@ -66,6 +56,7 @@ int main(){
     printf("\n");
   }
   printf("\n");
+  relu_op2 = relu->back_prop(linear_matrix);
   printf("Back Prop : \n");
   for(int i=0;i<relu_op2->shape[0];i++){
     for(int j=0;j<relu_op2->shape[1];j++){
@@ -74,9 +65,9 @@ int main(){
     printf("\n");
   }
   printf("\n");
-  // free2d(relu_op1);
-  // free2d(relu_op2);
-  // free2d(linear_matrix);
-  // free(relu);
+  free2d(relu_op1);
+  free2d(relu_op2);
+  free2d(linear_matrix);
+  free(relu);
   return 0;
 }
