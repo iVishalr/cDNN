@@ -1,5 +1,5 @@
-#include "../utils/utils.h"
-// #include "./test_utils.h"
+#include "../../utils/utils.h"
+#include "./test_utils.h"
 
 void TEST_DOT(){
   FILE * fp;

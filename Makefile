@@ -7,7 +7,9 @@ SRC=src
 UTILS=utils
 TEST=test
 ACTIVATIONS=Activations
-RELU=sigmoid
+RELU=relu
+SIGMOID=sigmoid
+TANH=tanh
 all: 
 	@if ! test -d $(BUILD); \
 		then echo "\033[93msetting up build directory...\033[0m"; mkdir -p build;\
@@ -17,15 +19,19 @@ all:
   	fi;
 	@$(MAKE) start
 # $(BUILD)/test_utils.o	
-start:  $(BUILD)/utils.o $(BUILD)/relu.o
-	$(CC) $(ATTR) $(BUILD)/utils.o $(BUILD)/relu.o
+start:  $(BUILD)/utils.o $(BUILD)/relu.o $(BUILD)/sigmoid.o $(BUILD)/tanh.o $(BUILD)/test_activations.o
+	$(CC) $(ATTR) $(BUILD)/utils.o $(BUILD)/relu.o $(BUILD)/sigmoid.o $(BUILD)/tanh.o $(BUILD)/test_activations.o
 	@echo "\033[92mBuild Successful\033[0m"
-# $(BUILD)/test_utils.o: $(SRC)/$(TEST)/test_utils.c
-# 	$(CC) $(CFLAGS) -o $@ $<
-# 	@echo "\033[92mCompiled Test\033[0m"
+$(BUILD)/test_activations.o: $(SRC)/$(TEST)/$(ACTIVATIONS)/test_activations.c
+	$(CC) $(CFLAGS) $(ATTR) -o $@ $<
+	@echo "\033[92mCompiled Test\033[0m"
 $(BUILD)/utils.o: $(SRC)/$(UTILS)/utils.c
 	$(CC) $(CFLAGS) $(ATTR) -o $@ $<
-$(BUILD)/relu.o: $(SRC)/$(UTILS)/$(ACTIVATIONS)/$(RELU)/sigmoid.c
+$(BUILD)/relu.o: $(SRC)/$(UTILS)/$(ACTIVATIONS)/$(RELU)/relu.c
+	$(CC) $(CFLAGS) $(ATTR) -o $@ $<
+$(BUILD)/sigmoid.o: $(SRC)/$(UTILS)/$(ACTIVATIONS)/$(SIGMOID)/sigmoid.c
+	$(CC) $(CFLAGS) $(ATTR) -o $@ $<
+$(BUILD)/tanh.o: $(SRC)/$(UTILS)/$(ACTIVATIONS)/$(TANH)/tanh.c
 	$(CC) $(CFLAGS) $(ATTR) -o $@ $<
 clean:
 	@rm -rf $(BUILD) a.out a.exe
