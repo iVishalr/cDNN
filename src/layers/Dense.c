@@ -52,7 +52,7 @@ void forward_pass(){
   Z=NULL;
 }
 void backward_pass(Dense_layer * layer, Dense_layer * prev_layer){
-  //TODO
+  
 }
 
 void (Dense)(dense_args dense_layer_args){
@@ -72,13 +72,12 @@ void (Dense)(dense_args dense_layer_args){
 int main(){
   G = NULL;
   Dense(.layer_size=5,.activation="relu",.initializer="he");
-  // printf("Printing the G\n");
-  printf("Initializer used : %s\n",G->DENSE->initializer);
+  Dense(.layer_size=5,.activation="sigmoid",.initializer="random");
+  printf("First Layer\nInitializer used : %s\n",G->DENSE->initializer);
   printf("Initializing params\n");
   G->DENSE->initalize_params();
   printf("Forward Propagating!\n");
   G->DENSE->forward_prop();
-  // display(G->DENSE->A);
   printf("Weights of first layer : \n");
   for(int i=0;i<G->DENSE->weights->shape[0];i++){
     for(int j=0;j<G->DENSE->weights->shape[1];j++){
@@ -95,6 +94,47 @@ int main(){
     printf("\n");
   }
   printf("\n");
-  // printModel(G);
-  // destroy_G(G);
+
+  printf("Bias of first layer : \n");
+  for(int i=0;i<G->DENSE->bias->shape[0];i++){
+    for(int j=0;j<G->DENSE->bias->shape[1];j++){
+      printf("%lf ",G->DENSE->bias->matrix[i*G->DENSE->bias->shape[1]+j]);
+    }
+    printf("\n");
+  }
+  printf("\n");
+  G = G->next_layer;
+  printf("Second Layer\nInitializer used : %s\n",G->DENSE->initializer);
+  printf("Initializing params\n");
+  G->DENSE->initalize_params();
+  printf("Forward Propagating!\n");
+  G->DENSE->forward_prop();
+
+  printf("Weights of second layer : \n");
+  for(int i=0;i<G->DENSE->weights->shape[0];i++){
+    for(int j=0;j<G->DENSE->weights->shape[1];j++){
+      printf("%lf ",G->DENSE->weights->matrix[i*G->DENSE->weights->shape[1]+j]);
+    }
+    printf("\n");
+  }
+  printf("\n");
+  printf("Activation of second layer : \n");
+  for(int i=0;i<G->DENSE->A->shape[0];i++){
+    for(int j=0;j<G->DENSE->A->shape[1];j++){
+      printf("%lf ",G->DENSE->A->matrix[i*G->DENSE->A->shape[1]+j]);
+    }
+    printf("\n");
+  }
+  printf("\n");
+
+  printf("Bias of second layer : \n");
+  for(int i=0;i<G->DENSE->bias->shape[0];i++){
+    for(int j=0;j<G->DENSE->bias->shape[1];j++){
+      printf("%lf ",G->DENSE->bias->matrix[i*G->DENSE->bias->shape[1]+j]);
+    }
+    printf("\n");
+  }
+  printf("\n");
+  printComputation_Graph(G);
+  destroy_G(G);
 }
