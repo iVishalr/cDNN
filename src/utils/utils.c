@@ -302,7 +302,7 @@ dARRAY * subtract(dARRAY * MatrixA, dARRAY * MatrixB){
  * @result A pointer to the result of addScalar(matrix,scalar) 
  * @return A pointer to the result of addScalar(matrix,scalar) 
 */
-dARRAY * addScalar(dARRAY * matrix, int scalar){
+dARRAY * addScalar(dARRAY * matrix, double scalar){
   if(matrix==NULL){
     printf("\033[1;31mError:\033[93m Matrix is empty. Call addScalar() only after intializing dARRAY object.\033[0m\n");
     return NULL;
@@ -320,7 +320,7 @@ dARRAY * addScalar(dARRAY * matrix, int scalar){
  * @result A pointer to the result of subScalar(matrix,scalar) 
  * @return A pointer to the result of subScalar(matrix,scalar) 
 */
-dARRAY * subScalar(dARRAY * matrix, int scalar){
+dARRAY * subScalar(dARRAY * matrix, double scalar){
   if(matrix==NULL){
     printf("\033[1;31mError:\033[93m Matrix is empty. Call subScalar() only after intializing dARRAY object.\033[0m\n");
     return NULL;
@@ -338,7 +338,7 @@ dARRAY * subScalar(dARRAY * matrix, int scalar){
  * @result A pointer to the result of mulScalar(matrix,scalar) 
  * @return A pointer to the result of mulScalar(matrix,scalar) 
 */
-dARRAY * mulScalar(dARRAY * matrix, int scalar){
+dARRAY * mulScalar(dARRAY * matrix, double scalar){
   if(matrix==NULL){
     printf("\033[1;31mError:\033[93m Matrix is empty. Call mulScalar() only after intializing dARRAY object.\033[0m\n");
     return NULL;
@@ -356,7 +356,7 @@ dARRAY * mulScalar(dARRAY * matrix, int scalar){
  * @result A pointer to the result of divScalar(matrix,scalar) 
  * @return A pointer to the result of divScalar(matrix,scalar) 
 */
-dARRAY * divScalar(dARRAY * matrix, int scalar){
+dARRAY * divScalar(dARRAY * matrix, double scalar){
   if(matrix==NULL){
     printf("\033[1;31mError:\033[93m Matrix is empty. Call divScalar() only after intializing dARRAY object.\033[0m\n");
     return NULL;

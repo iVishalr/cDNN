@@ -22,12 +22,18 @@ dARRAY * backward_pass_sigmoid(dARRAY * linear_matrix){
   return sigmoid_out;
 }
 
-Sigmoid * Sigmoid__init__(dARRAY * layer_matrix, int layer){
+Sigmoid * Sigmoid__init__(dARRAY * layer_matrix){
   Sigmoid * sigmoid = (Sigmoid*)malloc(sizeof(Sigmoid));
   sigmoid->forward_prop = forward_pass_sigmoid;
   sigmoid->back_prop = backward_pass_sigmoid;
   sigmoid->in_dims[0] = sigmoid->out_dims[0] = layer_matrix->shape[0];
   sigmoid->in_dims[1] = sigmoid->out_dims[1] = layer_matrix->shape[1];
-  sigmoid->layer_num = layer;
   return sigmoid;
+}
+
+
+dARRAY * (sigmoid)(Sigmoid_args args){
+  Sigmoid * s = Sigmoid__init__(args.input);
+  return s->forward_prop(args.input);
+  // s->back_prop(args.input);
 }

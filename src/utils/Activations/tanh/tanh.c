@@ -32,13 +32,18 @@ dARRAY * backward_pass_tanh(dARRAY * layer_matrix){
   return tanh_out;
 }
 
-Tanh * Tanh__init__(dARRAY * linear_matrix,int layer){
+Tanh * Tanh__init__(dARRAY * linear_matrix){
   Tanh * tanh = (Tanh*)malloc(sizeof(Tanh));
   tanh->forward_prop = forward_pass_tanh;
   tanh->back_prop = backward_pass_tanh;
   tanh->in_dims[0] = tanh->out_dims[0] = linear_matrix->shape[0];
   tanh->in_dims[1] = tanh->out_dims[1] = linear_matrix->shape[1];
-  tanh->layer_num = layer;
+  // tanh->layer_num = layer;
   return tanh;
 }
 
+dARRAY * (TanH)(Tanh_args args){
+  Tanh * t = Tanh__init__(args.input);
+  return t->forward_prop(args.input);
+  // t->back_prop(args.input);
+}

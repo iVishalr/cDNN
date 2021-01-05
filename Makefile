@@ -21,8 +21,8 @@ all:
 	@$(MAKE) start
 # $(BUILD)/test_utils.o	
 # $(BUILD)/test_activations.o
-start:  $(BUILD)/utils.o $(BUILD)/relu.o $(BUILD)/sigmoid.o $(BUILD)/tanh.o $(BUILD)/Dense.o 
-	$(CC) $(ATTR) $(BUILD)/utils.o $(BUILD)/relu.o $(BUILD)/sigmoid.o $(BUILD)/tanh.o $(BUILD)/Dense.o 
+start:  $(BUILD)/utils.o $(BUILD)/relu.o $(BUILD)/sigmoid.o $(BUILD)/tanh.o $(BUILD)/Dense.o
+	$(CC) $(ATTR) $(BUILD)/utils.o $(BUILD)/relu.o $(BUILD)/sigmoid.o $(BUILD)/tanh.o $(BUILD)/Dense.o
 	@echo "\033[92mBuild Successful\033[0m"
 # $(BUILD)/test_activations.o: $(SRC)/$(TEST)/$(ACTIVATIONS)/test_activations.c
 # 	$(CC) $(CFLAGS) $(ATTR) -o $@ $<
@@ -37,6 +37,8 @@ $(BUILD)/tanh.o: $(SRC)/$(UTILS)/$(ACTIVATIONS)/$(TANH)/tanh.c
 	$(CC) $(CFLAGS) $(ATTR) -o $@ $<
 $(BUILD)/Dense.o: $(SRC)/$(LAYERS)/Dense.c
 	$(CC) $(CFLAGS) $(ATTR) -o $@ $<
+# $(BUILD)/neural_net.o: $(SRC)/neural_net/neural_net.c
+# 	$(CC) $(CFLAGS) $(ATTR) -o $@ $<
 clean:
 	@rm -rf $(BUILD) a.out a.exe
 	@echo "\033[92mDone\033[0m"
