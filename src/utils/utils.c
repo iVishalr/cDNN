@@ -307,10 +307,14 @@ dARRAY * addScalar(dARRAY * matrix, double scalar){
     printf("\033[1;31mError:\033[93m Matrix is empty. Call addScalar() only after intializing dARRAY object.\033[0m\n");
     return NULL;
   }
+  dARRAY * result = (dARRAY*)malloc(sizeof(dARRAY));
+  result->matrix = (double*)malloc(sizeof(double)*matrix->shape[0]*matrix->shape[1]);
   for(int i=0; i<matrix->shape[0]*matrix->shape[1];  i++){
-    matrix->matrix[i] = matrix->matrix[i] + scalar;
+    result->matrix[i] = matrix->matrix[i] + scalar;
   }
-  return matrix;
+  result->shape[0] = matrix->shape[0];
+  result->shape[1] = matrix->shape[1];
+  return result;
 }
 
 /**!
@@ -325,10 +329,14 @@ dARRAY * subScalar(dARRAY * matrix, double scalar){
     printf("\033[1;31mError:\033[93m Matrix is empty. Call subScalar() only after intializing dARRAY object.\033[0m\n");
     return NULL;
   }
-  for(int i=0; i<matrix->shape[0]*matrix->shape[1]; i++){
-    matrix->matrix[i] = matrix->matrix[i] - scalar;
+  dARRAY * result = (dARRAY*)malloc(sizeof(dARRAY));
+  result->matrix = (double*)malloc(sizeof(double)*matrix->shape[0]*matrix->shape[1]);
+  for(int i=0; i<matrix->shape[0]*matrix->shape[1];  i++){
+    result->matrix[i] = matrix->matrix[i] - scalar;
   }
-  return matrix;
+  result->shape[0] = matrix->shape[0];
+  result->shape[1] = matrix->shape[1];
+  return result;
 }
 
 /**!
@@ -343,10 +351,14 @@ dARRAY * mulScalar(dARRAY * matrix, double scalar){
     printf("\033[1;31mError:\033[93m Matrix is empty. Call mulScalar() only after intializing dARRAY object.\033[0m\n");
     return NULL;
   }
-  for(int i=0;i<matrix->shape[0]*matrix->shape[1];i++){
-    matrix->matrix[i] = matrix->matrix[i] * scalar;
+  dARRAY * result = (dARRAY*)malloc(sizeof(dARRAY));
+  result->matrix = (double*)malloc(sizeof(double)*matrix->shape[0]*matrix->shape[1]);
+  for(int i=0; i<matrix->shape[0]*matrix->shape[1];  i++){
+    result->matrix[i] = matrix->matrix[i] * scalar;
   }
-  return matrix;
+  result->shape[0] = matrix->shape[0];
+  result->shape[1] = matrix->shape[1];
+  return result;
 }
 
 /**!
@@ -361,10 +373,14 @@ dARRAY * divScalar(dARRAY * matrix, double scalar){
     printf("\033[1;31mError:\033[93m Matrix is empty. Call divScalar() only after intializing dARRAY object.\033[0m\n");
     return NULL;
   }
-  for(int i=0;i<matrix->shape[0]*matrix->shape[1];i++){
-    matrix->matrix[i] = matrix->matrix[i] / scalar;
+  dARRAY * result = (dARRAY*)malloc(sizeof(dARRAY));
+  result->matrix = (double*)malloc(sizeof(double)*matrix->shape[0]*matrix->shape[1]);
+  for(int i=0; i<matrix->shape[0]*matrix->shape[1];  i++){
+    result->matrix[i] = matrix->matrix[i] / scalar;
   }
-  return matrix;
+  result->shape[0] = matrix->shape[0];
+  result->shape[1] = matrix->shape[1];
+  return result;
 }
 
 /**!
@@ -379,10 +395,14 @@ dARRAY * power(dARRAY * matrix, int power){
     printf("\033[1;31mError:\033[93m Matrix is empty. Call power() only after intializing dARRAY object.\033[0m\n");
     return NULL;
   }
-  for(int i=0;i<matrix->shape[0]*matrix->shape[1];i++){
-    matrix->matrix[i] = pow(matrix->matrix[i],power);
+  dARRAY * result = (dARRAY*)malloc(sizeof(dARRAY));
+  result->matrix = (double*)malloc(sizeof(double)*matrix->shape[0]*matrix->shape[1]);
+  for(int i=0; i<matrix->shape[0]*matrix->shape[1];  i++){
+    result->matrix[i] = pow(matrix->matrix[i],power);
   }
-  return matrix;
+  result->shape[0] = matrix->shape[0];
+  result->shape[1] = matrix->shape[1];
+  return result;
 }
 
 /**!
@@ -442,7 +462,7 @@ dARRAY * b_cast(dARRAY * MatrixA, dARRAY * MatrixB){
  * @return A pointer to the result of sum(matrix,axis) 
 */
 dARRAY * sum(dARRAY * matrix, int axis){
-  if(axis!=0 || axis!=1){
+  if(axis!=0 && axis!=1){
     printf("\033[1;31mError:\033[93m axis=%d not supported. Instead use axis=0 or axis=1\033[0m\n",axis);
     return NULL;
   }

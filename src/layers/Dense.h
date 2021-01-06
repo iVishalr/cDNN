@@ -13,6 +13,7 @@ typedef struct dense{
   dARRAY * dW;
   dARRAY * db;
   dARRAY * dA;
+  dARRAY * linear_grad;
   dARRAY * A;
   __compute forward_prop;
   __compute back_prop;
@@ -33,3 +34,4 @@ dARRAY * init_weights(int * weights_dims,const char * init_type);
 dARRAY * init_bias(int * bias_dims);
 void forward_pass();
 void backward_pass();
+void sleep(int milliseconds);

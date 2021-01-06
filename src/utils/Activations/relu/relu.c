@@ -31,7 +31,9 @@ ReLu * ReLu__init__(dARRAY * linear_matrix){
 
 dARRAY * (relu)(ReLu_args args){
   ReLu * r = ReLu__init__(args.input);
-  return r->forward_prop(args.input);
-  // r->back_prop(args.input);
+  if(!args.status)
+    return r->forward_prop(args.input);
+  else
+    return r->back_prop(args.input);
 }
 

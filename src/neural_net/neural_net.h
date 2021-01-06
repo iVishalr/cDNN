@@ -14,6 +14,8 @@ typedef struct computational_graph{
 
 Computation_Graph * G;
 
+int computation_graph_status;//0 - Fprop 1- Backprop
+
 Computation_Graph * init(){
   Computation_Graph * G = (Computation_Graph*)malloc(sizeof(Computation_Graph));
   G->next_layer = NULL;

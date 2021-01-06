@@ -34,6 +34,8 @@ Sigmoid * Sigmoid__init__(dARRAY * layer_matrix){
 
 dARRAY * (sigmoid)(Sigmoid_args args){
   Sigmoid * s = Sigmoid__init__(args.input);
-  return s->forward_prop(args.input);
-  // s->back_prop(args.input);
+  if(!args.status)
+    return s->forward_prop(args.input);
+  else
+    return s->back_prop(args.input);
 }

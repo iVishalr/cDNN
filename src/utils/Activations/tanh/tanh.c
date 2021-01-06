@@ -44,6 +44,8 @@ Tanh * Tanh__init__(dARRAY * linear_matrix){
 
 dARRAY * (TanH)(Tanh_args args){
   Tanh * t = Tanh__init__(args.input);
-  return t->forward_prop(args.input);
-  // t->back_prop(args.input);
+  if(!args.status)
+    return t->forward_prop(args.input);
+  else 
+    return t->back_prop(args.input);
 }

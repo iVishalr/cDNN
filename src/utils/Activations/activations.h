@@ -30,19 +30,22 @@ Tanh * Tanh__init__(dARRAY * layer_matrix);
 
 typedef struct{
   dARRAY * input;
+  int status;
 }ReLu_args;
 
 typedef struct{
   dARRAY * input;
+  int status;
 }Sigmoid_args;
 
 typedef struct{
   dARRAY * input;
+  int status;
 }Tanh_args;
 
-#define relu(...) relu((ReLu_args){.input=NULL,__VA_ARGS__});
-#define sigmoid(...) sigmoid((Sigmoid_args){.input=NULL,__VA_ARGS__});
-#define TanH(...) TanH((Tanh_args){.input=NULL,__VA_ARGS__});
+#define relu(...) relu((ReLu_args){.input=NULL,.status=0,__VA_ARGS__});
+#define sigmoid(...) sigmoid((Sigmoid_args){.input=NULL,.status=0,__VA_ARGS__});
+#define TanH(...) TanH((Tanh_args){.input=NULL,.status=0,__VA_ARGS__});
 
 dARRAY * (relu)(ReLu_args args);
 dARRAY * (sigmoid)(Sigmoid_args args);
