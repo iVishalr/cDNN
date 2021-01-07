@@ -13,21 +13,26 @@ typedef struct dense{
   dARRAY * dW;
   dARRAY * db;
   dARRAY * dA;
-  dARRAY * linear_grad;
   dARRAY * A;
   __compute forward_prop;
   __compute back_prop;
   __init_params initalize_params;
   char * initializer;
+  double dropout;
+  double lambda;
+  dARRAY * dropout_mask;
+  int isTraining;
 }Dense_layer;
 
 typedef struct{
   int layer_size;
   char * activation;
   char * initializer;
+  double dropout;
+  double lambda;
 }dense_args; 
 
-#define Dense(...) Dense((dense_args){.layer_size=20,.activation="relu",.initializer="he",__VA_ARGS__});
+#define Dense(...) Dense((dense_args){.layer_size=20,.activation="relu",.initializer="he",.dropout=1.0,.lambda=0.0,__VA_ARGS__});
 void (Dense)(dense_args dense_layer_args);
 void init_params();
 dARRAY * init_weights(int * weights_dims,const char * init_type);

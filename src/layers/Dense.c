@@ -39,30 +39,49 @@ dARRAY * init_bias(int * bias_dims){
 }
 
 void forward_pass(){
-  // int dims[] = {5,1};//5 features and one training eg
-  // dARRAY * temp = randn(dims);
-  // dARRAY * weight_input_res = dot(G->DENSE->weights, G->prev->DENSE->A);
   dARRAY * weight_input_res = dot(G->DENSE->weights, G->prev_layer->DENSE->A);
   dARRAY * Z = G->DENSE->cache = add(weight_input_res,G->DENSE->bias);//Z
-  printf("\nFinished calculating Z\n");
-  //sleep(2000);
+  printf("Shape(Z) : ");
+  shape(Z);
+  dARRAY * activation_temp = NULL;
   if(!strcmp(G->DENSE->activation,"relu")){
-    G->DENSE->A = relu(.input=Z);
+    activation_temp = relu(.input=Z);
+    printf("Shape(activation_temp) : ");
+    shape(activation_temp);
   }
   else if(!strcmp(G->DENSE->activation,"sigmoid")){
-    G->DENSE->A = sigmoid(.input=Z);
+    activation_temp = sigmoid(.input=Z);
+    printf("Shape(activation_temp) : ");
+    shape(activation_temp);
   }
   else if(!strcmp(G->DENSE->activation,"tanh")){
-    G->DENSE->A = TanH(.input=Z);
+    activation_temp = TanH(.input=Z);
+    printf("Shape(activation_temp) : ");
+    shape(activation_temp);
   }
-  // free2d(temp);
-  printf("\nCalculated Activation\n");
-  //sleep(2000);
+  if(G->DENSE->dropout<1.0 && G->DENSE->dropout>=0.0 && G->DENSE->isTraining){
+    //implementation of inverted dropout layer
+    int dims[] = {activation_temp->shape[0],activation_temp->shape[1]};
+    G->DENSE->dropout_mask = randn(dims);
+    omp_set_num_threads(4);
+    #pragma omp parallel for
+    for(int i=0;i<G->DENSE->dropout_mask->shape[0]*G->DENSE->dropout_mask->shape[1];i++)
+      G->DENSE->dropout_mask->matrix[i] = G->DENSE->dropout_mask->matrix[i]<G->DENSE->dropout ? 1 : 0;
+    dARRAY * mul_mask = multiply(activation_temp,G->DENSE->dropout_mask);
+    G->DENSE->A = divScalar(mul_mask,G->DENSE->dropout);
+    free2d(mul_mask);
+  }
+  else{
+    G->DENSE->A = activation_temp;
+    printf("Shape(A) : ");
+    shape(G->DENSE->A);
+  }
   free2d(weight_input_res);
   Z=NULL;
 }
+
 void backward_pass(){
-  double m = 1;//temporarily set m=1;
+  double m = 4;//temporarily set m=1;
   Dense_layer * layer = G->DENSE; 
   Dense_layer * prev_layer = G->prev_layer->DENSE;
   //calculate dZ 
@@ -77,46 +96,66 @@ void backward_pass(){
     diff_layer_activation = TanH(.input=layer->cache,.status=1);
   }
   layer->dZ = multiply(layer->dA,diff_layer_activation);
-  printf("\nCalculated dZ\n");
+  free2d(diff_layer_activation);
   printf("Shape(dZ) : ");
   shape(G->DENSE->dZ);
   printf("\n");
-  //sleep(2000);
-  free2d(diff_layer_activation);
 
   //Calculate gradients with respect to the layer weights
   printf("\nCalculating Weight Gradients\n");
   dARRAY * prev_A_transpose = transpose(prev_layer->A);
   dARRAY * temp1_dW = dot(layer->dZ,prev_A_transpose);
-  layer->dW = divScalar(temp1_dW,(1/(double)m));
+  dARRAY * regularization_grad_temp = mulScalar(layer->weights,layer->lambda);
+  dARRAY * regularization_grad = divScalar(regularization_grad_temp,m);
+  dARRAY * dW_temp = divScalar(temp1_dW,(1/(double)m));
+  layer->dW = add(dW_temp,regularization_grad);
+  free2d(regularization_grad_temp);
+  free2d(regularization_grad);
+  free2d(dW_temp);
   free2d(prev_A_transpose);
   free2d(temp1_dW);
-  printf("\nCalculated dW\n");
   printf("Shape(dW) : ");
   shape(G->DENSE->dW);
   printf("\n");
-  //sleep(2000);
 
   //calculate gradients with respect to the layer biases
   printf("\nCalculating Bias Gradients\n");
+  shape(layer->dZ);
+  printf("dZ = \n");
+  for(int i=0;i<layer->dZ->shape[0];i++){
+    for(int j=0;j<layer->dZ->shape[1];j++){
+      printf("%lf ",layer->dZ->matrix[i*layer->dZ->shape[1]+j]);
+    }
+    printf("\n");
+  }
+  printf("\n");
   dARRAY * temp1_db = sum(layer->dZ,1);
+  shape(temp1_db);
   layer->db = divScalar(temp1_db,(1/(double)m));
   free2d(temp1_db);
   printf("\nCalculated db\n");
   printf("Shape(db) : ");
-  shape(G->DENSE->db);
+  shape(layer->db);
   printf("\n");
   //sleep(2000);
 
   //calculate gradients of activation of prev layer
   if(prev_layer->cache!=NULL){
     dARRAY * weight_transpose = transpose(layer->weights);
-    prev_layer->dA = dot(weight_transpose,layer->dZ);
+    dARRAY * prev_layer_A_temp = dot(weight_transpose,layer->dZ);
+    if(layer->dropout_mask==NULL){
+      prev_layer->dA = prev_layer_A_temp;
+    }
+    else{
+      dARRAY * prev_layer_A_masked = multiply(prev_layer_A_temp,prev_layer->dropout_mask);
+      prev_layer->dA = divScalar(prev_layer_A_masked,prev_layer->dropout);
+      free2d(prev_layer_A_temp);
+      free2d(prev_layer_A_masked);
+    }
     printf("\nCalculated dA_prev\n");
     printf("Shape(dA) : ");
     shape(G->prev_layer->DENSE->dA);
     printf("\n");
-    //sleep(2000);
     free2d(weight_transpose);
   }
 }
@@ -130,19 +169,23 @@ void (Dense)(dense_args dense_layer_args){
   layer->cache = NULL;
   layer->forward_prop = forward_pass;
   layer->back_prop = backward_pass;
+  layer->dropout_mask = NULL;
+  layer->dropout = dense_layer_args.dropout;
+  layer->lambda = dense_layer_args.lambda;
+  layer->dA = layer->db = layer->dW = layer->dZ = NULL;
+  layer->isTraining = 1;
   //finally we need to append to computation graph
-  printf("Appending DENSE\n");
   G = append_graph(G,layer,"Dense");
 }
 
 int main(){
   G = NULL;
   Dense(.layer_size=5);
-  Dense(.layer_size=5,.activation="relu",.initializer="he");
+  Dense(.layer_size=5,.activation="relu",.initializer="he",.dropout=0.5);
   Dense(.layer_size=1,.activation="sigmoid",.initializer="random");
   printf("First Layer\nInitializer used : %s\n",G->DENSE->initializer);
   printf("Initializing params\n");
-  int input_dims[] = {5,1};
+  int input_dims[] = {5,4};
   G->DENSE->A = randn(input_dims);
   shape(G->DENSE->A);
   printf("\nInput Layer's values : \n");
@@ -245,10 +288,9 @@ int main(){
 
   printf("\nInitiating Backprop\n");
   int dims[] = {G->DENSE->A->shape[0],G->DENSE->A->shape[1]};
-  dARRAY * Y =ones(dims);
-  //sleep(2000);
-  printf("Y = %lf\n",Y->matrix[0]);
-
+  dARRAY * Y = ones(dims);
+  printf("Shape(Y) : ");
+  shape(Y);
 
   dARRAY * temp1 = NULL;
   dARRAY * temp2 = NULL;
@@ -274,19 +316,12 @@ int main(){
     printf("\n");
   }
   printf("\n");
-  printf("feering temp1\n");
   free2d(temp1);
-  printf("feering temp2\n");
   free2d(temp2);
-  printf("feering temp3\n");
   free2d(temp3);
-  printf("feering temp4\n");
   free2d(temp4);
-  printf("feering temp5\n");
   free2d(temp5);
-  printf("feering temp6\n");
   free2d(temp6);
-  printf("feering add_temp\n");
   free2d(add_temp);
 
   computation_graph_status = 1;

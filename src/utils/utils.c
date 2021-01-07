@@ -466,6 +466,7 @@ dARRAY * sum(dARRAY * matrix, int axis){
     printf("\033[1;31mError:\033[93m axis=%d not supported. Instead use axis=0 or axis=1\033[0m\n",axis);
     return NULL;
   }
+  // if(matrix->shape[0]==1 || matrix->shape[1]==1) return matrix;
   dARRAY * new = (dARRAY*)malloc(sizeof(dARRAY));
   double * res = NULL;
   if(axis==0){
@@ -648,7 +649,7 @@ double rand_norm(double mu, double std){
 */
 void free2d(dARRAY * matrix){
   if(matrix==NULL) {
-    printf("\033[1;31mError:\033[93m Matrix is Empty. No need for deallocation.\033[0m\n");
+    printf("\033[1;93mWarning:\033[93m Matrix is Empty. No need for deallocation.\033[0m\n");
     return;
   }
   free(matrix->matrix);
