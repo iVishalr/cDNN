@@ -27,6 +27,7 @@ dARRAY * divison(dARRAY * MatrixA, dARRAY * MatrixB);
 dARRAY * divScalar(dARRAY * matrix, double scalar);
 dARRAY * power(dARRAY * matrix, int power);
 dARRAY * b_cast(dARRAY * MatrixA, dARRAY * MatrixB);
+dARRAY * reshape(dARRAY * matrix, int * dims);
 
 double mean(dARRAY * matrix);
 double var(dARRAY * matrix, char * type);

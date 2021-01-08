@@ -20,11 +20,12 @@ all:
   	fi;
 	@$(MAKE) start
 # $(BUILD)/test_utils.o	
-# $(BUILD)/test_activations.o
-start:  $(BUILD)/utils.o $(BUILD)/relu.o $(BUILD)/sigmoid.o $(BUILD)/tanh.o $(BUILD)/Dense.o
-	$(CC) $(ATTR) $(BUILD)/utils.o $(BUILD)/relu.o $(BUILD)/sigmoid.o $(BUILD)/tanh.o $(BUILD)/Dense.o
+
+start:  $(BUILD)/utils.o $(BUILD)/relu.o $(BUILD)/sigmoid.o $(BUILD)/tanh.o $(BUILD)/layers.o
+	$(CC) $(ATTR) $(BUILD)/utils.o $(BUILD)/relu.o $(BUILD)/sigmoid.o $(BUILD)/tanh.o $(BUILD)/layers.o
 	@echo "\033[92mBuild Successful\033[0m"
-# $(BUILD)/test_activations.o: $(SRC)/$(TEST)/$(ACTIVATIONS)/test_activations.c
+
+# $(BUILD)/test_layers.o: $(SRC)/$(TEST)/$(LAYERS)/layers.c
 # 	$(CC) $(CFLAGS) $(ATTR) -o $@ $<
 	@echo "\033[92mCompiled Test\033[0m"
 $(BUILD)/utils.o: $(SRC)/$(UTILS)/utils.c
@@ -35,7 +36,7 @@ $(BUILD)/sigmoid.o: $(SRC)/$(UTILS)/$(ACTIVATIONS)/$(SIGMOID)/sigmoid.c
 	$(CC) $(CFLAGS) $(ATTR) -o $@ $<
 $(BUILD)/tanh.o: $(SRC)/$(UTILS)/$(ACTIVATIONS)/$(TANH)/tanh.c
 	$(CC) $(CFLAGS) $(ATTR) -o $@ $<
-$(BUILD)/Dense.o: $(SRC)/$(LAYERS)/Dense.c
+$(BUILD)/layers.o: $(SRC)/$(LAYERS)/layers.c
 	$(CC) $(CFLAGS) $(ATTR) -o $@ $<
 # $(BUILD)/neural_net.o: $(SRC)/neural_net/neural_net.c
 # 	$(CC) $(CFLAGS) $(ATTR) -o $@ $<

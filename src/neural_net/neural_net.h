@@ -1,4 +1,4 @@
-#include "../layers/Dense.h"
+#include "../layers/layers.h"
 
 enum layer_type {NONE, INPUT, DENSE, LOSS, OPTIMIZER};
 
@@ -9,6 +9,7 @@ typedef struct computational_graph{
   union
   {
     Dense_layer * DENSE;
+    Input_layer * INPUT;
   };
 }Computation_Graph;
 
@@ -22,6 +23,7 @@ Computation_Graph * init(){
   G->prev_layer = NULL;
   G->type = NONE;
   G->DENSE = NULL;
+  G->INPUT = NULL;
   return G;
 }
 
@@ -32,6 +34,11 @@ Computation_Graph * new_node(void * layer, char * type){
     G->DENSE = (Dense_layer*)layer;
     G->type = DENSE;
   } 
+  else if(!strcmp(type,"Input")){
+    printf("Appending input layer!\n");
+    G->INPUT = (Input_layer*)layer;
+    G->type = INPUT;
+  }
   return G;
 }
 
@@ -56,6 +63,8 @@ void printComputation_Graph(Computation_Graph * G){
   while(temp!=NULL){
     if(temp->type==DENSE)
       printf("DENSE\n");
+    else if(temp->type==INPUT)
+      printf("INPUT\n");
     else printf("NULL\n");
     temp = temp->next_layer;
   }
@@ -68,7 +77,28 @@ Computation_Graph * destroy_G(Computation_Graph * G){
   while(temp!=NULL){
     prev = temp;
     temp = temp->next_layer;
-    free(prev->DENSE);
+    if(prev->type==DENSE){
+      Dense_layer * layer = prev->DENSE;
+      free(layer->weights);
+      free(layer->bias);
+      free(layer->cache);
+      free(layer->dA);
+      free(layer->A);
+      free(layer->dropout_mask);
+      free(layer->db);
+      free(layer->dZ);
+      free(layer->dW);
+      free(prev->DENSE);
+      prev->prev_layer = NULL;
+      layer=NULL;
+    }
+    else if(prev->type==INPUT){
+      Input_layer * layer = prev->INPUT;
+      free(layer->A);
+      prev->prev_layer = NULL;
+      free(prev->INPUT);
+      layer=NULL;
+    }
     free(prev);
   }
   prev = NULL;
