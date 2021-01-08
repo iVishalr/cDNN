@@ -1,4 +1,4 @@
-// #include "./loss_functions.h"
+#include "./loss_functions.h"
 
 double cross_entroy_loss(Dense_layer * layer, dARRAY * Y){
   int m = Y->shape[1];
@@ -34,7 +34,7 @@ double cross_entroy_loss(Dense_layer * layer, dARRAY * Y){
   free2d(temp_1);
   temp_1 = NULL;
 
-  dARRAY * temp_sub = subtract(temp_ones,Y);
+  temp_sub = subtract(temp_ones,Y);
   free2d(temp_ones);
   temp_ones = NULL;
 

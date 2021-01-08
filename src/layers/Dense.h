@@ -1,3 +1,7 @@
+#ifndef DENSE_LAYER_H_
+#define DENSE_LAYER_H_
+
+#include "../utils/utils.h"
 #include "../utils/Activations/activations.h"
 
 typedef void (*__init_params)();
@@ -25,7 +29,7 @@ typedef struct dense{
   char * layer_type;
 }Dense_layer;
 
-typedef struct{
+typedef struct dense_arg{
   int layer_size;
   char * activation;
   char * initializer;
@@ -35,24 +39,17 @@ typedef struct{
 }dense_args; 
 
 #define Dense(...) Dense((dense_args){.layer_size=20,.activation="relu",.initializer="he",.dropout=1.0,.lambda=0.0,.layer_type="hidden",__VA_ARGS__});
-void (Dense)(dense_args dense_layer_args);
-void init_params();
-dARRAY * init_weights(int * weights_dims,const char * init_type);
-dARRAY * init_bias(int * bias_dims);
-void forward_pass();
-void backward_pass();
-void sleep(int milliseconds);
 
-typedef struct input{
-  int input_features_size;
-  dARRAY * A;
-  int isTraining;
-}Input_layer;
-
-typedef struct{
-  dARRAY * input_features;
-  int layer_size;
-}Input_args; 
-
-#define Input(...) Input((Input_args){.layer_size=20,.input_features=NULL,__VA_ARGS__});
-void (Input)(Input_args input_layer_args);
+#ifdef __cplusplus
+extern "C" {
+#endif
+  void (Dense)(dense_args dense_layer_args);
+  void init_params();
+  dARRAY * init_weights(int * weights_dims,const char * init_type);
+  dARRAY * init_bias(int * bias_dims);
+  void forward_pass();
+  void backward_pass();
+#ifdef __cplusplus
+}
+#endif
+#endif //DENSE_H_
