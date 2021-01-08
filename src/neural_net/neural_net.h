@@ -80,21 +80,32 @@ Computation_Graph * destroy_G(Computation_Graph * G){
     if(prev->type==DENSE){
       Dense_layer * layer = prev->DENSE;
       free(layer->weights);
+      layer->weights = NULL;
       free(layer->bias);
+      layer->bias = NULL;
       free(layer->cache);
+      layer->cache = NULL;
       free(layer->dA);
+      layer->dA = NULL;
       free(layer->A);
+      layer->A = NULL;
       free(layer->dropout_mask);
+      layer->dropout_mask = NULL;
       free(layer->db);
+      layer->db = NULL;
       free(layer->dZ);
+      layer->dZ = NULL;
       free(layer->dW);
+      layer->dW = NULL;
       free(prev->DENSE);
+      prev->DENSE = NULL;
       prev->prev_layer = NULL;
       layer=NULL;
     }
     else if(prev->type==INPUT){
       Input_layer * layer = prev->INPUT;
       free(layer->A);
+      layer->A = NULL;
       prev->prev_layer = NULL;
       free(prev->INPUT);
       layer=NULL;
