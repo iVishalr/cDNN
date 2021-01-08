@@ -56,5 +56,3 @@ typedef struct{
 
 #define Input(...) Input((Input_args){.layer_size=20,.input_features=NULL,__VA_ARGS__});
 void (Input)(Input_args input_layer_args);
-
-

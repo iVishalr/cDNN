@@ -16,6 +16,8 @@ typedef struct computational_graph{
 Computation_Graph * G;
 
 int computation_graph_status;//0 - Fprop 1- Backprop
+char * loss_type;
+dARRAY * Y;
 
 Computation_Graph * init(){
   Computation_Graph * G = (Computation_Graph*)malloc(sizeof(Computation_Graph));
@@ -117,3 +119,4 @@ Computation_Graph * destroy_G(Computation_Graph * G){
   G = NULL;
   return G;
 }
+double cross_entropy_loss(Dense_layer * layer, dARRAY * Y);
