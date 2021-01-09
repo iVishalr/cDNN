@@ -1,24 +1,27 @@
 #include "./loss_functions.h"
 
 double cross_entropy_loss(Dense_layer * layer, dARRAY * Y){
+  // printf("I came here!\n");
   int m = Y->shape[1];
+  // printf("calculating!\n");
   dARRAY * temp_1 = NULL;
   temp_1 = (dARRAY *)malloc(sizeof(dARRAY));
-  temp_1->matrix = (double*)malloc(sizeof(double)*layer->A->shape[0]*layer->A->shape[1]);
+  temp_1->matrix = (double*)calloc(layer->A->shape[0]*layer->A->shape[1],sizeof(double));
+  // printf("calculating!\n");
   #pragma omp parallel for
   for(int i=0;i<layer->A->shape[0]*layer->A->shape[1];i++){
     temp_1->matrix[i] = log(layer->A->matrix[i]);
   }
   temp_1->shape[0] = layer->A->shape[0];
   temp_1->shape[1] = layer->A->shape[1];
-
+  // printf("calculating!\n");
   int dims[] = {layer->A->shape[0],layer->A->shape[1]};
   dARRAY * temp_ones = ones(dims);
   dARRAY * temp_sub = subtract(temp_ones,layer->A);
   
   dARRAY * temp_2 = NULL;
   temp_2 = (dARRAY *)malloc(sizeof(dARRAY));
-  temp_2->matrix = (double*)malloc(sizeof(double)*layer->A->shape[0]*layer->A->shape[1]);
+  temp_2->matrix = (double*)calloc(layer->A->shape[0]*layer->A->shape[1],sizeof(double));
 
   #pragma omp parallel for
   for(int i=0;i<layer->A->shape[0]*layer->A->shape[1];i++){

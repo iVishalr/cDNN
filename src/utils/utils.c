@@ -682,3 +682,9 @@ void shape(dARRAY * A){
   }
   printf("(%d,%d)\n",A->shape[0],A->shape[1]);
 }
+
+void sleep(int milliseconds) {
+  //Function to create a time delay. Mimicks thread.sleep() of Java
+  unsigned int duration = time(0) + (milliseconds/1000);
+  while(time(0)<duration);
+}

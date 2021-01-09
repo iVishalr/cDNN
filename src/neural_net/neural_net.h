@@ -5,6 +5,7 @@
 #include "../layers/Input.h"
 #include "../utils/utils.h"
 #include "../loss_functions/loss_functions.h"
+#include "../optimizers/gradient_descent.h"
 
 enum layer_type {NONE, INPUT, DENSE, LOSS, OPTIMIZER};
 typedef struct computational_graph{
@@ -17,7 +18,7 @@ typedef struct computational_graph{
     Input_layer * INPUT;
   };
   int computation_graph_status;//0 - Fprop 1- Backprop
-  
+  // int layer_num;
   dARRAY * Y;
 }Computation_Graph;
 

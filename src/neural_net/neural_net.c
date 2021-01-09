@@ -2,6 +2,7 @@
 
 Computation_Graph * G;
 char * loss_type;
+dARRAY * Y;
 
 Computation_Graph * init(){
   G = (Computation_Graph*)malloc(sizeof(Computation_Graph));
@@ -21,15 +22,18 @@ Computation_Graph * new_node(void * layer, char * type){
     printf("Appending dense layer!\n");
     new->DENSE = (Dense_layer*)layer;
     new->type = DENSE;
+    // new->layer_num = (Dense_layer*)layer->layer_num;
   } 
   else if(!strcmp(type,"Input")){
     printf("Appending input layer!\n");
     new->INPUT = (Input_layer*)layer;
     new->type = INPUT;
+    // new->layer_num = (Input_layer*)layer->layer_num;
   }
   printf("Returning G!\n");
   new->computation_graph_status=1;
   new->Y = NULL;
+  
   return new;
 }
 

@@ -3,6 +3,7 @@
 
 extern Computation_Graph * G;
 extern char * loss_type;
+extern dARRAY * Y;
 
 void init_params(){
   Dense_layer * layer = G->DENSE;
@@ -86,7 +87,7 @@ void backward_pass(){
     prev_layer = G->prev_layer->DENSE;
 
   if(strcmp(layer->layer_type,"output")!=0){ 
-    printf("Calculating dZ\n");
+    // printf("Calculating dZ\n");
     dARRAY * diff_layer_activation = NULL;
     if(!strcmp(layer->activation,"relu")){
       diff_layer_activation = relu(.input=layer->cache,.status=1);
@@ -102,14 +103,14 @@ void backward_pass(){
     diff_layer_activation = NULL;
   }
   else{
-    printf("Calculating dZ2\n");
+    // printf("Calculating dZ2\n");
     if(!strcmp(loss_type,"cross_entropy_loss")){
-      G->DENSE->dZ = subtract(G->DENSE->A,G->Y);
+      G->DENSE->dZ = subtract(G->DENSE->A,Y);
     }
   }
 
   //Calculate gradients with respect to the layer weights
-  printf("\nCalculating Weight Gradients\n");
+  // printf("\nCalculating Weight Gradients\n");
   dARRAY * prev_A_transpose = NULL;
   if(G->prev_layer->type==INPUT) 
     prev_A_transpose = transpose(prev_layer_in_features->A);
@@ -130,12 +131,12 @@ void backward_pass(){
   regularization_grad = dW_temp = NULL;
 
   //calculate gradients with respect to the layer biases
-  printf("\nCalculating Bias Gradients\n");
+  // printf("\nCalculating Bias Gradients\n");
   dARRAY * temp1_db = sum(layer->dZ,1);
   layer->db = divScalar(temp1_db,(1/(double)m));
   free2d(temp1_db);
   temp1_db = NULL;
-  printf("\n");
+  // printf("\n");
   //sleep(2000);
 
   //calculate gradients of activation of prev layer
@@ -177,6 +178,7 @@ void (Dense)(dense_args dense_layer_args){
   layer->dA = layer->db = layer->dW = layer->dZ = NULL;
   layer->isTraining = 1;
   layer->layer_type = dense_layer_args.layer_type;
+  layer->layer_num = dense_layer_args.layer_num;
   //finally we need to append to computation graph
   append_graph(layer,"Dense");
 }
