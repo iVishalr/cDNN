@@ -2,7 +2,7 @@
 
 dARRAY * forward_pass_relu(dARRAY * layer_matrix){
   dARRAY * relu_out = (dARRAY*)malloc(sizeof(dARRAY));
-  relu_out->matrix = (double*)malloc(sizeof(double)*layer_matrix->shape[0]*layer_matrix->shape[1]);
+  relu_out->matrix = (double*)calloc(layer_matrix->shape[0]*layer_matrix->shape[1],sizeof(double));
   for(int i=0;i<layer_matrix->shape[0]*layer_matrix->shape[1];i++)
     relu_out->matrix[i] = layer_matrix->matrix[i]>(double)0 ?(double)layer_matrix->matrix[i] : 0.0;
   relu_out->shape[0] = layer_matrix->shape[0];
@@ -12,7 +12,7 @@ dARRAY * forward_pass_relu(dARRAY * layer_matrix){
 
 dARRAY * backward_pass_relu(dARRAY * layer_matrix){
   dARRAY * relu_out = (dARRAY*)malloc(sizeof(dARRAY));
-  relu_out->matrix = (double*)malloc(sizeof(double)*layer_matrix->shape[0]*layer_matrix->shape[1]);
+  relu_out->matrix = (double*)calloc(layer_matrix->shape[0]*layer_matrix->shape[1],sizeof(double));
   for(int i=0;i<layer_matrix->shape[0]*layer_matrix->shape[1];i++)
     relu_out->matrix[i] = layer_matrix->matrix[i]>(double)0 ? 1.0 : 0.0;
   relu_out->shape[0] = layer_matrix->shape[0];

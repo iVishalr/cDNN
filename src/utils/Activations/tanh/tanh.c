@@ -2,7 +2,7 @@
 
 dARRAY * forward_pass_tanh(dARRAY * layer_matrix){
   dARRAY * tanh_out = (dARRAY*)malloc(sizeof(dARRAY));
-  tanh_out->matrix = (double*)malloc(sizeof(double)*layer_matrix->shape[0]*layer_matrix->shape[1]);
+  tanh_out->matrix = (double*)calloc(layer_matrix->shape[0]*layer_matrix->shape[1],sizeof(double));
   // omp_set_num_threads(4);
   #pragma omp parallel for shared(layer_matrix,tanh_out)
   for(int i=0;i<layer_matrix->shape[0]*layer_matrix->shape[1];i++){
@@ -18,7 +18,7 @@ dARRAY * forward_pass_tanh(dARRAY * layer_matrix){
 
 dARRAY * backward_pass_tanh(dARRAY * layer_matrix){
   dARRAY * tanh_out = (dARRAY*)malloc(sizeof(dARRAY));
-  tanh_out->matrix = (double*)malloc(sizeof(double)*layer_matrix->shape[0]*layer_matrix->shape[1]);
+  tanh_out->matrix = (double*)calloc(layer_matrix->shape[0]*layer_matrix->shape[1],sizeof(double));
   // omp_set_num_threads(4);
   #pragma omp parallel for shared(layer_matrix,tanh_out)
   for(int i=0;i<layer_matrix->shape[0]*layer_matrix->shape[1];i++){

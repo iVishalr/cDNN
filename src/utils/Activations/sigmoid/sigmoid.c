@@ -2,7 +2,7 @@
 
 dARRAY * forward_pass_sigmoid(dARRAY * linear_matrix){
   dARRAY * sigmoid_out = (dARRAY*)malloc(sizeof(dARRAY));
-  sigmoid_out->matrix = (double*)malloc(sizeof(double)*linear_matrix->shape[0]*linear_matrix->shape[1]);
+  sigmoid_out->matrix = (double*)calloc(linear_matrix->shape[0]*linear_matrix->shape[1],sizeof(double));
   #pragma omp parallel for shared(linear_matrix,sigmoid_out)
   for(int i=0;i<linear_matrix->shape[0]*linear_matrix->shape[1];i++)
     sigmoid_out->matrix[i] = (double)(1/(1+exp(-1*linear_matrix->matrix[i])));
