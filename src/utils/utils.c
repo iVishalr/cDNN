@@ -64,10 +64,9 @@ dARRAY * transpose(dARRAY * restrict Matrix){
     return NULL;
   }
   if(Matrix->shape[0]==1 && Matrix->shape[1]==1) return Matrix;
-
-  omp_set_num_threads(4);
   dARRAY * matrix = (dARRAY*)malloc(sizeof(dARRAY));
-  matrix->matrix = (double *)malloc(sizeof(double)*Matrix->shape[0]*Matrix->shape[1]);
+  matrix->matrix = (double*)calloc(Matrix->shape[0]*Matrix->shape[1],sizeof(double));
+  omp_set_num_threads(4);
   #pragma omp parallel for shared(Matrix,matrix)
   for(int i=0;i<Matrix->shape[0];i++)
     for(int j=0;j<Matrix->shape[1];j++)
@@ -94,22 +93,21 @@ dARRAY * dot(dARRAY * restrict MatrixA, dARRAY * restrict MatrixB){
     return NULL;
   }
   dARRAY * BT = NULL;
-  double * res = (double *)malloc(sizeof(double)*MatrixA->shape[0]*MatrixB->shape[1]);
+  dARRAY * result = NULL;
+  result = (dARRAY *)malloc(sizeof(dARRAY));
+  result->matrix = (double*)calloc(MatrixA->shape[0]*MatrixB->shape[1],sizeof(double));
   BT = transpose(MatrixB);
   omp_set_num_threads(4);
-  #pragma omp parallel for collapse(1) shared(MatrixA,MatrixB,res)
+  #pragma omp parallel for collapse(1) shared(MatrixA,MatrixB)
   for(int i=0;i<MatrixA->shape[0];i++){
     for(int j=0;j<MatrixB->shape[1];j++){
       for(int k=0;k<MatrixB->shape[0];k++){
-        res[i * MatrixB->shape[1]+j] += MatrixA->matrix[i*MatrixA->shape[1]+k] * BT->matrix[j*MatrixB->shape[0]+k];
+        result->matrix[i * MatrixB->shape[1]+j] += MatrixA->matrix[i*MatrixA->shape[1]+k] * BT->matrix[j*MatrixB->shape[0]+k];
       }
     }
   }
   free2d(BT);
   BT = NULL;
-  dARRAY * result = NULL;
-  result = (dARRAY *)malloc(sizeof(dARRAY));
-  result->matrix = res;
   result->shape[0] = MatrixA->shape[0];
   result->shape[1] = MatrixB->shape[1];
   return result;
@@ -145,7 +143,7 @@ dARRAY * multiply(dARRAY * restrict MatrixA, dARRAY * restrict MatrixB){
   }
   //since both the matrices must have the same dimensions, we can use shape of any matrix
   dARRAY * result = (dARRAY*)malloc(sizeof(dARRAY));
-  result->matrix = (double*)malloc(sizeof(double)*MatrixA->shape[0]*MatrixA->shape[1]);
+  result->matrix = (double*)calloc(MatrixA->shape[0]*MatrixA->shape[1],sizeof(double));
   if(x==y){
     for(int i=0;i<MatrixA->shape[0]*MatrixA->shape[1];i++){
       result->matrix[i] = MatrixA->matrix[i] * MatrixB->matrix[i];
@@ -190,7 +188,7 @@ dARRAY * divison(dARRAY * restrict MatrixA, dARRAY * restrict MatrixB){
   }
   //since both the matrices must have the same dimensions, we can use shape of any matrix
   dARRAY * result = (dARRAY*)malloc(sizeof(dARRAY));
-  result->matrix = (double*)malloc(sizeof(double)*MatrixA->shape[0]*MatrixA->shape[1]);
+  result->matrix = (double*)calloc(MatrixA->shape[0]*MatrixA->shape[1],sizeof(double));
   if(x==y){
     for(int i=0;i<MatrixA->shape[0]*MatrixA->shape[1];i++){
       result->matrix[i] = MatrixA->matrix[i] / MatrixB->matrix[i];
@@ -235,7 +233,7 @@ dARRAY * add(dARRAY * MatrixA, dARRAY * MatrixB){
   }
   //since both the matrices must have the same dimensions, we can use shape of any matrix
   dARRAY * result = (dARRAY*)malloc(sizeof(dARRAY));
-  result->matrix = (double*)malloc(sizeof(double)*MatrixA->shape[0]*MatrixA->shape[1]);
+  result->matrix = (double*)calloc(MatrixA->shape[0]*MatrixA->shape[1],sizeof(double));
   if(x==y){
     for(int i=0;i<MatrixA->shape[0]*MatrixA->shape[1];i++){
       result->matrix[i] = MatrixA->matrix[i] + MatrixB->matrix[i];
@@ -280,7 +278,7 @@ dARRAY * subtract(dARRAY * MatrixA, dARRAY * MatrixB){
   }
   //since both the matrices must have the same dimensions, we can use shape of any matrix
   dARRAY * result = (dARRAY*)malloc(sizeof(dARRAY));
-  result->matrix = (double*)malloc(sizeof(double)*MatrixA->shape[0]*MatrixA->shape[1]);
+  result->matrix = (double*)calloc(MatrixA->shape[0]*MatrixA->shape[1],sizeof(double));
   if(x==y){
     for(int i=0;i<MatrixA->shape[0]*MatrixA->shape[1];i++){
       result->matrix[i] = MatrixA->matrix[i] - MatrixB->matrix[i];
@@ -308,7 +306,7 @@ dARRAY * addScalar(dARRAY * matrix, double scalar){
     return NULL;
   }
   dARRAY * result = (dARRAY*)malloc(sizeof(dARRAY));
-  result->matrix = (double*)malloc(sizeof(double)*matrix->shape[0]*matrix->shape[1]);
+  result->matrix = (double*)calloc(matrix->shape[0]*matrix->shape[1],sizeof(double));
   for(int i=0; i<matrix->shape[0]*matrix->shape[1];  i++){
     result->matrix[i] = matrix->matrix[i] + scalar;
   }
@@ -330,7 +328,7 @@ dARRAY * subScalar(dARRAY * matrix, double scalar){
     return NULL;
   }
   dARRAY * result = (dARRAY*)malloc(sizeof(dARRAY));
-  result->matrix = (double*)malloc(sizeof(double)*matrix->shape[0]*matrix->shape[1]);
+  result->matrix = (double*)calloc(matrix->shape[0]*matrix->shape[1],sizeof(double));
   for(int i=0; i<matrix->shape[0]*matrix->shape[1];  i++){
     result->matrix[i] = matrix->matrix[i] - scalar;
   }
@@ -352,7 +350,7 @@ dARRAY * mulScalar(dARRAY * matrix, double scalar){
     return NULL;
   }
   dARRAY * result = (dARRAY*)malloc(sizeof(dARRAY));
-  result->matrix = (double*)malloc(sizeof(double)*matrix->shape[0]*matrix->shape[1]);
+  result->matrix = (double*)calloc(matrix->shape[0]*matrix->shape[1],sizeof(double));
   for(int i=0; i<matrix->shape[0]*matrix->shape[1];  i++){
     result->matrix[i] = matrix->matrix[i] * scalar;
   }
@@ -374,7 +372,7 @@ dARRAY * divScalar(dARRAY * matrix, double scalar){
     return NULL;
   }
   dARRAY * result = (dARRAY*)malloc(sizeof(dARRAY));
-  result->matrix = (double*)malloc(sizeof(double)*matrix->shape[0]*matrix->shape[1]);
+  result->matrix = (double*)calloc(matrix->shape[0]*matrix->shape[1],sizeof(double));
   for(int i=0; i<matrix->shape[0]*matrix->shape[1];  i++){
     result->matrix[i] = matrix->matrix[i] / scalar;
   }
@@ -396,7 +394,7 @@ dARRAY * power(dARRAY * matrix, int power){
     return NULL;
   }
   dARRAY * result = (dARRAY*)malloc(sizeof(dARRAY));
-  result->matrix = (double*)malloc(sizeof(double)*matrix->shape[0]*matrix->shape[1]);
+  result->matrix = (double*)calloc(matrix->shape[0]*matrix->shape[1],sizeof(double));
   for(int i=0; i<matrix->shape[0]*matrix->shape[1];  i++){
     result->matrix[i] = pow(matrix->matrix[i],power);
   }
@@ -468,32 +466,31 @@ dARRAY * sum(dARRAY * matrix, int axis){
   }
   // if(matrix->shape[0]==1 || matrix->shape[1]==1) return matrix;
   dARRAY * new = (dARRAY*)malloc(sizeof(dARRAY));
-  double * res = NULL;
+  new->matrix = NULL;
   if(axis==0){
-    res = (double*)malloc(sizeof(double)*matrix->shape[1]);
+    new->matrix = (double*)calloc(matrix->shape[1],sizeof(double));
     for(int i = 0; i<matrix->shape[0];i++){
       double temp = 0.0;
       for(int j=0;j<matrix->shape[1];j++){
         temp += matrix->matrix[j*matrix->shape[1]+i];
       }
-      res[i] = temp;
+      new->matrix[i] = temp;
     }
     new->shape[0] = 1;
     new->shape[1] = matrix->shape[1];
   }
   else if(axis==1){
-    res = (double*)malloc(sizeof(double)*matrix->shape[0]);
+    new->matrix = (double*)calloc(matrix->shape[0],sizeof(double));
     for(int i=0;i<matrix->shape[0];i++){
       double temp = 0.0;
       for(int j=0;j<matrix->shape[1];j++){
         temp += matrix->matrix[i*matrix->shape[1]+j];
       }
-      res[i] = temp;
+      new->matrix[i] = temp;
     }
     new->shape[0] = matrix->shape[0];
     new->shape[1] = 1;
   }
-  new->matrix = res;
   return new;
 }
 

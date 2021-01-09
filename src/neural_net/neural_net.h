@@ -17,14 +17,17 @@ typedef struct computational_graph{
     Input_layer * INPUT;
   };
   int computation_graph_status;//0 - Fprop 1- Backprop
-  char * loss_type;
+  
   dARRAY * Y;
 }Computation_Graph;
+
+// typedef Computation_Graph * G;
+// Computation_Graph * G;
 
 #ifdef __cplusplus
 extern "C"{
 #endif
-  Computation_Graph * G;
+  // Computation_Graph * G;
   Computation_Graph * init();
   Computation_Graph * new_node(void * layer, char * type);
   void append_graph(void * layer, char * type);

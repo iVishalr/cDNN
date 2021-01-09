@@ -1,9 +1,10 @@
-#include "./neural_net.h"
+#include "neural_net.h"
 
-// Computation_Graph * G;
+Computation_Graph * G;
+char * loss_type;
 
 Computation_Graph * init(){
-  Computation_Graph * G = (Computation_Graph*)malloc(sizeof(Computation_Graph));
+  G = (Computation_Graph*)malloc(sizeof(Computation_Graph));
   G->next_layer = NULL;
   G->prev_layer = NULL;
   G->type = NONE;
@@ -13,24 +14,30 @@ Computation_Graph * init(){
 }
 
 Computation_Graph * new_node(void * layer, char * type){
-  Computation_Graph * G = (Computation_Graph*)malloc(sizeof(Computation_Graph));
-  G->next_layer = G->prev_layer = NULL;
+  Computation_Graph * new = (Computation_Graph*)malloc(sizeof(Computation_Graph));
+  new->next_layer = NULL;
+  new->prev_layer = NULL;
   if(!strcmp(type,"Dense")){
-    G->DENSE = (Dense_layer*)layer;
-    G->type = DENSE;
+    printf("Appending dense layer!\n");
+    new->DENSE = (Dense_layer*)layer;
+    new->type = DENSE;
   } 
   else if(!strcmp(type,"Input")){
     printf("Appending input layer!\n");
-    G->INPUT = (Input_layer*)layer;
-    G->type = INPUT;
+    new->INPUT = (Input_layer*)layer;
+    new->type = INPUT;
   }
-  return G;
+  printf("Returning G!\n");
+  new->computation_graph_status=1;
+  new->Y = NULL;
+  return new;
 }
 
 void append_graph(void * layer, char * type){
   Computation_Graph * new = new_node(layer,type);
   if(G==NULL){
     G = new;
+    return;
   }
   Computation_Graph * temp = G;
   while(temp->next_layer!=NULL){

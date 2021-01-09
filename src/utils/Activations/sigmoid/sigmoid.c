@@ -3,20 +3,27 @@
 dARRAY * forward_pass_sigmoid(dARRAY * linear_matrix){
   dARRAY * sigmoid_out = (dARRAY*)malloc(sizeof(dARRAY));
   sigmoid_out->matrix = (double*)malloc(sizeof(double)*linear_matrix->shape[0]*linear_matrix->shape[1]);
-  omp_set_num_threads(4);
   #pragma omp parallel for shared(linear_matrix,sigmoid_out)
   for(int i=0;i<linear_matrix->shape[0]*linear_matrix->shape[1];i++)
-    sigmoid_out->matrix[i] = 1/(1+exp(-1*linear_matrix->matrix[i]));
+    sigmoid_out->matrix[i] = (double)(1/(1+exp(-1*linear_matrix->matrix[i])));
   sigmoid_out->shape[0] = linear_matrix->shape[0];
   sigmoid_out->shape[1] = linear_matrix->shape[1];
   return sigmoid_out;
 }
 
 dARRAY * backward_pass_sigmoid(dARRAY * linear_matrix){
-  dARRAY * sigmoid_out;
+  dARRAY * sigmoid_out = NULL;
+  dARRAY * temp = NULL;
+  dARRAY * one = NULL;
   omp_set_num_threads(4);
   int dims[] = {linear_matrix->shape[0],linear_matrix->shape[1]};
-  sigmoid_out = multiply(linear_matrix,subtract(ones(dims),linear_matrix));
+  one = ones(dims);
+  temp = subtract(one,linear_matrix);
+  free2d(one);
+  one=NULL;
+  sigmoid_out = multiply(linear_matrix,temp);
+  free2d(temp);
+  temp = NULL;
   sigmoid_out->shape[0] = linear_matrix->shape[0];
   sigmoid_out->shape[1] = linear_matrix->shape[1];
   return sigmoid_out;

@@ -1,6 +1,6 @@
 #include "./loss_functions.h"
 
-double cross_entroy_loss(Dense_layer * layer, dARRAY * Y){
+double cross_entropy_loss(Dense_layer * layer, dARRAY * Y){
   int m = Y->shape[1];
   dARRAY * temp_1 = NULL;
   temp_1 = (dARRAY *)malloc(sizeof(dARRAY));

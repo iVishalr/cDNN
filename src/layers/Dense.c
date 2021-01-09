@@ -1,7 +1,8 @@
 #include "../neural_net/neural_net.h"
 #include "./Dense.h"
 
-// extern Computation_Graph * G;
+extern Computation_Graph * G;
+extern char * loss_type;
 
 void init_params(){
   Dense_layer * layer = G->DENSE;
@@ -36,30 +37,21 @@ dARRAY * init_bias(int * bias_dims){
 }
 
 void forward_pass(){
-
   dARRAY * weight_input_res = NULL;
   if(G->prev_layer->type==INPUT) weight_input_res = dot(G->DENSE->weights, G->prev_layer->INPUT->A);
   else weight_input_res = dot(G->DENSE->weights, G->prev_layer->DENSE->A);
   dARRAY * Z = G->DENSE->cache = add(weight_input_res,G->DENSE->bias);//Z
   free2d(weight_input_res);
   weight_input_res = NULL;
-  printf("Shape(Z) : ");
-  shape(Z);
   dARRAY * activation_temp = NULL;
   if(!strcmp(G->DENSE->activation,"relu")){
     activation_temp = relu(.input=Z);
-    printf("Shape(activation_temp) : ");
-    shape(activation_temp);
   }
   else if(!strcmp(G->DENSE->activation,"sigmoid")){
     activation_temp = sigmoid(.input=Z);
-    printf("Shape(activation_temp) : ");
-    shape(activation_temp);
   }
   else if(!strcmp(G->DENSE->activation,"tanh")){
     activation_temp = TanH(.input=Z);
-    printf("Shape(activation_temp) : ");
-    shape(activation_temp);
   }
   if(G->DENSE->dropout<1.0 && G->DENSE->dropout>=0.0 && G->DENSE->isTraining){
     //implementation of inverted dropout layer
@@ -76,8 +68,6 @@ void forward_pass(){
   }
   else{
     G->DENSE->A = activation_temp;
-    printf("Shape(A) : ");
-    shape(G->DENSE->A);
   }
   activation_temp = NULL;
   Z=NULL;
@@ -85,13 +75,18 @@ void forward_pass(){
 
 void backward_pass(){
   double m = 4;//temporarily set m=1;
+
   Dense_layer * layer = G->DENSE; 
   Input_layer * prev_layer_in_features = NULL;
   Dense_layer * prev_layer = NULL;
-  if(G->prev_layer->type==INPUT) prev_layer_in_features = G->prev_layer->INPUT;
-  else prev_layer = G->prev_layer->DENSE;
-  //calculate dZ
+
+  if(G->prev_layer->type==INPUT) 
+    prev_layer_in_features = G->prev_layer->INPUT;
+  else 
+    prev_layer = G->prev_layer->DENSE;
+
   if(strcmp(layer->layer_type,"output")!=0){ 
+    printf("Calculating dZ\n");
     dARRAY * diff_layer_activation = NULL;
     if(!strcmp(layer->activation,"relu")){
       diff_layer_activation = relu(.input=layer->cache,.status=1);
@@ -105,12 +100,10 @@ void backward_pass(){
     layer->dZ = multiply(layer->dA,diff_layer_activation);
     free2d(diff_layer_activation);
     diff_layer_activation = NULL;
-    printf("Shape(dZ) : ");
-    shape(G->DENSE->dZ);
-    printf("\n");
   }
   else{
-    if(!strcmp(G->loss_type,"cross_entropy_loss")){
+    printf("Calculating dZ2\n");
+    if(!strcmp(loss_type,"cross_entropy_loss")){
       G->DENSE->dZ = subtract(G->DENSE->A,G->Y);
     }
   }
@@ -118,7 +111,8 @@ void backward_pass(){
   //Calculate gradients with respect to the layer weights
   printf("\nCalculating Weight Gradients\n");
   dARRAY * prev_A_transpose = NULL;
-  if(G->prev_layer->type==INPUT) prev_A_transpose = transpose(prev_layer_in_features->A);
+  if(G->prev_layer->type==INPUT) 
+    prev_A_transpose = transpose(prev_layer_in_features->A);
   else prev_A_transpose = transpose(prev_layer->A);
   dARRAY * temp1_dW = dot(layer->dZ,prev_A_transpose);
   free2d(prev_A_transpose);
@@ -134,20 +128,13 @@ void backward_pass(){
   free2d(regularization_grad);
   free2d(dW_temp);
   regularization_grad = dW_temp = NULL;
-  printf("Shape(dW) : ");
-  shape(G->DENSE->dW);
-  printf("\n");
 
   //calculate gradients with respect to the layer biases
   printf("\nCalculating Bias Gradients\n");
   dARRAY * temp1_db = sum(layer->dZ,1);
-  shape(temp1_db);
   layer->db = divScalar(temp1_db,(1/(double)m));
   free2d(temp1_db);
   temp1_db = NULL;
-  printf("\nCalculated db\n");
-  printf("Shape(db) : ");
-  shape(layer->db);
   printf("\n");
   //sleep(2000);
 
@@ -169,17 +156,13 @@ void backward_pass(){
     }
     free2d(weight_transpose);
     weight_transpose = NULL;
-    printf("\nCalculated dA_prev\n");
-    printf("Shape(dA) : ");
-    shape(G->prev_layer->DENSE->dA);
-    printf("\n");
   }
-  else{
-    printf("skipping calculation of dA_prev\n");
-  }
+  free2d(layer->dZ);
+  layer->dZ = NULL;
 }
 
 void (Dense)(dense_args dense_layer_args){
+  
   Dense_layer * layer = (Dense_layer*)malloc(sizeof(Dense_layer));
   layer->activation = dense_layer_args.activation;
   layer->num_of_computation_nodes = dense_layer_args.layer_size;
