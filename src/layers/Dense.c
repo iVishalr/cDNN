@@ -1,16 +1,23 @@
 #include "../neural_net/neural_net.h"
 #include "./Dense.h"
+#include "../model/model.h"
 
-extern Computation_Graph * G;
-extern char * loss_type;
-extern dARRAY * Y;
+extern __Model__ * m;
 
 void init_params(){
-  Dense_layer * layer = G->DENSE;
-  int weight_dims[] = {layer->num_of_computation_nodes,5};
+  Dense_layer * layer = m->current_layer->DENSE;
+  int weight_dims[2];
+  if(m->current_layer->prev_layer->type!=INPUT){
+    weight_dims[0] = layer->num_of_computation_nodes;
+    weight_dims[1] = m->current_layer->prev_layer->DENSE->num_of_computation_nodes;
+  }
+  else{
+    weight_dims[0] = layer->num_of_computation_nodes;
+    weight_dims[1] = 12288;
+  }
   int bias_dims[] = {layer->num_of_computation_nodes,1};
-  G->DENSE->weights = init_weights(weight_dims,layer->initializer);
-  G->DENSE->bias = init_bias(bias_dims);
+  m->current_layer->DENSE->weights = init_weights(weight_dims,layer->initializer);
+  m->current_layer->DENSE->bias = init_bias(bias_dims);
 }
 
 dARRAY * init_weights(int * weights_dims,const char * init_type){
@@ -39,55 +46,56 @@ dARRAY * init_bias(int * bias_dims){
 
 void forward_pass(){
   dARRAY * weight_input_res = NULL;
-  if(G->prev_layer->type==INPUT) weight_input_res = dot(G->DENSE->weights, G->prev_layer->INPUT->A);
-  else weight_input_res = dot(G->DENSE->weights, G->prev_layer->DENSE->A);
-  dARRAY * Z = G->DENSE->cache = add(weight_input_res,G->DENSE->bias);//Z
+  if(m->current_layer->prev_layer->type==INPUT) weight_input_res = dot(m->current_layer->DENSE->weights, m->current_layer->prev_layer->INPUT->A);
+  else weight_input_res = dot(m->current_layer->DENSE->weights, m->current_layer->prev_layer->DENSE->A);
+  dARRAY * Z = m->current_layer->DENSE->cache = add(weight_input_res,m->current_layer->DENSE->bias);//Z
   free2d(weight_input_res);
   weight_input_res = NULL;
   dARRAY * activation_temp = NULL;
-  if(!strcmp(G->DENSE->activation,"relu")){
+  if(!strcmp(m->current_layer->DENSE->activation,"relu")){
     activation_temp = relu(.input=Z);
   }
-  else if(!strcmp(G->DENSE->activation,"sigmoid")){
+  else if(!strcmp(m->current_layer->DENSE->activation,"sigmoid")){
     activation_temp = sigmoid(.input=Z);
   }
-  else if(!strcmp(G->DENSE->activation,"tanh")){
+  else if(!strcmp(m->current_layer->DENSE->activation,"tanh")){
     activation_temp = TanH(.input=Z);
   }
-  if(G->DENSE->dropout<1.0 && G->DENSE->dropout>=0.0 && G->DENSE->isTraining){
+  if(m->current_layer->DENSE->dropout<1.0 && m->current_layer->DENSE->dropout>=0.0 && m->current_layer->DENSE->isTraining){
     //implementation of inverted dropout layer
     int dims[] = {activation_temp->shape[0],activation_temp->shape[1]};
-    G->DENSE->dropout_mask = randn(dims);
+    m->current_layer->DENSE->dropout_mask = randn(dims);
     omp_set_num_threads(4);
     #pragma omp parallel for
-    for(int i=0;i<G->DENSE->dropout_mask->shape[0]*G->DENSE->dropout_mask->shape[1];i++)
-      G->DENSE->dropout_mask->matrix[i] = G->DENSE->dropout_mask->matrix[i]<G->DENSE->dropout ? 1 : 0;
-    dARRAY * mul_mask = multiply(activation_temp,G->DENSE->dropout_mask);
-    G->DENSE->A = divScalar(mul_mask,G->DENSE->dropout);
+    for(int i=0;i<m->current_layer->DENSE->dropout_mask->shape[0]*m->current_layer->DENSE->dropout_mask->shape[1];i++)
+      m->current_layer->DENSE->dropout_mask->matrix[i] = m->current_layer->DENSE->dropout_mask->matrix[i]<m->current_layer->DENSE->dropout ? 1 : 0;
+    dARRAY * mul_mask = multiply(activation_temp,m->current_layer->DENSE->dropout_mask);
+    m->current_layer->DENSE->A = divScalar(mul_mask,m->current_layer->DENSE->dropout);
     free2d(mul_mask);
     mul_mask = NULL;
   }
   else{
-    G->DENSE->A = activation_temp;
+    m->current_layer->DENSE->A = activation_temp;
   }
   activation_temp = NULL;
   Z=NULL;
+  if(m->predicting)
+    m->output = m->current_layer->DENSE->A;
 }
 
 void backward_pass(){
-  double m = 4;//temporarily set m=1;
+  double num_examples = 12288;//temporarily set m=1;
 
-  Dense_layer * layer = G->DENSE; 
+  Dense_layer * layer = m->current_layer->DENSE; 
   Input_layer * prev_layer_in_features = NULL;
   Dense_layer * prev_layer = NULL;
 
-  if(G->prev_layer->type==INPUT) 
-    prev_layer_in_features = G->prev_layer->INPUT;
+  if(m->current_layer->prev_layer->type==INPUT) 
+    prev_layer_in_features = m->current_layer->prev_layer->INPUT;
   else 
-    prev_layer = G->prev_layer->DENSE;
+    prev_layer = m->current_layer->prev_layer->DENSE;
 
   if(strcmp(layer->layer_type,"output")!=0){ 
-    // printf("Calculating dZ\n");
     dARRAY * diff_layer_activation = NULL;
     if(!strcmp(layer->activation,"relu")){
       diff_layer_activation = relu(.input=layer->cache,.status=1);
@@ -104,25 +112,25 @@ void backward_pass(){
   }
   else{
     // printf("Calculating dZ2\n");
-    if(!strcmp(loss_type,"cross_entropy_loss")){
-      G->DENSE->dZ = subtract(G->DENSE->A,Y);
+    if(!strcmp(m->loss,"cross_entropy_loss")){
+      m->current_layer->DENSE->dZ = subtract(m->current_layer->DENSE->A,m->Y_train);
     }
   }
 
   //Calculate gradients with respect to the layer weights
   // printf("\nCalculating Weight Gradients\n");
   dARRAY * prev_A_transpose = NULL;
-  if(G->prev_layer->type==INPUT) 
+  if(m->current_layer->prev_layer->type==INPUT) 
     prev_A_transpose = transpose(prev_layer_in_features->A);
   else prev_A_transpose = transpose(prev_layer->A);
   dARRAY * temp1_dW = dot(layer->dZ,prev_A_transpose);
   free2d(prev_A_transpose);
   prev_A_transpose = NULL;
   dARRAY * regularization_grad_temp = mulScalar(layer->weights,layer->lambda);
-  dARRAY * regularization_grad = divScalar(regularization_grad_temp,m);
+  dARRAY * regularization_grad = divScalar(regularization_grad_temp,num_examples);
   free2d(regularization_grad_temp);
   regularization_grad_temp = NULL;
-  dARRAY * dW_temp = mulScalar(temp1_dW,(1/(double)m));
+  dARRAY * dW_temp = mulScalar(temp1_dW,(1/(double)num_examples));
   free2d(temp1_dW);
   temp1_dW = NULL;
   layer->dW = add(dW_temp,regularization_grad);
@@ -133,14 +141,14 @@ void backward_pass(){
   //calculate gradients with respect to the layer biases
   // printf("\nCalculating Bias Gradients\n");
   dARRAY * temp1_db = sum(layer->dZ,1);
-  layer->db = divScalar(temp1_db,(1/(double)m));
+  layer->db = divScalar(temp1_db,(1/(double)num_examples));
   free2d(temp1_db);
   temp1_db = NULL;
   // printf("\n");
   //sleep(2000);
 
   //calculate gradients of activation of prev layer
-  if(G->prev_layer->type!=INPUT){
+  if(m->current_layer->prev_layer->type!=INPUT){
     dARRAY * weight_transpose = transpose(layer->weights);
     dARRAY * prev_layer_A_temp = dot(weight_transpose,layer->dZ);
     if(layer->dropout_mask==NULL){

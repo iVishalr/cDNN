@@ -1,12 +1,13 @@
 #include "gradient_descent.h"
-#include "../neural_net/neural_net.h"
+#include "../model/model.h"
 
-extern Computation_Graph * G;
+extern __Model__ * m;
 
 void GD(double lr){
-  Computation_Graph * temp = G;
+  Computation_Graph * temp = m->graph;
   dARRAY * layer_weights, *layer_biases, *grad_W, *grad_b;
   while(temp!=NULL){
+    m->current_layer = temp;
     if(temp->type!=INPUT){
       layer_weights = temp->DENSE->weights;
       layer_biases = temp->DENSE->bias;

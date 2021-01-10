@@ -1,59 +1,41 @@
 #include "neural_net.h"
+#include "../model/model.h"
 
-Computation_Graph * G;
-char * loss_type;
-dARRAY * Y;
-
-Computation_Graph * init(){
-  G = (Computation_Graph*)malloc(sizeof(Computation_Graph));
-  G->next_layer = NULL;
-  G->prev_layer = NULL;
-  G->type = NONE;
-  G->DENSE = NULL;
-  G->INPUT = NULL;
-  return G;
-}
+extern __Model__ * m;
 
 Computation_Graph * new_node(void * layer, char * type){
   Computation_Graph * new = (Computation_Graph*)malloc(sizeof(Computation_Graph));
   new->next_layer = NULL;
   new->prev_layer = NULL;
   if(!strcmp(type,"Dense")){
-    printf("Appending dense layer!\n");
     new->DENSE = (Dense_layer*)layer;
     new->type = DENSE;
-    // new->layer_num = (Dense_layer*)layer->layer_num;
   } 
   else if(!strcmp(type,"Input")){
-    printf("Appending input layer!\n");
     new->INPUT = (Input_layer*)layer;
     new->type = INPUT;
-    // new->layer_num = (Input_layer*)layer->layer_num;
   }
-  printf("Returning G!\n");
-  new->computation_graph_status=1;
-  new->Y = NULL;
-  
   return new;
 }
 
 void append_graph(void * layer, char * type){
   Computation_Graph * new = new_node(layer,type);
-  if(G==NULL){
-    G = new;
+  if(m->graph==NULL){
+    m->graph = new;
+    m->current_layer = new;
     return;
   }
-  Computation_Graph * temp = G;
-  while(temp->next_layer!=NULL){
+  Computation_Graph * temp = m->graph;
+  while(temp->next_layer!=NULL)
     temp = temp->next_layer;
-  }
   //now we are on the last node
   temp->next_layer = new;
   new->prev_layer = temp;
+  m->number_of_layers+=1;
 }
 
 void printComputation_Graph(Computation_Graph * G){
-  Computation_Graph * temp = G;
+  Computation_Graph * temp = m->graph;
   while(temp!=NULL){
     if(temp->type==DENSE)
       printf("DENSE\n");
@@ -66,7 +48,7 @@ void printComputation_Graph(Computation_Graph * G){
 }
 
 Computation_Graph * destroy_G(Computation_Graph * G){
-  Computation_Graph * temp = G;
+  Computation_Graph * temp = m->graph;
   Computation_Graph * prev;
   while(temp!=NULL){
     prev = temp;
@@ -108,6 +90,7 @@ Computation_Graph * destroy_G(Computation_Graph * G){
   }
   prev = NULL;
   temp = NULL;
-  G = NULL;
-  return G;
+  m->graph = NULL;
+  m->current_layer = NULL;
+  return m->graph;
 }

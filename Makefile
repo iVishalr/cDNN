@@ -13,6 +13,7 @@ TANH=tanh
 LAYERS=layers
 LOSS=loss_functions
 OPTIMIZERS=optimizers
+MODEL=model
 all: 
 	@if ! test -d $(BUILD); \
 		then echo "\033[93msetting up build directory...\033[0m"; mkdir -p build;\
@@ -23,8 +24,8 @@ all:
 	@$(MAKE) start
 # $(BUILD)/test_utils.o	
 
-start:  $(BUILD)/utils.o $(BUILD)/relu.o $(BUILD)/sigmoid.o $(BUILD)/tanh.o $(BUILD)/neural_net.o $(BUILD)/Dense.o $(BUILD)/Input.o $(BUILD)/loss_functions.o $(BUILD)/gradient_descent.o $(BUILD)/test_network.o
-	$(CC) $(ATTR) $(BUILD)/utils.o $(BUILD)/relu.o $(BUILD)/sigmoid.o $(BUILD)/tanh.o $(BUILD)/neural_net.o $(BUILD)/Dense.o $(BUILD)/Input.o $(BUILD)/loss_functions.o $(BUILD)/gradient_descent.o $(BUILD)/test_network.o
+start:  $(BUILD)/utils.o $(BUILD)/relu.o $(BUILD)/sigmoid.o $(BUILD)/tanh.o $(BUILD)/neural_net.o $(BUILD)/Dense.o $(BUILD)/Input.o $(BUILD)/loss_functions.o $(BUILD)/gradient_descent.o $(BUILD)/model.o $(BUILD)/test_network.o
+	$(CC) $(ATTR) $(BUILD)/utils.o $(BUILD)/relu.o $(BUILD)/sigmoid.o $(BUILD)/tanh.o $(BUILD)/neural_net.o $(BUILD)/Dense.o $(BUILD)/Input.o $(BUILD)/loss_functions.o $(BUILD)/gradient_descent.o $(BUILD)/model.o $(BUILD)/test_network.o
 	@echo "\033[92mBuild Successful\033[0m"
 	@echo "\033[92mCompiled Test\033[0m"
 $(BUILD)/utils.o: $(SRC)/$(UTILS)/utils.c
@@ -44,6 +45,8 @@ $(BUILD)/neural_net.o: $(SRC)/neural_net/neural_net.c
 $(BUILD)/loss_functions.o: $(SRC)/$(LOSS)/loss_functions.c
 	$(CC) $(CFLAGS) $(ATTR) -o $@ $<
 $(BUILD)/gradient_descent.o: $(SRC)/$(OPTIMIZERS)/gradient_descent.c
+	$(CC) $(CFLAGS) $(ATTR) -o $@ $<
+$(BUILD)/model.o: $(SRC)/$(MODEL)/model.c
 	$(CC) $(CFLAGS) $(ATTR) -o $@ $<
 $(BUILD)/test_network.o: $(SRC)/$(TEST)/test_network.c
 	$(CC) $(CFLAGS) $(ATTR) -o $@ $<
