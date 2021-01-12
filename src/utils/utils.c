@@ -680,6 +680,7 @@ void shape(dARRAY * A){
     printf("\033[1;31mError:\033[93m Matrix is Empty. Call shape() only after intializing dARRAY object.\033[0m\n");
     return;
   }
+  printf("first element of matrix is : %lf\n",A->matrix[0]);
   printf("(%d,%d)\n",A->shape[0],A->shape[1]);
 }
 
@@ -687,4 +688,11 @@ void sleep(int milliseconds) {
   //Function to create a time delay. Mimicks thread.sleep() of Java
   unsigned int duration = time(0) + (milliseconds/1000);
   while(time(0)<duration);
+}
+
+void cleanSTDIN() {
+  //This function is used instead of fflush(stdin) as it is a bad practice to use it 
+  //due to undefined behaviour.
+  int ch;
+  while ((ch = getchar()) != '\n' && ch != EOF){}
 }

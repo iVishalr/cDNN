@@ -23,6 +23,7 @@ void append_graph(void * layer, char * type){
   if(m->graph==NULL){
     m->graph = new;
     m->current_layer = new;
+    m->number_of_layers+=1;
     return;
   }
   Computation_Graph * temp = m->graph;
@@ -31,7 +32,7 @@ void append_graph(void * layer, char * type){
   //now we are on the last node
   temp->next_layer = new;
   new->prev_layer = temp;
-  m->number_of_layers+=1;
+  m->number_of_layers++;
 }
 
 void printComputation_Graph(Computation_Graph * G){

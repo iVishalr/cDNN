@@ -20,21 +20,13 @@ typedef struct model_args{
   int print_cost;
 }Model_args;
 
-typedef struct weight_arr{
-  dARRAY * weight;
-}__weights__;
+typedef struct save_model_weights{
+  dARRAY * weights;
+}Model_Weights;
 
-typedef struct bias_arr{
+typedef struct save_model_biases{
   dARRAY * bias;
-}__biases__;
-
-typedef struct save_model{
-  __weights__ * weights_arr[200];
-  __biases__ * biases_arr[200];
-  double learning_rate;
-  double lambda;
-  int num_layers;
-}SAVE_MODEL;
+}Save_Model_Biases;
 
 #ifdef __cplusplus
 extern "C"{
@@ -77,6 +69,8 @@ typedef struct model{
   dARRAY * x_cv;
   dARRAY * Y_cv;
   dARRAY * output;
+
+  int num_of_training_examples;
   int print_cost;
   int num_iter;
   char * optimizer;

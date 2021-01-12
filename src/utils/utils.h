@@ -47,6 +47,7 @@ extern "C"{
   void shape(dARRAY * A);
   void free2d(dARRAY * matrix);
   void sleep(int milliseconds);
+  void cleanSTDIN();
 #ifdef __cplusplus
 }
 #endif

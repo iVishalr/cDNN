@@ -3,10 +3,7 @@
 __Model__ * m;
 
 void __init__(){
-  m->input_size = 0;
-  m->output_size = 0;
   m->predicting = 0;
-  m->number_of_layers = 0;
   m->test_accuracy = 0.0;
   m->train_accuracy = 0.0;
   m->train_cost = 0.0;
@@ -82,64 +79,115 @@ void __predict__(dARRAY * input_feature){
   }
 }
 
+void load_weights(){
+  
+}
+
+void load_biases(){
+  // FILE * fp1;
+  // Computation_Graph * temp = m->graph->next_layer;
+  
+}
+
 void __load_model__(){
-  SAVE_MODEL * loaded_model = (SAVE_MODEL*)malloc(sizeof(SAVE_MODEL));
-  FILE * file_ptr;
-  file_ptr = fopen("weights.data","rb");
-  if(file_ptr==NULL){
-    printf("ERROR!\n");
-  exit(EXIT_FAILURE);
-  }
-  fread(loaded_model,sizeof(SAVE_MODEL),1,file_ptr);
+  dARRAY weights[m->number_of_layers-1];
+  dARRAY biases[m->number_of_layers-1];
+
   Computation_Graph * temp = m->graph->next_layer;
-  int index = 0;
-  while(temp!=NULL){
-    printf("Attempting to load weights!\n");
-    __weights__ * new_w = loaded_model->weights_arr[index];
-    printf("Attempting to load weights!\n");
-    __biases__ * new_b = loaded_model->biases_arr[index];
-    printf("Attempting to load weights!\n");
-    temp->DENSE->weights = new_w->weight;
-    printf("Attempting to load weights!\n");
-    temp->DENSE->bias = new_b->bias;
-    printf("Attempting to load weights!\n");
+
+  // printf("allocating memory\n");
+  for(int i=0;i<m->number_of_layers-1 && temp!=NULL;i++){
+    shape(temp->DENSE->weights);
+    shape(temp->DENSE->bias);
+    weights[i].matrix = (double*)calloc(temp->DENSE->weights->shape[0]*temp->DENSE->weights->shape[1],sizeof(double));
+    biases[i].matrix = (double*)calloc(temp->DENSE->bias->shape[0]*temp->DENSE->bias->shape[1],sizeof(double));
     temp = temp->next_layer;
-    index++;
-    new_w=NULL;
-    new_b=NULL;
   }
-  m->learning_rate = loaded_model->learning_rate;
-  m->lambda = loaded_model->lambda;
-  printf("Learning rate : %lf\n",loaded_model->learning_rate);
+  // printf("Finished memory\n");
+  temp = m->graph->next_layer;
+
+  FILE * fp = NULL;
+  fp = fopen("./bin/model_weights.t7","rb");
+
+  for(int i=0;i<m->number_of_layers-1;i++){
+    if(temp==NULL) printf("null\n");
+    for(int j=0;j<temp->DENSE->weights->shape[0]*temp->DENSE->weights->shape[1];j++){
+      fscanf(fp,"%lf ",&weights[i].matrix[j]);
+    }
+    weights[i].shape[0] = temp->DENSE->weights->shape[0];
+    weights[i].shape[1] = temp->DENSE->weights->shape[1];
+    temp = temp->next_layer;
+  }
+  // printf("%lf\n",weights[0].matrix[0]);
+  // printf("%lf\n",weights[1].matrix[0]);
+
+  printf("weight matrix of layer 3 : \n");
+  for(int i=0;i<weights[1].shape[0];i++){
+    for(int j=0;j<weights[1].shape[1];j++){
+      printf("%lf ",weights[1].matrix[i*weights[1].shape[1]+j]);
+    }
+    printf("\n");
+  }
+  printf("W3 (%d,%d)\n",weights[1].shape[0],weights[1].shape[1]);
+  // shape((dARRAY*)weights[0]);
+  // shape((dARRAY*)weights[1]);
+  fclose(fp);
+
+
+  sleep(1000);
+  
+
+  
+  temp = m->graph->next_layer;
+
+  FILE * fp1 = NULL;
+  fp1 = fopen("./bin/model_biases.t7","rb");
+
+  temp = m->graph->next_layer;
+
+  for(int i=0;i<m->number_of_layers-1;i++){
+    for(int j=0;j<temp->DENSE->bias->shape[0]*temp->DENSE->bias->shape[1];j++){
+      fscanf(fp1,"%lf ",&biases[i].matrix[j]);
+    }
+    biases[i].shape[0] = temp->DENSE->bias->shape[0];
+    biases[i].shape[1] = temp->DENSE->bias->shape[1];
+    temp = temp->next_layer;
+  }
+
+  // printf("%lf\n",biases[0].matrix[0]);
+  // printf("%lf\n",biases[1].matrix[0]);
+
+  printf("bias matrix of layer 2 : \n");
+  for(int i=0;i<biases[0].shape[0];i++){
+    for(int j=0;j<biases[0].shape[1];j++){
+      printf("%lf ",biases[0].matrix[i*biases[0].shape[1]+j]);
+    }
+    printf("\n");
+  }
+  fclose(fp1);
 }
 
 void __save_model__(char * file_name){
+  FILE * fp = NULL;
+  fp = fopen("./bin/model_weights.t7","ab+");
   Computation_Graph * temp = m->graph->next_layer;
-  SAVE_MODEL * __save_model__ = (SAVE_MODEL *)malloc(sizeof(SAVE_MODEL));
-  __save_model__->num_layers = m->number_of_layers;
-  __save_model__->lambda = m->lambda;
-  __save_model__->learning_rate = m->learning_rate;
-  int index = 0;
-  while(temp!=NULL){
-    __weights__ * new_w = (__weights__*)malloc(sizeof(__weights__));
-    new_w->weight = temp->DENSE->weights;
-    __save_model__->weights_arr[index] = new_w;
-    __biases__  * new_b = (__biases__*)malloc(sizeof(__biases__));
-    new_b->bias = temp->DENSE->bias;
-    __save_model__->biases_arr[index]=new_b;
-    new_w = NULL;
-    new_b = NULL;
-    index++;
+  printf("first ele : %lf\n",temp->DENSE->weights->matrix[0]);
+  shape(temp->DENSE->weights);
+  for(int i=0;i<m->number_of_layers-1;i++){
+    for(int j=0;j<temp->DENSE->weights->shape[0]*temp->DENSE->weights->shape[1];j++)
+      fprintf(fp,"%lf ",temp->DENSE->weights->matrix[j]);
     temp = temp->next_layer;
   }
-  FILE * file_ptr;
-  file_ptr = fopen("weights.data","wb+");
-  if(file_ptr==NULL){
-    printf("ERROR!\n");
-    exit(EXIT_FAILURE);
+  fclose(fp);
+  fp = NULL;
+  fp = fopen("./bin/model_biases.t7","ab+");
+  temp = m->graph->next_layer;
+  for(int i=0;i<m->number_of_layers-1;i++){
+    for(int j=0;j<temp->DENSE->bias->shape[0]*temp->DENSE->bias->shape[1];j++)
+      fprintf(fp,"%lf ",temp->DENSE->bias->matrix[j]);
+    temp = temp->next_layer;
   }
-  fwrite(__save_model__,sizeof(SAVE_MODEL),1,file_ptr);
-  fclose(file_ptr);
+  fclose(fp);
 }
 
 void __summary__(){}
@@ -150,6 +198,9 @@ void (create_model)(){
   m->graph = NULL;
   m->graph = NULL;
   m->current_layer = NULL;
+  m->number_of_layers = 0;
+  m->input_size = 0;
+  m->output_size = 0;
 }
 
 void (destroy_model)(){
@@ -174,6 +225,11 @@ void (Model)(Model_args model_args){
 
   m->mini_batch_size = model_args.mini_batch_size;
   m->num_iter = model_args.num_iter;
+
+  m->input_size = model_args.x_train->shape[0];
+  m->output_size = model_args.Y_train->shape[0];
+
+  m->num_of_training_examples = model_args.x_train->shape[1];
 
   m->print_cost = model_args.print_cost;
   m->init = __init__;

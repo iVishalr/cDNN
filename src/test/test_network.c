@@ -15,8 +15,11 @@ int main(){
   Dense(.layer_size=1,.activation="sigmoid",.initializer="random",.layer_type="output",.layer_num=3);
   Model(.x_train=X,.Y_train=Y,.num_iter=2500);
   // m->fit();
+  // sleep(1000);
   // m->save_model("blala");
   m->load_model();
+  printf("in main\n");
+  // printf("%d\n",m->number_of_layers);
   // m->predict(test);
   free2d(Y);
   printComputation_Graph(m->graph);
