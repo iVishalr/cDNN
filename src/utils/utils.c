@@ -153,6 +153,9 @@ dARRAY * multiply(dARRAY * restrict MatrixA, dARRAY * restrict MatrixB){
     for(int i=0;i<MatrixA->shape[0]*MatrixA->shape[1];i++)
         result->matrix[i] = x>y ? MatrixA->matrix[i] * temp->matrix[i] : temp->matrix[i] * MatrixB->matrix[i];
   }
+  if(temp!=NULL)
+    free2d(temp);
+  temp = NULL;
   result->shape[0] = MatrixA->shape[0];
   result->shape[1] = MatrixA->shape[1];
   return result;
@@ -198,6 +201,9 @@ dARRAY * divison(dARRAY * restrict MatrixA, dARRAY * restrict MatrixB){
     for(int i=0;i<MatrixA->shape[0]*MatrixA->shape[1];i++)
         result->matrix[i] = x>y ? MatrixA->matrix[i] / temp->matrix[i] : temp->matrix[i] / MatrixB->matrix[i];
   }
+  if(temp!=NULL)
+    free2d(temp);
+  temp = NULL;
   result->shape[0] = MatrixA->shape[0];
   result->shape[1] = MatrixA->shape[1];
   return result;
@@ -243,6 +249,9 @@ dARRAY * add(dARRAY * MatrixA, dARRAY * MatrixB){
     for(int i=0;i<MatrixA->shape[0]*MatrixA->shape[1];i++)
         result->matrix[i] = x>y ? MatrixA->matrix[i] + temp->matrix[i] : temp->matrix[i] + MatrixB->matrix[i];
   }
+  if(temp!=NULL)
+    free2d(temp);
+  temp = NULL;
   result->shape[0] = MatrixA->shape[0];
   result->shape[1] = MatrixA->shape[1];
   return result;
@@ -288,6 +297,9 @@ dARRAY * subtract(dARRAY * MatrixA, dARRAY * MatrixB){
     for(int i=0;i<MatrixA->shape[0]*MatrixA->shape[1];i++)
         result->matrix[i] = x>y ? MatrixA->matrix[i] - temp->matrix[i] : temp->matrix[i] - MatrixB->matrix[i];
   }
+  if(temp!=NULL)
+    free2d(temp);
+  temp = NULL;
   result->shape[0] = MatrixA->shape[0];
   result->shape[1] = MatrixA->shape[1];
   return result;
@@ -420,6 +432,8 @@ dARRAY * b_cast(dARRAY * MatrixA, dARRAY * MatrixB){
     //M(5,4) B(1,4)  repeat 5 * 4 = 20 times
     b_castArr = (dARRAY*)malloc(sizeof(dARRAY));
     b_castArr->matrix = (double*)malloc(sizeof(double)*MatrixA->shape[0]*MatrixB->shape[1]);
+    omp_set_num_threads(4);
+    #pragma omp parallel for
     for(int i=0;i<MatrixA->shape[0]*MatrixB->shape[1];i++){
       b_castArr->matrix[i] = MatrixB->matrix[(i%MatrixB->shape[1])];
     }
@@ -433,6 +447,7 @@ dARRAY * b_cast(dARRAY * MatrixA, dARRAY * MatrixB){
     b_castArr = (dARRAY*)malloc(sizeof(dARRAY));
     b_castArr->matrix = (double*)malloc(sizeof(double)*MatrixA->shape[0]*MatrixA->shape[1]);
     int k=0;
+    omp_set_num_threads(4);
     #pragma omp parallel for shared(MatrixA,MatrixB,k)
     for(int i=0;i<MatrixA->shape[0];i++){
       //copy b n times
@@ -444,10 +459,6 @@ dARRAY * b_cast(dARRAY * MatrixA, dARRAY * MatrixB){
     b_castArr->shape[0] = MatrixA->shape[0];
     b_castArr->shape[1] = MatrixA->shape[1];
   }
-  // else{
-  //   printf("\033[1;31mError:\033[93m Matrices of shape (%d,%d) and (%d,%d) could not be broadcasted! Please input matrices with broadcastable dims.\n\033[1;36m(Refer www.numpy.org for more information on broadcasting)\033[0m\n",MatrixA->shape[0],MatrixA->shape[1],MatrixB->shape[0],MatrixB->shape[1]);
-  //   return NULL;
-  // }
   return b_castArr;
 }
 
@@ -469,6 +480,8 @@ dARRAY * sum(dARRAY * matrix, int axis){
   new->matrix = NULL;
   if(axis==0){
     new->matrix = (double*)calloc(matrix->shape[1],sizeof(double));
+    omp_set_num_threads(4);
+    #pragma omp parallel for collapse(1)
     for(int i = 0; i<matrix->shape[0];i++){
       double temp = 0.0;
       for(int j=0;j<matrix->shape[1];j++){
@@ -481,6 +494,8 @@ dARRAY * sum(dARRAY * matrix, int axis){
   }
   else if(axis==1){
     new->matrix = (double*)calloc(matrix->shape[0],sizeof(double));
+    omp_set_num_threads(4);
+    #pragma omp parallel for collapse(1)
     for(int i=0;i<matrix->shape[0];i++){
       double temp = 0.0;
       for(int j=0;j<matrix->shape[1];j++){
@@ -505,7 +520,7 @@ dARRAY * randn(int * dims){
   dARRAY * matrix = (dARRAY*)malloc(sizeof(dARRAY));
   matrix->matrix = (double*)malloc(sizeof(double)*dims[0]*dims[1]);
   omp_set_num_threads(4);
-  #pragma omp parallel for shared(matrix)
+  #pragma omp parallel for collapse(1) shared(matrix)
   for(int i=0;i<dims[0];i++){
     for(int j=0;j<dims[1];j++){
       matrix->matrix[i*dims[1]+j] = rand_norm(0.0,1.0);

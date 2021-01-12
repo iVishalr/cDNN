@@ -36,6 +36,8 @@ dARRAY * init_weights(int * weights_dims,const char * init_type){
     printf("\033[93mInvalid initializer specified. Defaulting to He initialization.\033[0m\n");
     weights = mulScalar(temp,sqrt(2.0/5.0));
   }
+  free2d(temp);
+  temp=NULL;
   return weights;
 }
 
@@ -48,9 +50,12 @@ void forward_pass(){
   dARRAY * weight_input_res = NULL;
   if(m->current_layer->prev_layer->type==INPUT) weight_input_res = dot(m->current_layer->DENSE->weights, m->current_layer->prev_layer->INPUT->A);
   else weight_input_res = dot(m->current_layer->DENSE->weights, m->current_layer->prev_layer->DENSE->A);
+
   dARRAY * Z = m->current_layer->DENSE->cache = add(weight_input_res,m->current_layer->DENSE->bias);//Z
+
   free2d(weight_input_res);
   weight_input_res = NULL;
+
   dARRAY * activation_temp = NULL;
   if(!strcmp(m->current_layer->DENSE->activation,"relu")){
     activation_temp = relu(.input=Z);
@@ -61,10 +66,12 @@ void forward_pass(){
   else if(!strcmp(m->current_layer->DENSE->activation,"tanh")){
     activation_temp = TanH(.input=Z);
   }
+
   if(m->current_layer->DENSE->dropout<1.0 && m->current_layer->DENSE->dropout>=0.0 && m->current_layer->DENSE->isTraining){
     //implementation of inverted dropout layer
     int dims[] = {activation_temp->shape[0],activation_temp->shape[1]};
     m->current_layer->DENSE->dropout_mask = randn(dims);
+    //create a binary mask using dropout with probability of dropout
     omp_set_num_threads(4);
     #pragma omp parallel for
     for(int i=0;i<m->current_layer->DENSE->dropout_mask->shape[0]*m->current_layer->DENSE->dropout_mask->shape[1];i++)
@@ -118,39 +125,46 @@ void backward_pass(){
   }
 
   //Calculate gradients with respect to the layer weights
-  // printf("\nCalculating Weight Gradients\n");
   dARRAY * prev_A_transpose = NULL;
+
   if(m->current_layer->prev_layer->type==INPUT) 
     prev_A_transpose = transpose(prev_layer_in_features->A);
   else prev_A_transpose = transpose(prev_layer->A);
+
   dARRAY * temp1_dW = dot(layer->dZ,prev_A_transpose);
+
   free2d(prev_A_transpose);
   prev_A_transpose = NULL;
+  
   dARRAY * regularization_grad_temp = mulScalar(layer->weights,layer->lambda);
   dARRAY * regularization_grad = divScalar(regularization_grad_temp,num_examples);
+  
   free2d(regularization_grad_temp);
   regularization_grad_temp = NULL;
+  
   dARRAY * dW_temp = mulScalar(temp1_dW,(1/(double)num_examples));
+  
   free2d(temp1_dW);
   temp1_dW = NULL;
+  
   layer->dW = add(dW_temp,regularization_grad);
+  
   free2d(regularization_grad);
   free2d(dW_temp);
   regularization_grad = dW_temp = NULL;
 
   //calculate gradients with respect to the layer biases
-  // printf("\nCalculating Bias Gradients\n");
   dARRAY * temp1_db = sum(layer->dZ,1);
   layer->db = divScalar(temp1_db,(1/(double)num_examples));
+  
   free2d(temp1_db);
   temp1_db = NULL;
-  // printf("\n");
-  //sleep(2000);
 
   //calculate gradients of activation of prev layer
   if(m->current_layer->prev_layer->type!=INPUT){
     dARRAY * weight_transpose = transpose(layer->weights);
     dARRAY * prev_layer_A_temp = dot(weight_transpose,layer->dZ);
+    
     if(layer->dropout_mask==NULL){
       prev_layer->dA = prev_layer_A_temp;
       prev_layer_A_temp = NULL;
@@ -158,6 +172,7 @@ void backward_pass(){
     else{
       dARRAY * prev_layer_A_masked = multiply(prev_layer_A_temp,prev_layer->dropout_mask);
       prev_layer->dA = divScalar(prev_layer_A_masked,prev_layer->dropout);
+      
       free2d(prev_layer_A_temp);
       prev_layer_A_temp = NULL; 
       free2d(prev_layer_A_masked);

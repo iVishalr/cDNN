@@ -14,10 +14,10 @@ int main(){
   Dense(.layer_size=5,.activation="relu",.initializer="he",.layer_type="hidden",.layer_num=2);
   Dense(.layer_size=1,.activation="sigmoid",.initializer="random",.layer_type="output",.layer_num=3);
   Model(.x_train=X,.Y_train=Y,.num_iter=2500);
-  // m->fit();
+  m->fit();
   // sleep(1000);
   // m->save_model("blala");
-  m->load_model();
+  // m->load_model();
   printf("in main\n");
   // printf("%d\n",m->number_of_layers);
   // m->predict(test);
