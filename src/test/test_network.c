@@ -20,7 +20,7 @@ int main(){
   // m->load_model();
   printf("in main\n");
   // printf("%d\n",m->number_of_layers);
-  // m->predict(test);
+  m->predict(test);
   free2d(Y);
   printComputation_Graph(m->graph);
   destroy_G(m->graph);

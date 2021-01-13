@@ -1,7 +1,10 @@
+#include "../model/model.h"
 #include "./loss_functions.h"
 
+extern __Model__ * m;
+
 double cross_entropy_loss(Dense_layer * layer, dARRAY * Y){
-  int m = Y->shape[1];
+  int number_of_examples = Y->shape[1];
   
   dARRAY * temp_1 = NULL;
   temp_1 = (dARRAY *)malloc(sizeof(dARRAY));
@@ -67,7 +70,36 @@ double cross_entropy_loss(Dense_layer * layer, dARRAY * Y){
   free2d(temp_loss_res);
   temp_loss_res = NULL;
 
-  dARRAY * cost = divScalar(loss,m);
+  dARRAY * cost = NULL;
+  dARRAY * data_cost = divScalar(loss,number_of_examples);
+
+  Computation_Graph * temp = m->graph->next_layer;
+
+  double reg_cost=0.0;
+  if(m->regularization!=NULL){
+    if(!strcmp(m->regularization,"L2")){
+      double layer_frobenius = 0.0;
+      while(temp!=NULL){
+        layer_frobenius += frobenius_norm(temp->DENSE->weights);
+        temp = temp->next_layer;
+      }
+      reg_cost = m->lambda*layer_frobenius/(2*number_of_examples);
+    }
+    else if(!strcmp(m->regularization,"L1")){
+      double layer_manhattan = 0.0;
+      while(temp!=NULL){
+        layer_manhattan += Manhattan_distance(temp->DENSE->weights);
+        temp = temp->next_layer;
+      }
+      reg_cost = m->lambda * layer_manhattan/(2*number_of_examples);
+    }
+  }
+
+  cost = addScalar(data_cost,reg_cost);
+  temp = NULL;
+
+  free2d(data_cost);
+  data_cost = NULL;
 
   free2d(loss);
   loss = NULL;

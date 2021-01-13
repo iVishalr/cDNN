@@ -43,6 +43,9 @@ extern "C"{
   double gaussRandom();
   double rand_norm(double mu, double std);
 
+  double frobenius_norm(dARRAY * matrix);
+  double Manhattan_distance(dARRAY * matrix);
+
   int size(dARRAY * A);
   void shape(dARRAY * A);
   void free2d(dARRAY * matrix);

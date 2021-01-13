@@ -509,6 +509,26 @@ dARRAY * sum(dARRAY * matrix, int axis){
   return new;
 }
 
+double frobenius_norm(dARRAY * matrix){
+  double frobenius_norm = 0.0;
+  omp_set_num_threads(4);
+  #pragma omp parallel for
+  for(int i=0;i<matrix->shape[0]*matrix->shape[1];i++){
+    frobenius_norm += pow(matrix->matrix[i],2);
+  }
+  return frobenius_norm;
+}
+
+double Manhattan_distance(dARRAY * matrix){
+  double dist = 0.0;
+  omp_set_num_threads(4);
+  #pragma omp parallel for
+  for(int i=0;i<matrix->shape[0]*matrix->shape[1];i++){
+    dist += abs(matrix->matrix[i]);
+  }
+  return dist;
+}
+
 /**!
  * Function generates a matrix of specified dimensions filled with random variables 
  * from normal distribution with mean 0 and unit standard deviation. 

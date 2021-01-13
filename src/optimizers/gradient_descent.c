@@ -12,11 +12,43 @@ void GD(double lr){
     if(temp->type!=INPUT){
       layer_weights = temp->DENSE->weights;
       layer_biases = temp->DENSE->bias;
+
+      double mul_val = m->lambda / m->Y_train->shape[1];
+      
+      dARRAY * temp_reg_weight = NULL;
+      temp_reg_weight = mulScalar(layer_weights,mul_val);
+
+      grad_W = temp->DENSE->dW;
+      temp->DENSE->dW = add(grad_W,temp_reg_weight); 
+      
+      free2d(grad_W);
+      free2d(temp_reg_weight);
+      grad_W = NULL;
+      temp_reg_weight = NULL;
+      
       grad_W = temp->DENSE->dW;
       grad_b = temp->DENSE->db;
-      
+
       dARRAY * mul_lr_W = mulScalar(grad_W,lr);
-      temp->DENSE->weights = subtract(layer_weights,mul_lr_W);
+
+      if(m->lambda==0.0)
+        temp->DENSE->weights = subtract(layer_weights,mul_lr_W);
+      else{
+
+        dARRAY * reg_weight_decay = NULL;
+        double mul_value = m->lambda * m->learning_rate / m->Y_train->shape[1];
+        reg_weight_decay = mulScalar(layer_weights,mul_value);
+        
+        dARRAY * temp_weight_update = subtract(layer_weights,reg_weight_decay);
+        
+        free2d(reg_weight_decay);
+        reg_weight_decay = NULL;
+
+        temp->DENSE->weights = subtract(temp_weight_update,mul_lr_W);
+
+        free2d(temp_weight_update);
+        temp_weight_update = NULL;
+      }
       
       free2d(layer_weights);
       free2d(mul_lr_W);
@@ -28,6 +60,7 @@ void GD(double lr){
       free2d(mul_lr_b);
       free2d(grad_W);
       free2d(grad_b);
+
       if(temp->DENSE->dropout_mask!=NULL)
         free2d(temp->DENSE->dropout_mask);
       if(temp->DENSE->A!=NULL)

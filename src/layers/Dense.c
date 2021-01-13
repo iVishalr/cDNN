@@ -72,12 +72,15 @@ void forward_pass(){
     int dims[] = {activation_temp->shape[0],activation_temp->shape[1]};
     m->current_layer->DENSE->dropout_mask = randn(dims);
     //create a binary mask using dropout with probability of dropout
+    
     omp_set_num_threads(4);
     #pragma omp parallel for
     for(int i=0;i<m->current_layer->DENSE->dropout_mask->shape[0]*m->current_layer->DENSE->dropout_mask->shape[1];i++)
       m->current_layer->DENSE->dropout_mask->matrix[i] = m->current_layer->DENSE->dropout_mask->matrix[i]<m->current_layer->DENSE->dropout ? 1 : 0;
+    
     dARRAY * mul_mask = multiply(activation_temp,m->current_layer->DENSE->dropout_mask);
     m->current_layer->DENSE->A = divScalar(mul_mask,m->current_layer->DENSE->dropout);
+
     free2d(mul_mask);
     mul_mask = NULL;
   }
@@ -175,6 +178,7 @@ void backward_pass(){
       
       free2d(prev_layer_A_temp);
       prev_layer_A_temp = NULL; 
+      
       free2d(prev_layer_A_masked);
       prev_layer_A_masked = NULL;
     }
