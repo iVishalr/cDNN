@@ -13,7 +13,7 @@ void init_params(){
   }
   else{
     weight_dims[0] = layer->num_of_computation_nodes;
-    weight_dims[1] = 12288;
+    weight_dims[1] = m->input_size;
   }
   int bias_dims[] = {layer->num_of_computation_nodes,1};
   m->current_layer->DENSE->weights = init_weights(weight_dims,layer->initializer);
@@ -96,7 +96,7 @@ void forward_pass(){
 }
 
 void backward_pass(){
-  double num_examples = 12288;//temporarily set m=1;
+  double num_examples = m->num_of_training_examples;//temporarily set m=1;
 
   Dense_layer * layer = m->current_layer->DENSE; 
   Input_layer * prev_layer_in_features = NULL;
@@ -206,7 +206,6 @@ void (Dense)(dense_args dense_layer_args){
   layer->dA = layer->db = layer->dW = layer->dZ = NULL;
   layer->isTraining = 1;
   layer->layer_type = dense_layer_args.layer_type;
-  layer->layer_num = dense_layer_args.layer_num;
   //finally we need to append to computation graph
   append_graph(layer,"Dense");
 }

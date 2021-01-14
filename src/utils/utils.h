@@ -7,6 +7,8 @@
 #include <omp.h>
 #include <math.h>
 #include <string.h>
+#include <unistd.h>
+#include <errno.h>
 
 #ifdef __cplusplus
 extern "C"{
@@ -49,7 +51,7 @@ extern "C"{
   int size(dARRAY * A);
   void shape(dARRAY * A);
   void free2d(dARRAY * matrix);
-  void sleep(int milliseconds);
+  void sleep_my(int milliseconds);
   void cleanSTDIN();
 #ifdef __cplusplus
 }

@@ -11,7 +11,6 @@ typedef struct dense_arg{
   double dropout;
   double lambda;
   char * layer_type;
-  int layer_num;
 }dense_args; 
 
 #ifdef __cplusplus
@@ -49,9 +48,8 @@ typedef struct dense{
   dARRAY * dropout_mask;
   int isTraining;
   char * layer_type;
-  int layer_num;
 }Dense_layer;
 
-#define Dense(...) Dense((dense_args){.layer_size=20,.activation="relu",.initializer="he",.dropout=1.0,.lambda=0.0,.layer_type="hidden",.layer_num=0,__VA_ARGS__});
+#define Dense(...) Dense((dense_args){.layer_size=20,.activation="relu",.initializer="he",.dropout=1.0,.lambda=0.0,.layer_type="hidden",__VA_ARGS__});
 
 #endif //DENSE_H_

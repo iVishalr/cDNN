@@ -79,36 +79,31 @@ void __predict__(dARRAY * input_feature){
   }
 }
 
-void load_weights(){
-  
-}
 
-void load_biases(){
-  // FILE * fp1;
-  // Computation_Graph * temp = m->graph->next_layer;
-  
-}
-
-void __load_model__(){
+void __load_model__(char * filename){
+  if(strstr(filename,".t7")==NULL){
+    printf("\033[1;31mFileExtension Error : \033[93m Please use \".t7\" extension only. Other extensions are not supported currently.\033[0m\n");
+    exit(EXIT_FAILURE);
+  }
+  char destpath[1024];
+  snprintf (destpath, sizeof(destpath), "./bin/%s", filename);
   dARRAY weights[m->number_of_layers-1];
   dARRAY biases[m->number_of_layers-1];
 
   Computation_Graph * temp = m->graph->next_layer;
 
-  // printf("allocating memory\n");
   for(int i=0;i<m->number_of_layers-1 && temp!=NULL;i++){
-    shape(temp->DENSE->weights);
-    shape(temp->DENSE->bias);
     weights[i].matrix = (double*)calloc(temp->DENSE->weights->shape[0]*temp->DENSE->weights->shape[1],sizeof(double));
     biases[i].matrix = (double*)calloc(temp->DENSE->bias->shape[0]*temp->DENSE->bias->shape[1],sizeof(double));
     temp = temp->next_layer;
   }
-  // printf("Finished memory\n");
   temp = m->graph->next_layer;
-
   FILE * fp = NULL;
-  fp = fopen("./bin/model_weights.t7","rb");
-
+  fp = fopen(destpath,"rb");
+  if(fp==NULL){
+    printf("\033[1;31mFile Error : \033[93m Could not open the specified file!\033[0m\n");
+    exit(EXIT_FAILURE);
+  }
   for(int i=0;i<m->number_of_layers-1;i++){
     if(temp==NULL) printf("null\n");
     for(int j=0;j<temp->DENSE->weights->shape[0]*temp->DENSE->weights->shape[1];j++){
@@ -118,75 +113,87 @@ void __load_model__(){
     weights[i].shape[1] = temp->DENSE->weights->shape[1];
     temp = temp->next_layer;
   }
-  // printf("%lf\n",weights[0].matrix[0]);
-  // printf("%lf\n",weights[1].matrix[0]);
-
-  printf("weight matrix of layer 3 : \n");
-  for(int i=0;i<weights[1].shape[0];i++){
-    for(int j=0;j<weights[1].shape[1];j++){
-      printf("%lf ",weights[1].matrix[i*weights[1].shape[1]+j]);
-    }
-    printf("\n");
-  }
-  printf("W3 (%d,%d)\n",weights[1].shape[0],weights[1].shape[1]);
-  // shape((dARRAY*)weights[0]);
-  // shape((dARRAY*)weights[1]);
-  fclose(fp);
-
-
-  sleep(1000);
-  
-
-  
   temp = m->graph->next_layer;
-
-  FILE * fp1 = NULL;
-  fp1 = fopen("./bin/model_biases.t7","rb");
-
-  temp = m->graph->next_layer;
-
   for(int i=0;i<m->number_of_layers-1;i++){
     for(int j=0;j<temp->DENSE->bias->shape[0]*temp->DENSE->bias->shape[1];j++){
-      fscanf(fp1,"%lf ",&biases[i].matrix[j]);
+      fscanf(fp,"%lf ",&biases[i].matrix[j]);
     }
     biases[i].shape[0] = temp->DENSE->bias->shape[0];
     biases[i].shape[1] = temp->DENSE->bias->shape[1];
     temp = temp->next_layer;
   }
+  fclose(fp);
+  temp = m->graph->next_layer;
+  int index = 0;
+  while(temp!=NULL){
+    free2d(temp->DENSE->weights);
+    free2d(temp->DENSE->bias);
+    
+    temp->DENSE->weights = NULL;
+    temp->DENSE->bias = NULL;
 
-  // printf("%lf\n",biases[0].matrix[0]);
-  // printf("%lf\n",biases[1].matrix[0]);
+    temp->DENSE->weights = (dARRAY*)malloc(sizeof(dARRAY));
+    temp->DENSE->weights->matrix = (double*)calloc(weights[index].shape[0]*weights[index].shape[1],sizeof(double));
 
-  printf("bias matrix of layer 2 : \n");
-  for(int i=0;i<biases[0].shape[0];i++){
-    for(int j=0;j<biases[0].shape[1];j++){
-      printf("%lf ",biases[0].matrix[i*biases[0].shape[1]+j]);
-    }
-    printf("\n");
+    temp->DENSE->bias = (dARRAY*)malloc(sizeof(dARRAY));
+    temp->DENSE->bias->matrix = (double*)calloc(biases[index].shape[0]*biases[index].shape[1],sizeof(double));
+    
+    temp->DENSE->weights->matrix = weights[index].matrix;
+
+    temp->DENSE->weights->shape[0] = weights[index].shape[0];
+    temp->DENSE->weights->shape[1] = weights[index].shape[1];
+
+    temp->DENSE->bias->matrix = biases[index].matrix;
+
+    temp->DENSE->bias->shape[0] = biases[index].shape[0];
+    temp->DENSE->bias->shape[1] = biases[index].shape[1];
+    index++;
+    temp = temp->next_layer;
   }
-  fclose(fp1);
+  temp = NULL;
 }
 
-void __save_model__(char * file_name){
+void __save_model__(char * filename){
+  if(strstr(filename,".t7")==NULL){
+    printf("\033[1;31mFileExtension Error : \033[93m Please use \".t7\" extension only. Other extensions are not supported currently.\033[0m\n");
+    exit(EXIT_FAILURE);
+  }
+  char destpath[1024];
+  snprintf (destpath, sizeof(destpath), "./bin/%s", filename);
   FILE * fp = NULL;
-  fp = fopen("./bin/model_weights.t7","ab+");
+  if( access(destpath,F_OK)==0) {
+    if(remove(destpath)==0){}
+  } 
+  fp = fopen(destpath,"ab+");
+  if(fp==NULL){
+    printf("\033[1;31mFile Error : \033[93m Could not open the specified file!\033[0m\n");
+    exit(EXIT_FAILURE);
+  }
   Computation_Graph * temp = m->graph->next_layer;
-  printf("first ele : %lf\n",temp->DENSE->weights->matrix[0]);
-  shape(temp->DENSE->weights);
   for(int i=0;i<m->number_of_layers-1;i++){
     for(int j=0;j<temp->DENSE->weights->shape[0]*temp->DENSE->weights->shape[1];j++)
       fprintf(fp,"%lf ",temp->DENSE->weights->matrix[j]);
     temp = temp->next_layer;
   }
-  fclose(fp);
-  fp = NULL;
-  fp = fopen("./bin/model_biases.t7","ab+");
   temp = m->graph->next_layer;
   for(int i=0;i<m->number_of_layers-1;i++){
     for(int j=0;j<temp->DENSE->bias->shape[0]*temp->DENSE->bias->shape[1];j++)
       fprintf(fp,"%lf ",temp->DENSE->bias->matrix[j]);
     temp = temp->next_layer;
   }
+  fclose(fp);
+  fp = NULL;
+  // fp = fopen("./bin/model_biases1.t7","ab+");
+  // if(fp==NULL){
+  //   printf("\033[1;31mFile Error : \033[93m Could not open the specified file!\033[0m\n");
+  //   exit(EXIT_FAILURE);
+  // }
+  // temp = m->graph->next_layer;
+  // for(int i=0;i<m->number_of_layers-1;i++){
+  //   for(int j=0;j<temp->DENSE->bias->shape[0]*temp->DENSE->bias->shape[1];j++)
+  //     fprintf(fp,"%lf ",temp->DENSE->bias->matrix[j]);
+  //   temp = temp->next_layer;
+  // }
   fclose(fp);
 }
 
@@ -228,6 +235,12 @@ void (Model)(Model_args model_args){
 
   m->input_size = model_args.x_train->shape[0];
   m->output_size = model_args.Y_train->shape[0];
+
+  if(m->input_size!=m->graph->INPUT->input_features_size){
+    printf("\033[1;31mModel Error : \033[93m Size of Input Layer does not match the size of x_train.\033[0m\n");
+    printf("\033[96mHint : \033[93mCheck if layer_size of input layer == x_train->shape[0]\033[0m\n");
+    exit(EXIT_FAILURE);
+  }
 
   m->num_of_training_examples = model_args.x_train->shape[1];
 

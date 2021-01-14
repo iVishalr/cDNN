@@ -1,8 +1,6 @@
 #include "./Input.h"
 #include "../neural_net/neural_net.h"
 
-extern Computation_Graph * G;
-
 void (Input)(Input_args input_layer_args){
   Input_layer * layer = (Input_layer*)malloc(sizeof(Input_layer));
   layer->input_features_size = input_layer_args.layer_size;
