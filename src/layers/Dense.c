@@ -83,6 +83,8 @@ void forward_pass(){
 
     free2d(mul_mask);
     mul_mask = NULL;
+
+    free2d(activation_temp);
   }
   else{
     m->current_layer->DENSE->A = activation_temp;
@@ -167,7 +169,6 @@ void backward_pass(){
   if(m->current_layer->prev_layer->type!=INPUT){
     dARRAY * weight_transpose = transpose(layer->weights);
     dARRAY * prev_layer_A_temp = dot(weight_transpose,layer->dZ);
-    
     if(layer->dropout_mask==NULL){
       prev_layer->dA = prev_layer_A_temp;
       prev_layer_A_temp = NULL;

@@ -11,9 +11,9 @@ int main(){
   dARRAY * Y = ones(output_dims);
   create_model();
   Input(.layer_size=12288,.input_features=X,.layer_num=1);
-  Dense(.layer_size=5,.activation="relu",.initializer="he",.layer_type="hidden",.layer_num=2);
+  Dense(.layer_size=5,.activation="relu",.initializer="he",.layer_type="hidden",.layer_num=2,.dropout=0.8);
   Dense(.layer_size=1,.activation="sigmoid",.initializer="random",.layer_type="output",.layer_num=3);
-  Model(.x_train=X,.Y_train=Y,.num_iter=2500);
+  Model(.x_train=X,.Y_train=Y,.num_iter=2500,.regularization="L2",.lambda=3e-5);
   m->fit();
   // sleep(1000);
   // m->save_model("blala");

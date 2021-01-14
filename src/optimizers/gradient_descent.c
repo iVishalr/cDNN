@@ -23,6 +23,7 @@ void GD(double lr){
       
       free2d(grad_W);
       free2d(temp_reg_weight);
+      
       grad_W = NULL;
       temp_reg_weight = NULL;
       
