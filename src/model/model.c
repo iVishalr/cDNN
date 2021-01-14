@@ -8,8 +8,6 @@ void __init__(){
   m->train_accuracy = 0.0;
   m->train_cost = 0.0;
   m->cross_val_accuracy = 0.0;
-  m->model_layer_weights = NULL;
-  m->model_layer_biases = NULL;
   m->output = NULL;
   __initialize_params__();
 }
@@ -23,16 +21,6 @@ void __initialize_params__(){
     temp = temp->next_layer;
   }
   m->current_layer = m->graph;
-  // m->model_layer_weights = (dARRAY *)malloc(sizeof(dARRAY)*m->number_of_layers);
-  // m->model_layer_biases = (dARRAY *)malloc(sizeof(dARRAY)*m->number_of_layers);
-  // temp = m->graph;
-  // int index=0;
-  // while(temp!=NULL){
-  //   m->current_layer = temp;
-  //   m->model_layer_weights[index] = temp->DENSE->weights;
-  //   m->model_layer_biases[index] = temp->DENSE->bias;
-  //   temp = temp->next_layer;
-  // }
 }
 
 void __forward__(){
@@ -54,12 +42,31 @@ void __backward__(){
   }
 }
 
+double calculate_accuracy(dARRAY * predicted, dARRAY * gnd_truth){
+  int success = 0;
+  dARRAY * temp = (dARRAY*)malloc(sizeof(dARRAY));
+  temp->matrix = (double*)calloc(predicted->shape[0]*predicted->shape[1],sizeof(double));
+  for(int i = 0;i<predicted->shape[0]*predicted->shape[1];i++){
+    temp->matrix[i] = predicted->matrix[i]<0.5 ? 0 : 1;
+  }
+  temp->shape[0] = predicted->shape[0];
+  temp->shape[1] = predicted->shape[1];
+  for(int i = 0;i<predicted->shape[0]*predicted->shape[1];i++){
+    if(temp->matrix[i]==gnd_truth->matrix[i]) success++;
+  }
+  free2d(temp);
+  temp = NULL;
+  return success/(double)gnd_truth->shape[1];
+}
+
 void __fit__(){
   int i = 1;
   while(i<=m->num_iter){
     __forward__();
-    if(m->print_cost && i%100==0)
-      printf("\033[96mIteration (%d) - Cost : \033[0m%lf\n",i,cross_entropy_loss(m->current_layer->DENSE,m->Y_train));
+    if(m->print_cost && i%100==0){
+      printf("\033[96m%d. Cost : \033[0m%lf ",i,cross_entropy_loss(m->current_layer->DENSE,m->Y_train));
+      printf("\033[96m Accuracy : \033[0m%lf\n",calculate_accuracy(m->output,m->Y_train));
+    }
     __backward__();
     GD(m->learning_rate);
     i++;
@@ -199,6 +206,17 @@ void __save_model__(char * filename){
 
 void __summary__(){}
 
+long int get_total_params(){
+  long int total_params = 0;
+  Computation_Graph * temp = m->graph->next_layer;
+  while(temp!=NULL){
+    total_params+= temp->DENSE->weights->shape[0]*temp->DENSE->weights->shape[1];
+    total_params+= temp->DENSE->bias->shape[0]*temp->DENSE->bias->shape[1];
+    temp = temp->next_layer;
+  }
+  return total_params;
+}
+
 void (create_model)(){
   m = NULL;
   m = (__Model__*)malloc(sizeof(__Model__));
@@ -255,4 +273,6 @@ void (Model)(Model_args model_args){
   m->summary = __summary__;
 
   m->init();
+  m->total_parameters = get_total_params();
+  printf("Total Trainable Parameters : %ld\n",m->total_parameters);
 }

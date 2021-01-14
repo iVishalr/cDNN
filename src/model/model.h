@@ -20,14 +20,6 @@ typedef struct model_args{
   int print_cost;
 }Model_args;
 
-typedef struct save_model_weights{
-  dARRAY * weights;
-}Model_Weights;
-
-typedef struct save_model_biases{
-  dARRAY * bias;
-}Save_Model_Biases;
-
 #ifdef __cplusplus
 extern "C"{
 #endif
@@ -50,6 +42,7 @@ extern "C"{
   void __save_model__();
   void __summary__();
   void __predict__();
+  double calculate_accuracy(dARRAY * predicted, dARRAY * gnd_truth);
   void (destroy_model)();
 #ifdef __cplusplus
 }
@@ -86,8 +79,7 @@ typedef struct model{
   double test_accuracy;
   double cross_val_accuracy;
   int predicting;
-  dARRAY * model_layer_weights;
-  dARRAY * model_layer_biases;
+
   __model_init__ init;
   __model_fit__ fit;
   __model_predict__ predict;
@@ -97,8 +89,6 @@ typedef struct model{
   __model_forward__ forward;
   __model_backward__ backward;
 }__Model__;
-
-// __Model__ * m;
 
 #define create_model(...) create_model();
 

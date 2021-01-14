@@ -91,7 +91,7 @@ void forward_pass(){
   }
   activation_temp = NULL;
   Z=NULL;
-  if(m->predicting)
+  if(m->current_layer->next_layer==NULL)
     m->output = m->current_layer->DENSE->A;
 }
 
