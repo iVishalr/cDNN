@@ -47,7 +47,7 @@ double calculate_accuracy(dARRAY * predicted, dARRAY * gnd_truth){
   dARRAY * temp = (dARRAY*)malloc(sizeof(dARRAY));
   temp->matrix = (double*)calloc(predicted->shape[0]*predicted->shape[1],sizeof(double));
   for(int i = 0;i<predicted->shape[0]*predicted->shape[1];i++){
-    temp->matrix[i] = predicted->matrix[i]<0.5 ? 0 : 1;
+    temp->matrix[i] = round(predicted->matrix[i]);
   }
   temp->shape[0] = predicted->shape[0];
   temp->shape[1] = predicted->shape[1];
@@ -59,18 +59,34 @@ double calculate_accuracy(dARRAY * predicted, dARRAY * gnd_truth){
   return success/(double)gnd_truth->shape[1];
 }
 
+void append_to_file(double value,char * filename,char * mode){
+  FILE * fp = NULL;
+  fp = fopen(filename,mode);
+  if(fp==NULL){
+    printf("\033[1;31mFile Error : \033[93m Could not open the specified file!\033[0m\n");
+    exit(EXIT_FAILURE);
+  }
+  fprintf(fp,"%lf ",value);
+  fclose(fp);
+}
+
 void __fit__(){
   int i = 1;
   while(i<=m->num_iter){
     __forward__();
     if(m->print_cost && i%100==0){
-      printf("\033[96m%d. Cost : \033[0m%lf ",i,cross_entropy_loss(m->current_layer->DENSE,m->Y_train));
-      printf("\033[96m Accuracy : \033[0m%lf\n",calculate_accuracy(m->output,m->Y_train));
+      m->train_cost = cross_entropy_loss(m->current_layer->DENSE,m->Y_train);
+      m->train_accuracy = calculate_accuracy(m->output,m->Y_train);
+      printf("\033[96m%d. Cost : \033[0m%lf ",i,m->train_cost);
+      printf("\033[96m Accuracy : \033[0m%lf\n",m->train_accuracy);
+      append_to_file(m->train_cost,"./bin/cost.data","ab+");
+      append_to_file(m->train_accuracy,"./bin/train_acc.data","ab+");
     }
     __backward__();
     GD(m->learning_rate);
     i++;
   }
+  // system("python3 ./src/plot/plot_scores.py");
 }
 
 void __predict__(dARRAY * input_feature){
@@ -93,7 +109,7 @@ void __load_model__(char * filename){
     exit(EXIT_FAILURE);
   }
   char destpath[1024];
-  snprintf (destpath, sizeof(destpath), "./bin/%s", filename);
+  snprintf (destpath, sizeof(destpath), "./model/%s", filename);
   dARRAY weights[m->number_of_layers-1];
   dARRAY biases[m->number_of_layers-1];
 
@@ -166,7 +182,7 @@ void __save_model__(char * filename){
     exit(EXIT_FAILURE);
   }
   char destpath[1024];
-  snprintf (destpath, sizeof(destpath), "./bin/%s", filename);
+  snprintf (destpath, sizeof(destpath), "./model/%s", filename);
   FILE * fp = NULL;
   if( access(destpath,F_OK)==0) {
     if(remove(destpath)==0){}
@@ -201,6 +217,42 @@ void __save_model__(char * filename){
   //     fprintf(fp,"%lf ",temp->DENSE->bias->matrix[j]);
   //   temp = temp->next_layer;
   // }
+  fclose(fp);
+}
+
+void load_x_train(int * dims){
+  FILE * fp = NULL;
+
+  fp = fopen("test_file.data","rb");
+  if(fp==NULL){
+    printf("\033[1;31mFile Error : \033[93m Could not open the specified file!\033[0m\n");
+    exit(EXIT_FAILURE);
+  }
+  m->x_train = (dARRAY*)malloc(sizeof(dARRAY));
+  m->x_train->matrix = (double*)calloc(18,sizeof(double));
+  for(int j=0;j<dims[0]*dims[1];j++){
+    fscanf(fp,"%lf ",&m->x_train->matrix[j]);
+  }
+  m->x_train->shape[0] = dims[1];
+  m->x_train->shape[1] = dims[0];
+  for(int i = 0; i<dims[1]; i++){
+    for(int j=0;j<dims[0];j++){
+      printf("%lf ",m->x_train->matrix[i*dims[0]+j]);
+    }
+    printf("\n");
+  }
+  dARRAY * x_train = transpose(m->x_train);
+  for(int i = 0; i<x_train->shape[0]; i++){
+    for(int j=0;j<x_train->shape[1];j++){
+      printf("%lf ",x_train->matrix[i*x_train->shape[1]+j]);
+    }
+    printf("\n");
+  }
+  shape(x_train);
+  free2d(x_train);
+  x_train = NULL;
+  free2d(m->x_train);
+  m->x_train = NULL;
   fclose(fp);
 }
 

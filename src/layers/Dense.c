@@ -66,6 +66,9 @@ void forward_pass(){
   else if(!strcmp(m->current_layer->DENSE->activation,"tanh")){
     activation_temp = TanH(.input=Z);
   }
+  else{
+    activation_temp = Z;
+  }
 
   if(m->current_layer->DENSE->dropout<1.0 && m->current_layer->DENSE->dropout>=0.0 && m->current_layer->DENSE->isTraining){
     //implementation of inverted dropout layer
