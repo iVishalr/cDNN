@@ -222,37 +222,48 @@ void __save_model__(char * filename){
 
 void load_x_train(int * dims){
   FILE * fp = NULL;
-
-  fp = fopen("test_file.data","rb");
+  fp = fopen("X_train.data","rb");
   if(fp==NULL){
     printf("\033[1;31mFile Error : \033[93m Could not open the specified file!\033[0m\n");
     exit(EXIT_FAILURE);
   }
-  m->x_train = (dARRAY*)malloc(sizeof(dARRAY));
-  m->x_train->matrix = (double*)calloc(18,sizeof(double));
+  dARRAY * x_train = (dARRAY*)malloc(sizeof(dARRAY));
+  x_train->matrix = (double*)calloc(dims[0]*dims[1],sizeof(double));
   for(int j=0;j<dims[0]*dims[1];j++){
-    fscanf(fp,"%lf ",&m->x_train->matrix[j]);
+    fscanf(fp,"%lf ",&x_train->matrix[j]);
   }
-  m->x_train->shape[0] = dims[1];
-  m->x_train->shape[1] = dims[0];
-  for(int i = 0; i<dims[1]; i++){
-    for(int j=0;j<dims[0];j++){
-      printf("%lf ",m->x_train->matrix[i*dims[0]+j]);
-    }
-    printf("\n");
-  }
-  dARRAY * x_train = transpose(m->x_train);
-  for(int i = 0; i<x_train->shape[0]; i++){
-    for(int j=0;j<x_train->shape[1];j++){
-      printf("%lf ",x_train->matrix[i*x_train->shape[1]+j]);
-    }
-    printf("\n");
-  }
-  shape(x_train);
+  x_train->shape[0] = dims[1];
+  x_train->shape[1] = dims[0];
+
+  m->x_train = transpose(x_train);
+  // printf("shape of X_train : ");
+  // shape(m->x_train);
   free2d(x_train);
   x_train = NULL;
-  free2d(m->x_train);
-  m->x_train = NULL;
+  fclose(fp);
+}
+
+void load_y_train(int * dims){
+  FILE * fp = NULL;
+  fp = fopen("y_train.data","rb");
+  if(fp==NULL){
+    printf("\033[1;31mFile Error : \033[93m Could not open the specified file!\033[0m\n");
+    exit(EXIT_FAILURE);
+  }
+  dARRAY * Y_train = (dARRAY*)malloc(sizeof(dARRAY));
+  Y_train->matrix = (double*)calloc(dims[0]*dims[1],sizeof(double));
+  for(int j=0;j<dims[0]*dims[1];j++){
+    fscanf(fp,"%lf ",&Y_train->matrix[j]);
+  }
+  Y_train->shape[0] = dims[1];
+  Y_train->shape[1] = dims[0];
+
+  m->Y_train = transpose(Y_train);
+
+  // printf("Shape of Y_train : ");
+  // shape(m->Y_train);
+  free2d(Y_train);
+  Y_train = NULL;
   fclose(fp);
 }
 
