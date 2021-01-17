@@ -74,13 +74,13 @@ void __fit__(){
   int i = 1;
   while(i<=m->num_iter){
     __forward__();
-    if(m->print_cost && i%100==0){
+    if(i%100==0 && m->print_cost){
       m->train_cost = cross_entropy_loss(m->current_layer->DENSE,m->Y_train);
       m->train_accuracy = calculate_accuracy(m->output,m->Y_train);
       printf("\033[96m%d. Cost : \033[0m%lf ",i,m->train_cost);
       printf("\033[96m Accuracy : \033[0m%lf\n",m->train_accuracy);
-      append_to_file(m->train_cost,"./bin/cost.data","ab+");
-      append_to_file(m->train_accuracy,"./bin/train_acc.data","ab+");
+      // append_to_file(m->train_cost,"./bin/cost.data","ab+");
+      // append_to_file(m->train_accuracy,"./bin/train_acc.data","ab+");
     }
     __backward__();
     GD(m->learning_rate);

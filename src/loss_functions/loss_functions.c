@@ -9,9 +9,7 @@ double cross_entropy_loss(Dense_layer * layer, dARRAY * Y){
   dARRAY * temp_1 = NULL;
   temp_1 = (dARRAY *)malloc(sizeof(dARRAY));
   temp_1->matrix = (double*)calloc(layer->A->shape[0]*layer->A->shape[1],sizeof(double));
-  
-  omp_set_num_threads(4);
-  #pragma omp parallel for
+  //calculate log(y^)
   for(int i=0;i<layer->A->shape[0]*layer->A->shape[1];i++){
     temp_1->matrix[i] = log(layer->A->matrix[i]);
   }
@@ -25,9 +23,7 @@ double cross_entropy_loss(Dense_layer * layer, dARRAY * Y){
   dARRAY * temp_2 = NULL;
   temp_2 = (dARRAY *)malloc(sizeof(dARRAY));
   temp_2->matrix = (double*)calloc(layer->A->shape[0]*layer->A->shape[1],sizeof(double));
-
-  omp_set_num_threads(4);
-  #pragma omp parallel for
+  //calculate log(1-y^)
   for(int i=0;i<layer->A->shape[0]*layer->A->shape[1];i++){
     temp_2->matrix[i] = log(temp_sub->matrix[i]);
   }
@@ -36,17 +32,17 @@ double cross_entropy_loss(Dense_layer * layer, dARRAY * Y){
 
   free2d(temp_sub);
   temp_sub = NULL;
-
+  //calculate y*log(y^)
   dARRAY * loss_term_1 = multiply(Y,temp_1);
   
   free2d(temp_1);
   temp_1 = NULL;
-
+  //calculate (1-Y)
   temp_sub = subtract(temp_ones,Y);
   
   free2d(temp_ones);
   temp_ones = NULL;
-
+  //calculate (1-Y)*log(1-Y^)
   dARRAY * loss_term_2 = multiply(temp_sub,temp_2);
   
   free2d(temp_sub);
@@ -62,7 +58,7 @@ double cross_entropy_loss(Dense_layer * layer, dARRAY * Y){
   loss_term_1 = loss_term_2 = NULL;
 
   dARRAY * temp_loss_res = sum(temp_loss,1);
-  dARRAY * loss = mulScalar(temp_loss_res,-1);
+  dARRAY * loss = mulScalar(temp_loss,-1);
 
   free2d(temp_loss);
   temp_loss = NULL;
@@ -94,7 +90,6 @@ double cross_entropy_loss(Dense_layer * layer, dARRAY * Y){
       reg_cost = m->lambda * layer_manhattan/(2*number_of_examples);
     }
   }
-
   cost = addScalar(data_cost,reg_cost);
   temp = NULL;
 
