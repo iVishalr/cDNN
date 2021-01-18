@@ -6,6 +6,7 @@
 #include "../utils/utils.h"
 #include "../loss_functions/loss_functions.h"
 #include "../optimizers/gradient_descent.h"
+#include "../plot/plot.h"
 
 enum layer_type {NONE, INPUT, DENSE, LOSS, OPTIMIZER};
 typedef struct computational_graph{

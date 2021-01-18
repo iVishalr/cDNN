@@ -47,16 +47,17 @@ double calculate_accuracy(dARRAY * predicted, dARRAY * gnd_truth){
   dARRAY * temp = (dARRAY*)malloc(sizeof(dARRAY));
   temp->matrix = (double*)calloc(predicted->shape[0]*predicted->shape[1],sizeof(double));
   for(int i = 0;i<predicted->shape[0]*predicted->shape[1];i++){
-    temp->matrix[i] = round(predicted->matrix[i]);
+    temp->matrix[i] = predicted->matrix[i]<0.5 ? 0 : 1;
   }
   temp->shape[0] = predicted->shape[0];
   temp->shape[1] = predicted->shape[1];
+
   for(int i = 0;i<predicted->shape[0]*predicted->shape[1];i++){
     if(temp->matrix[i]==gnd_truth->matrix[i]) success++;
   }
   free2d(temp);
   temp = NULL;
-  return success/(double)gnd_truth->shape[1];
+  return success/(double)predicted->shape[1];
 }
 
 void append_to_file(double value,char * filename,char * mode){
@@ -72,15 +73,21 @@ void append_to_file(double value,char * filename,char * mode){
 
 void __fit__(){
   int i = 1;
+  double sum_cost = 0.0;
+  double sum_train_acc = 0.0;
   while(i<=m->num_iter){
     __forward__();
+    sum_cost += cross_entropy_loss(m->output,m->Y_train);
+    sum_train_acc += calculate_accuracy(m->output,m->Y_train);
     if(i%100==0 && m->print_cost){
-      m->train_cost = cross_entropy_loss(m->current_layer->DENSE,m->Y_train);
-      m->train_accuracy = calculate_accuracy(m->output,m->Y_train);
+      m->train_cost = sum_cost/(double)i;
+      m->train_accuracy = sum_train_acc/(double)i;
+
       printf("\033[96m%d. Cost : \033[0m%lf ",i,m->train_cost);
-      printf("\033[96m Accuracy : \033[0m%lf\n",m->train_accuracy);
-      // append_to_file(m->train_cost,"./bin/cost.data","ab+");
-      // append_to_file(m->train_accuracy,"./bin/train_acc.data","ab+");
+      printf("\033[96m train_acc : \033[0m%lf\n",m->train_accuracy);
+      
+      append_to_file(m->train_cost,"./bin/cost.data","ab+");
+      append_to_file(m->train_accuracy,"./bin/train_acc.data","ab+");
     }
     __backward__();
     GD(m->learning_rate);

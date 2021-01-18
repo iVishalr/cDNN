@@ -21,13 +21,14 @@ int main(){
   load_y_train(y_train_dims);
 
   Input(.layer_size=19200,.input_features=m->x_train);
-  // Dense(.layer_size=50,.activation="relu",.initializer="he",.layer_type="hidden");
-  // Dense(.layer_size=10,.activation="relu",.initializer="he",.layer_type="hidden");
-  // Dense(.layer_size=5,.activation="relu",.initializer="he",.layer_type="hidden");
+  Dense(.layer_size=20,.activation="relu",.initializer="he",.layer_type="hidden");
+  Dense(.layer_size=10,.activation="relu",.initializer="he",.layer_type="hidden");
+  Dense(.layer_size=2,.activation="relu",.initializer="he",.layer_type="hidden");
   Dense(.layer_size=1,.activation="sigmoid",.initializer="random",.layer_type="output");
-  Model(.x_train=m->x_train,.Y_train=m->Y_train,.num_iter=2500,.learning_rate=0.005);
-  m->fit();
-  m->save_model("model_cats_vs_dogs3.t7");
+  Model(.x_train=m->x_train,.Y_train=m->Y_train,.num_iter=5000,.learning_rate=0.005);
+  // m->fit();
+  // m->save_model("model_cats_vs_dogs3_new.t7");
+  plot_train_scores();
   // m->load_model("model1.t7");
   // m->predict(test);
   // free2d(Y);

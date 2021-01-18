@@ -163,7 +163,7 @@ void backward_pass(){
   prev_A_transpose = NULL;
 
   if(m->lambda>0.0){
-    dARRAY * regularization_grad_temp = mulScalar(layer->weights,layer->lambda);
+    dARRAY * regularization_grad_temp = mulScalar(layer->weights,m->lambda);
     dARRAY * regularization_grad = divScalar(regularization_grad_temp,(double)num_examples);
     
     free2d(regularization_grad_temp);

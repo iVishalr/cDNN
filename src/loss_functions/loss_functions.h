@@ -7,7 +7,7 @@
 #ifdef __cplusplus
 extern "C"{
 #endif
-  double cross_entropy_loss(Dense_layer * layer, dARRAY * Y);
+  double cross_entropy_loss(dARRAY * output, dARRAY * Y);
 #ifdef __cplusplus
 }
 #endif
