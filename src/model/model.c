@@ -93,7 +93,6 @@ void __fit__(){
     GD(m->learning_rate);
     i++;
   }
-  // system("python3 ./src/plot/plot_scores.py");
 }
 
 void __predict__(dARRAY * input_feature){
@@ -213,18 +212,6 @@ void __save_model__(char * filename){
   }
   fclose(fp);
   fp = NULL;
-  // fp = fopen("./bin/model_biases1.t7","ab+");
-  // if(fp==NULL){
-  //   printf("\033[1;31mFile Error : \033[93m Could not open the specified file!\033[0m\n");
-  //   exit(EXIT_FAILURE);
-  // }
-  // temp = m->graph->next_layer;
-  // for(int i=0;i<m->number_of_layers-1;i++){
-  //   for(int j=0;j<temp->DENSE->bias->shape[0]*temp->DENSE->bias->shape[1];j++)
-  //     fprintf(fp,"%lf ",temp->DENSE->bias->matrix[j]);
-  //   temp = temp->next_layer;
-  // }
-  fclose(fp);
 }
 
 void load_x_train(int * dims){
@@ -311,12 +298,21 @@ void (Model)(Model_args model_args){
   m->Y_test = model_args.Y_test;
   m->Y_cv = model_args.Y_cv;
 
+  //initialize regualrization hyperparameters
   m->loss = model_args.loss;
   m->lambda = model_args.lambda;
   m->regularization = model_args.regularization;
 
-  m->optimizer = model_args.optimizer;
-  m->learning_rate = model_args.learning_rate;
+  //initialize hyperparameters for various optimizers
+  m->optimizer = model_args.optimizer; // Optimizer choice
+  m->learning_rate = model_args.learning_rate; // hyperparameter for step size for optimization algorithm
+  m->time_step = 0; // timestep - required for Adam update, for bias correction
+  m->beta1 = model_args.beta1; // hyperparameter - used for Adam and RMSProp, Decay rate for estimation of first moment
+  m->beta2 = model_args.beta2; // hyperparameter - used for Adam, Decay rate used for estimation of second moment.
+  m->epsilon = 1e-8; // small value to prevent divison by zero during parameter updates
+  m->m_t = NULL;  // for Adam and RMSProp - to calculate first moment
+  m->v_t = NULL; // for Adam - to calculate second moment
+  m->cache = NULL; // for AdaGrad
 
   m->mini_batch_size = model_args.mini_batch_size;
   m->num_iter = model_args.num_iter;

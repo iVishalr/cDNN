@@ -18,6 +18,8 @@ typedef struct model_args{
   char * regularization;
   double lambda;
   int print_cost;
+  double beta1;
+  double beta2;
 }Model_args;
 
 #ifdef __cplusplus
@@ -72,6 +74,13 @@ typedef struct model{
   char * regularization;
   double lambda;
   char * loss;
+  double beta1;
+  double beta2;
+  int time_step;
+  dARRAY * m_t;
+  dARRAY * v_t;
+  double epsilon;
+  dARRAY * cache;
 
   int input_size;
   int output_size;
@@ -105,6 +114,8 @@ typedef struct model{
 .lambda=0.0,\
 .learning_rate=3e-4,\
 .print_cost=1,\
+.beta1=0.9,\
+.beta2=0.999,\
 .loss="cross_entropy_loss",__VA_ARGS__});
 
 #define destroy_model(...) destroy_model();
