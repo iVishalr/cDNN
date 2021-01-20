@@ -230,8 +230,6 @@ void load_x_train(int * dims){
   x_train->shape[1] = dims[0];
 
   m->x_train = transpose(x_train);
-  // printf("shape of X_train : ");
-  // shape(m->x_train);
   free2d(x_train);
   x_train = NULL;
   fclose(fp);
@@ -253,9 +251,6 @@ void load_y_train(int * dims){
   Y_train->shape[1] = dims[0];
 
   m->Y_train = transpose(Y_train);
-
-  // printf("Shape of Y_train : ");
-  // shape(m->Y_train);
   free2d(Y_train);
   Y_train = NULL;
   fclose(fp);
@@ -310,8 +305,10 @@ void (Model)(Model_args model_args){
   m->beta1 = model_args.beta1; // hyperparameter - used for Adam and RMSProp, Decay rate for estimation of first moment
   m->beta2 = model_args.beta2; // hyperparameter - used for Adam, Decay rate used for estimation of second moment.
   m->epsilon = 1e-8; // small value to prevent divison by zero during parameter updates
-  m->m_t = NULL;  // for Adam and RMSProp - to calculate first moment
-  m->v_t = NULL; // for Adam - to calculate second moment
+  m->m_t_dW = NULL;  // for Adam and RMSProp - to calculate first moment
+  m->v_t_dW = NULL; // for Adam - to calculate second moment
+  m->m_t_db = NULL;
+  m->v_t_db = NULL;
   m->cache = NULL; // for AdaGrad
 
   m->mini_batch_size = model_args.mini_batch_size;
