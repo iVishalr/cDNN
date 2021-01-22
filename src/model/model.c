@@ -15,9 +15,17 @@ void __init__(){
 void __initialize_params__(){
   Computation_Graph * temp = m->graph;
   temp = temp->next_layer;
+  int index = 0;
   while(temp!=NULL){
     m->current_layer = temp;
     temp->DENSE->initalize_params();
+    int dims_dW[] = {temp->DENSE->weights->shape[0],temp->DENSE->weights->shape[1]};
+    int dims_db[] = {temp->DENSE->bias->shape[0],temp->DENSE->bias->shape[1]};
+    m->m_t_dW[index] = zeros(dims_dW);
+    m->m_t_db[index] = zeros(dims_db);
+    m->v_t_dW[index] = zeros(dims_dW);
+    m->v_t_db[index] = zeros(dims_db);
+    index++;
     temp = temp->next_layer;
   }
   m->current_layer = m->graph;
@@ -305,10 +313,12 @@ void (Model)(Model_args model_args){
   m->beta1 = model_args.beta1; // hyperparameter - used for Adam and RMSProp, Decay rate for estimation of first moment
   m->beta2 = model_args.beta2; // hyperparameter - used for Adam, Decay rate used for estimation of second moment.
   m->epsilon = 1e-8; // small value to prevent divison by zero during parameter updates
-  m->m_t_dW = NULL;  // for Adam and RMSProp - to calculate first moment
-  m->v_t_dW = NULL; // for Adam - to calculate second moment
-  m->m_t_db = NULL;
-  m->v_t_db = NULL;
+  for(int i=0;i<m->number_of_layers;i++){
+    m->m_t_dW[i] = NULL;  // for Adam and RMSProp - to calculate first moment
+    m->v_t_dW[i] = NULL; // for Adam - to calculate second moment
+    m->m_t_db[i] = NULL;
+    m->v_t_db[i] = NULL;
+  }
   m->cache = NULL; // for AdaGrad
 
   m->mini_batch_size = model_args.mini_batch_size;

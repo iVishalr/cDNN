@@ -77,10 +77,10 @@ typedef struct model{
   double beta1;
   double beta2;
   int time_step;
-  dARRAY * m_t_dW;
-  dARRAY * v_t_dW;
-  dARRAY * m_t_db;
-  dARRAY * v_t_db;
+  dARRAY * m_t_dW[1024];
+  dARRAY * v_t_dW[1024];
+  dARRAY * m_t_db[1024];
+  dARRAY * v_t_db[1024];
   double epsilon;
   dARRAY * cache;
 
