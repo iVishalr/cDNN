@@ -82,7 +82,8 @@ typedef struct model{
   dARRAY * m_t_db[1024];
   dARRAY * v_t_db[1024];
   double epsilon;
-  dARRAY * cache;
+  dARRAY * cache_dW[1024];
+  dARRAY * cache_db[1024];
 
   int input_size;
   int output_size;
