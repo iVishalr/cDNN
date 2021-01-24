@@ -19,6 +19,7 @@ void __initialize_params__(){
   int flag = 0;
   if(!strcasecmp(m->optimizer,"adam")) flag = 1;
   if(!strcasecmp(m->optimizer,"adagrad")) flag = 2;
+  if(!strcasecmp(m->optimizer,"rmsprop")) flag = 2;
   while(temp!=NULL){
     m->current_layer = temp;
     temp->DENSE->initalize_params();
@@ -322,6 +323,7 @@ void (Model)(Model_args model_args){
   m->optimizer = model_args.optimizer; // Optimizer choice
   m->learning_rate = model_args.learning_rate; // hyperparameter for step size for optimization algorithm
   m->time_step = 0; // timestep - required for Adam update, for bias correction
+  m->beta = model_args.beta; //hyperparameter - used for RMSProp, Denotes Decay_rate for weighted average
   m->beta1 = model_args.beta1; // hyperparameter - used for Adam and RMSProp, Decay rate for estimation of first moment
   m->beta2 = model_args.beta2; // hyperparameter - used for Adam, Decay rate used for estimation of second moment.
   m->epsilon = 1e-8; // small value to prevent divison by zero during parameter updates

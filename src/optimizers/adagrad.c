@@ -8,7 +8,7 @@ void adagrad(){
   int layer=0;
   while(temp!=NULL){
     dARRAY * scaled_grads_dW = power(temp->DENSE->dW,2);
-    dARRAY * scaled_grads_db = power(temp->DENSE->bias,2);
+    dARRAY * scaled_grads_db = power(temp->DENSE->db,2);
     dARRAY * ptr_cache_dW = m->cache_dW[layer];
     dARRAY * ptr_cache_db = m->cache_db[layer];
 
@@ -44,7 +44,7 @@ void adagrad(){
     mul_lr_w = mul_lr_b = div_factor_dW = div_factor_db = NULL;
 
     dARRAY * grad_W = temp->DENSE->weights;
-    dARRAY * grad_b = temp->DENSE->db;
+    dARRAY * grad_b = temp->DENSE->bias;
 
     temp->DENSE->weights = subtract(grad_W,update_term_w);
     temp->DENSE->bias = subtract(grad_b,update_term_b);
@@ -55,6 +55,18 @@ void adagrad(){
     free2d(update_term_b);
     grad_W = grad_b = update_term_w = update_term_b = NULL;
 
+    if(temp->DENSE->dropout_mask!=NULL)
+      free2d(temp->DENSE->dropout_mask);
+    if(temp->DENSE->A!=NULL)
+      free2d(temp->DENSE->A);
+    if(temp->DENSE->cache!=NULL)
+      free2d(temp->DENSE->cache);
+    if(temp->DENSE->dA!=NULL)
+      free2d(temp->DENSE->dA);
+    if(temp->DENSE->dZ!=NULL)
+      free2d(temp->DENSE->dZ);
+    temp->DENSE->dA=temp->DENSE->cache = temp->DENSE->A = temp->DENSE->dropout_mask = temp->DENSE->dZ = NULL;
+    
     layer++;
     temp = temp->next_layer;
   }

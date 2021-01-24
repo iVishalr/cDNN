@@ -18,6 +18,7 @@ typedef struct model_args{
   char * regularization;
   double lambda;
   int print_cost;
+  double beta;
   double beta1;
   double beta2;
 }Model_args;
@@ -74,6 +75,7 @@ typedef struct model{
   char * regularization;
   double lambda;
   char * loss;
+  double beta;
   double beta1;
   double beta2;
   int time_step;
@@ -117,6 +119,7 @@ typedef struct model{
 .lambda=0.0,\
 .learning_rate=3e-4,\
 .print_cost=1,\
+.beta=0.9\
 .beta1=0.9,\
 .beta2=0.999,\
 .loss="cross_entropy_loss",__VA_ARGS__});
