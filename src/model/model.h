@@ -119,7 +119,7 @@ typedef struct model{
 .lambda=0.0,\
 .learning_rate=3e-4,\
 .print_cost=1,\
-.beta=0.9\
+.beta=0.9,\
 .beta1=0.9,\
 .beta2=0.999,\
 .loss="cross_entropy_loss",__VA_ARGS__});
