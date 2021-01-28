@@ -81,6 +81,54 @@ double calculate_accuracy(dARRAY * predicted, dARRAY * gnd_truth){
   return success/(double)predicted->shape[1];
 }
 
+double calculate_train_val_acc(){
+  dARRAY * weight_input_res = NULL;
+  dARRAY * output = NULL;
+  dARRAY * activation_temp = NULL;
+
+  Computation_Graph * temp = m->graph->next_layer;
+  int layer=0;
+  while(temp!=NULL){
+    if(temp->prev_layer->type==INPUT) weight_input_res = dot(temp->DENSE->weights, m->x_cv);
+    else weight_input_res = dot(temp->DENSE->weights, activation_temp);
+    
+    if(activation_temp!=NULL){
+       free2d(activation_temp);
+       activation_temp = NULL;
+    }
+    
+    dARRAY * Z = add(weight_input_res,temp->DENSE->bias);//Z
+    free2d(weight_input_res);
+    weight_input_res = NULL;
+    
+    if(!strcmp(temp->DENSE->activation,"relu")){
+      activation_temp = relu(.input=Z);
+      free2d(Z);
+    }
+    else if(!strcmp(temp->DENSE->activation,"sigmoid")){
+      activation_temp = sigmoid(.input=Z);
+      free2d(Z);
+    }
+    else if(!strcmp(temp->DENSE->activation,"tanh")){
+      activation_temp = TanH(.input=Z);
+      free2d(Z);
+    }
+    else{
+      activation_temp = Z;
+    }
+    if(temp->next_layer==NULL){
+      output = activation_temp;
+    }
+    layer++;
+    temp = temp->next_layer;
+    Z = NULL;
+  }
+  double val_acc = calculate_accuracy(output,m->Y_cv);
+  free2d(output);
+  output = NULL;
+  return val_acc;
+}
+
 void append_to_file(double value,char * filename,char * mode){
   FILE * fp = NULL;
   fp = fopen(filename,mode);
@@ -96,19 +144,24 @@ void __fit__(){
   int i = 1;
   double sum_cost = 0.0;
   double sum_train_acc = 0.0;
+  double sum_train_val_acc = 0.0;
   while(i<=m->num_iter){
     __forward__();
     sum_cost += cross_entropy_loss(m->output,m->Y_train);
     sum_train_acc += calculate_accuracy(m->output,m->Y_train);
+    sum_train_val_acc += calculate_train_val_acc();
     if(i%100==0 && m->print_cost){
       m->train_cost = sum_cost/(double)i;
       m->train_accuracy = sum_train_acc/(double)i;
+      m->cross_val_accuracy = sum_train_val_acc/(double)i;
 
       printf("\033[96m%d. Cost : \033[0m%lf ",i,m->train_cost);
-      printf("\033[96m train_acc : \033[0m%lf\n",m->train_accuracy);
+      printf("\033[96m train_acc : \033[0m%lf ",m->train_accuracy);
+      printf("\033[96m val_acc : \033[0m%lf\n",m->cross_val_accuracy);
       
       append_to_file(m->train_cost,"./bin/cost.data","ab+");
       append_to_file(m->train_accuracy,"./bin/train_acc.data","ab+");
+      append_to_file(m->cross_val_accuracy,"./bin/val_acc.data","ab+");
     }
     __backward__();
     GD(m->learning_rate);
@@ -120,13 +173,6 @@ void __predict__(dARRAY * input_feature){
   m->graph->INPUT->A = input_feature;
   m->predicting = 1;
   __forward__();
-  printf("Output : ");
-  for(int i=0;i<m->output->shape[0];i++){
-    for(int j=0;j<m->output->shape[1];j++){
-      printf("%lf ",m->output->matrix[i*m->output->shape[1]+j]);
-    }
-    printf("\n");
-  }
 }
 
 
@@ -274,6 +320,48 @@ void load_y_train(int * dims){
   m->Y_train = transpose(Y_train);
   free2d(Y_train);
   Y_train = NULL;
+  fclose(fp);
+}
+
+void load_x_cv(int * dims){
+  FILE * fp = NULL;
+  fp = fopen("X_cv.data","rb");
+  if(fp==NULL){
+    printf("\033[1;31mFile Error : \033[93m Could not open the specified file!\033[0m\n");
+    exit(EXIT_FAILURE);
+  }
+  dARRAY * x_cv = (dARRAY*)malloc(sizeof(dARRAY));
+  x_cv->matrix = (double*)calloc(dims[0]*dims[1],sizeof(double));
+  for(int j=0;j<dims[0]*dims[1];j++){
+    fscanf(fp,"%lf ",&x_cv->matrix[j]);
+  }
+  x_cv->shape[0] = dims[1];
+  x_cv->shape[1] = dims[0];
+
+  m->x_cv = transpose(x_cv);
+  free2d(x_cv);
+  x_cv = NULL;
+  fclose(fp);
+}
+
+void load_y_cv(int * dims){
+  FILE * fp = NULL;
+  fp = fopen("y_cv.data","rb");
+  if(fp==NULL){
+    printf("\033[1;31mFile Error : \033[93m Could not open the specified file!\033[0m\n");
+    exit(EXIT_FAILURE);
+  }
+  dARRAY * Y_cv = (dARRAY*)malloc(sizeof(dARRAY));
+  Y_cv->matrix = (double*)calloc(dims[0]*dims[1],sizeof(double));
+  for(int j=0;j<dims[0]*dims[1];j++){
+    fscanf(fp,"%lf ",&Y_cv->matrix[j]);
+  }
+  Y_cv->shape[0] = dims[1];
+  Y_cv->shape[1] = dims[0];
+
+  m->Y_cv = transpose(Y_cv);
+  free2d(Y_cv);
+  Y_cv = NULL;
   fclose(fp);
 }
 

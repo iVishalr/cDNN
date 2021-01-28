@@ -46,8 +46,11 @@ extern "C"{
   void __summary__();
   void __predict__();
   double calculate_accuracy(dARRAY * predicted, dARRAY * gnd_truth);
+  double calculate_train_val_acc();
   void load_x_train(int * dims);
   void load_y_train(int * dims);
+  void load_x_cv(int * dims);
+  void load_y_cv(int * dims);
   void (destroy_model)();
 #ifdef __cplusplus
 }
