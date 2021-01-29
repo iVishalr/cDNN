@@ -149,19 +149,19 @@ void __fit__(){
     __forward__();
     sum_cost += cross_entropy_loss(m->output,m->Y_train);
     sum_train_acc += calculate_accuracy(m->output,m->Y_train);
-    sum_train_val_acc += calculate_train_val_acc();
-    if(i%100==0 && m->print_cost){
+    // sum_train_val_acc += calculate_train_val_acc();
+    if(m->print_cost){
       m->train_cost = sum_cost/(double)i;
       m->train_accuracy = sum_train_acc/(double)i;
-      m->cross_val_accuracy = sum_train_val_acc/(double)i;
+      // m->cross_val_accuracy = sum_train_val_acc/(double)i;
 
       printf("\033[96m%d. Cost : \033[0m%lf ",i,m->train_cost);
-      printf("\033[96m train_acc : \033[0m%lf ",m->train_accuracy);
-      printf("\033[96m val_acc : \033[0m%lf\n",m->cross_val_accuracy);
+      printf("\033[96m train_acc : \033[0m%lf \n",m->train_accuracy);
+      // printf("\033[96m val_acc : \033[0m%lf\n",m->cross_val_accuracy);
       
       append_to_file(m->train_cost,"./bin/cost.data","ab+");
       append_to_file(m->train_accuracy,"./bin/train_acc.data","ab+");
-      append_to_file(m->cross_val_accuracy,"./bin/val_acc.data","ab+");
+      // append_to_file(m->cross_val_accuracy,"./bin/val_acc.data","ab+");
     }
     __backward__();
     GD(m->learning_rate);
