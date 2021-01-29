@@ -15,7 +15,7 @@ int main(){
   int y_cv_dims[] = {1,100};
   load_y_cv(y_cv_dims);
 
-  Input(.layer_size=12288,.input_features=m->x_train);
+  Input(.layer_size=12288);
   // Dense(.layer_size=64,.activation="relu",.initializer="he",.layer_type="hidden");
   // Dense(.layer_size=32,.activation="relu",.initializer="he",.layer_type="hidden");
   // Dense(.layer_size=16,.activation="relu",.initializer="he",.layer_type="hidden");

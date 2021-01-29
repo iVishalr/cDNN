@@ -49,7 +49,7 @@ void __forward__(){
   temp = temp->next_layer;
   while(temp!=NULL){
     m->current_layer = temp;
-    temp->DENSE->forward_prop();
+    temp->DENSE->forward();
     temp = temp->next_layer;
   }
 }
@@ -58,7 +58,7 @@ void __backward__(){
   Computation_Graph * temp = m->current_layer;
   while(temp->prev_layer!=NULL){
     m->current_layer = temp;
-    temp->DENSE->back_prop();
+    temp->DENSE->backward();
     temp = temp->prev_layer;
   }
 }

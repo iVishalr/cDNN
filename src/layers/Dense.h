@@ -39,8 +39,8 @@ typedef struct dense{
   dARRAY * db;
   dARRAY * dA;
   dARRAY * A;
-  __compute forward_prop;
-  __compute back_prop;
+  __compute forward;
+  __compute backward;
   __init_params initalize_params;
   char * initializer;
   double dropout;

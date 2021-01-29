@@ -22,8 +22,8 @@ dARRAY * backward_pass_relu(dARRAY * layer_matrix){
 
 ReLu * ReLu__init__(dARRAY * linear_matrix){
   ReLu * relu = (ReLu*)malloc(sizeof(ReLu));
-  relu->forward_prop = forward_pass_relu;
-  relu->back_prop = backward_pass_relu;
+  relu->forward = forward_pass_relu;
+  relu->backward = backward_pass_relu;
   relu->in_dims[0] = relu->out_dims[0] = linear_matrix->shape[0];
   relu->in_dims[1] = relu->out_dims[1] = linear_matrix->shape[1];
   return relu;
@@ -32,8 +32,8 @@ ReLu * ReLu__init__(dARRAY * linear_matrix){
 dARRAY * (relu)(ReLu_args args){
   ReLu * r = ReLu__init__(args.input);
   if(!args.status)
-    return r->forward_prop(args.input);
+    return r->forward(args.input);
   else
-    return r->back_prop(args.input);
+    return r->backward(args.input);
 }
 

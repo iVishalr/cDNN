@@ -24,84 +24,101 @@ void init_params(){
 }
 
 dARRAY * init_weights(int * weights_dims,const char * init_type){
+  //Generate a random matrix with normal distribution
   dARRAY * temp = randn(weights_dims);
+  
   dARRAY * weights = NULL;
+  
+  //create a scaling factor which will be used for proper
+  //initialization of layer weights according to the
+  //type of activation used for the layer.
   double scaling_factor = 0.0;
-  scaling_factor = m->current_layer->prev_layer->type!=INPUT ? m->current_layer->prev_layer->DENSE->num_of_computation_nodes : m->current_layer->prev_layer->INPUT->input_features_size;
+  scaling_factor = \
+  m->current_layer->prev_layer->type!=INPUT ? \
+  m->current_layer->prev_layer->DENSE->num_of_computation_nodes : \
+  m->current_layer->prev_layer->INPUT->input_features_size;
+  
+  //He initialization - commonly used for ReLu activations
   if(!strcmp(init_type,"he")){
-    weights = mulScalar(temp,sqrt(2.0/scaling_factor));//5 is size of prev layer
+    weights = mulScalar(temp,sqrt(2.0/scaling_factor));
   }
+  //Xavier initialization - commonly used for TanH activations
   else if(!strcmp(init_type,"xavier")){
     weights = mulScalar(temp,sqrt(1/scaling_factor));
   }
+  //Simple random initalization - can be used for any activations
+  //Warning
+  //Initializing all layers to random will not make the network work properly
+  //Spends lot of time for getting the optimal values of weights
+  //for optimization to begin
   else if(!strcmp(init_type,"random")){
     weights = mulScalar(temp,0.01);
   }
+  //Optional feature.
+  //Don't use it
+  //It is only to see what happens if your intialize all your weights to zeros
+  //Fails to break symmetry and thus network wont train no matter what you do.
   else if(!strcmp(init_type,"zeros")){
     weights = zeros(weights_dims);
   }
+  //Use He if an invalid initializer is specified
   else{
     printf("\033[93mInvalid initializer specified. Defaulting to He initialization.\033[0m\n");
     weights = mulScalar(temp,sqrt(2.0/scaling_factor));
   }
+
   free2d(temp);
   temp=NULL;
+
   return weights;
 }
 
 dARRAY * init_bias(int * bias_dims){
+  //initialize biases of layer to zeros.
+  //Doesn't matter if you init randomly or with only zeros.
   dARRAY * bias = zeros(bias_dims);
   return bias;
 }
 
 void forward_pass(){
-  dARRAY * weight_input_res = NULL;
-  if(m->current_layer->prev_layer->type==INPUT) weight_input_res = dot(m->current_layer->DENSE->weights, m->current_layer->prev_layer->INPUT->A);
-  else weight_input_res = dot(m->current_layer->DENSE->weights, m->current_layer->prev_layer->DENSE->A);
+  //Compute Z = W.A + b
+  //Z is the linear output of the gate
+  //W is the weights of the current layer
+  //A is the activation of previous layer
+  //b is a small bias offset
+  dARRAY * Wx = NULL;
+  //if the pevious layer is an input layer, we want to dot product the weights with the input
+  //features and not the activations
+  if(m->current_layer->prev_layer->type==INPUT) 
+    Wx = \
+    dot(m->current_layer->DENSE->weights, m->current_layer->prev_layer->INPUT->A);
+  else 
+    Wx = \
+    dot(m->current_layer->DENSE->weights, m->current_layer->prev_layer->DENSE->A);
 
-  dARRAY * Z = m->current_layer->DENSE->cache = add(weight_input_res,m->current_layer->DENSE->bias);//Z
-
-  free2d(weight_input_res);
-  weight_input_res = NULL;
-
-  dARRAY * activation_temp = NULL;
-  if(!strcmp(m->current_layer->DENSE->activation,"relu")){
-    activation_temp = relu(.input=Z);
+  //Store Z in cache as we will require it in backward pass
+  dARRAY * Z = m->current_layer->DENSE->cache = add(Wx,m->current_layer->DENSE->bias);//Z
+  //Done with Wx, free it.
+  free2d(Wx);
+  Wx = NULL;
+  //Compute the activation of this layer depending on the choice of activation selected.
+  if(!strcasecmp(m->current_layer->DENSE->activation,"relu")){
+    m->current_layer->DENSE->A = relu(.input=Z);
   }
-  else if(!strcmp(m->current_layer->DENSE->activation,"sigmoid")){
-    activation_temp = sigmoid(.input=Z);
+  else if(!strcasecmp(m->current_layer->DENSE->activation,"sigmoid")){
+    m->current_layer->DENSE->A = sigmoid(.input=Z);
   }
-  else if(!strcmp(m->current_layer->DENSE->activation,"tanh")){
-    activation_temp = TanH(.input=Z);
-  }
-  else{
-    activation_temp = Z;
-  }
-
-  if(m->current_layer->DENSE->dropout<1.0 && m->current_layer->DENSE->dropout>=0.0 && m->current_layer->DENSE->isTraining){
-    //implementation of inverted dropout layer
-    int dims[] = {activation_temp->shape[0],activation_temp->shape[1]};
-    m->current_layer->DENSE->dropout_mask = randn(dims);
-    //create a binary mask using dropout with probability of dropout
-    
-    omp_set_num_threads(4);
-    #pragma omp parallel for
-    for(int i=0;i<m->current_layer->DENSE->dropout_mask->shape[0]*m->current_layer->DENSE->dropout_mask->shape[1];i++)
-      m->current_layer->DENSE->dropout_mask->matrix[i] = m->current_layer->DENSE->dropout_mask->matrix[i]<m->current_layer->DENSE->dropout ? 1 : 0;
-    
-    dARRAY * mul_mask = multiply(activation_temp,m->current_layer->DENSE->dropout_mask);
-    m->current_layer->DENSE->A = divScalar(mul_mask,m->current_layer->DENSE->dropout);
-
-    free2d(mul_mask);
-    mul_mask = NULL;
-
-    free2d(activation_temp);
+  else if(!strcasecmp(m->current_layer->DENSE->activation,"tanh")){
+    m->current_layer->DENSE->A = TanH(.input=Z);
   }
   else{
-    m->current_layer->DENSE->A = activation_temp;
+    //if user didn't want to use any activation, pass Z itself as the output
+    m->current_layer->DENSE->A = Z;
   }
-  activation_temp = NULL;
+
   Z=NULL;
+
+  //set output of model to be activation of the last layer
   if(m->current_layer->next_layer==NULL)
     m->output = m->current_layer->DENSE->A;
 }
@@ -228,8 +245,8 @@ void (Dense)(dense_args dense_layer_args){
   layer->initalize_params = init_params;
   layer->initializer = dense_layer_args.initializer;
   layer->cache = NULL;
-  layer->forward_prop = forward_pass;
-  layer->back_prop = backward_pass;
+  layer->forward = forward_pass;
+  layer->backward = backward_pass;
   layer->dropout_mask = NULL;
   layer->dropout = dense_layer_args.dropout;
   layer->lambda = dense_layer_args.lambda;
