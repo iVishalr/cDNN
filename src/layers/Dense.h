@@ -22,9 +22,8 @@ extern "C" {
   void init_params();
   dARRAY * init_weights(int * weights_dims,const char * init_type);
   dARRAY * init_bias(int * bias_dims);
-  
-  void forward_pass();
-  void backward_pass();
+  void forward_pass_DENSE();
+  void backward_pass_DENSE();
 #ifdef __cplusplus
 }
 #endif

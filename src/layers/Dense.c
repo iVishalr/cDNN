@@ -124,8 +124,9 @@ void forward_pass_DENSE(){
 }
 
 void backward_pass_DENSE(){
+  //Store the number of training examples in a variable
   double num_examples = m->num_of_training_examples;
-
+  //Assign pointers to the respective layers
   Dense_layer * layer = m->current_layer->DENSE; 
   Input_layer * prev_layer_in_features = NULL;
   Dense_layer * prev_layer = NULL;
@@ -135,38 +136,57 @@ void backward_pass_DENSE(){
   else 
     prev_layer = m->current_layer->prev_layer->DENSE;
 
-  if(strcmp(layer->layer_type,"output")!=0){ 
-    dARRAY * diff_layer_activation = NULL;
-    if(!strcmp(layer->activation,"relu")){
-      diff_layer_activation = relu(.input=layer->cache,.status=1);
-    }
-    else if(!strcmp(layer->activation,"sigmoid")){
-      diff_layer_activation = sigmoid(.input=layer->cache,.status=1);
-    }
-    else if(!strcmp(layer->activation,"tanh")){
-      diff_layer_activation = TanH(.input=layer->cache,.status=1);
-    }
+  //Compute g'(z)
+  //where g is the activation function used for the layer
+  //g' is the differentiation of the activation function
+  //.status=1 - indicates that the activation function must perform backward pass
+  dARRAY * local_act_grad = NULL;
+  if(!strcasecmp(layer->activation,"relu")){
+    //local grad of relu gate
+    local_act_grad = relu(.input=layer->cache,.status=1);
+  }
+  else if(!strcasecmp(layer->activation,"sigmoid")){
+    //local grad of sigmoid gate
+    local_act_grad = sigmoid(.input=layer->cache,.status=1);
+  }
+  else if(!strcasecmp(layer->activation,"tanh")){
+    //local grad of tanh gate
+    local_act_grad = TanH(.input=layer->cache,.status=1);
+  }
+  if(m->current_layer->next_layer->type==LOSS){
+    //If we are on the last layer, then the gradient flowing
+    //into the Z computation block will be by chain rule
+    //dZ = local_act_grad * global_grad (loss_layer->grad_out)
+    layer->dZ = multiply(local_act_grad,m->current_layer->next_layer->LOSS->grad_out);
     
+    free2d(local_act_grad);
+    free2d(m->current_layer->next_layer->LOSS->grad_out);
+    local_act_grad = m->current_layer->next_layer->LOSS->grad_out = NULL;
+  }
+  else{
+    //If we are not on the last layer then, we need to calculate dZ differently
+    //dZ[1] = g'(Z[1]) * (W[2].dZ[2])
+    //[1], [2] - represents layers, 1 - first layer, 2 - second layer so on...
+    
+    //calculating W[2].dZ[2]
     dARRAY * weight_trans = transpose(m->current_layer->next_layer->DENSE->weights);
     dARRAY * temp_dz = dot(weight_trans,m->current_layer->next_layer->DENSE->dZ);
 
     free2d(weight_trans);
     weight_trans = NULL;
     
-    layer->dZ = multiply(temp_dz,diff_layer_activation);
+    //now we have the global gradient computed. We need to chain it with
+    //the local gradient and make it flow to dZ[1]
+    layer->dZ = multiply(temp_dz,local_act_grad);
 
     free2d(temp_dz);
     temp_dz = NULL;
 
-    free2d(diff_layer_activation);
-    diff_layer_activation = NULL;
-  }
-  else{
-    if(!strcmp(m->loss,"cross_entropy_loss")){
-      layer->dZ = subtract(layer->A,m->Y_train);
-    }
+    free2d(local_act_grad);
+    local_act_grad = NULL;
   }
 
+  //We have calculated dZ[current layer now] we can use it to calculate the remaining grads
   //Calculate gradients with respect to the layer weights
   dARRAY * prev_A_transpose = NULL;
 
@@ -179,13 +199,9 @@ void backward_pass_DENSE(){
   free2d(prev_A_transpose);
   prev_A_transpose = NULL;
 
-  if(m->lambda>0.0){
-    dARRAY * regularization_grad_temp = mulScalar(layer->weights,m->lambda);
-    dARRAY * regularization_grad = divScalar(regularization_grad_temp,(double)num_examples);
-    
-    free2d(regularization_grad_temp);
-    regularization_grad_temp = NULL;
-    
+  if(m->lambda>(double)0.0){
+    double mul_factor = m->lambda/(double)num_examples;
+    dARRAY * regularization_grad = mulScalar(temp1_dW,(double)num_examples);
     dARRAY * dW_temp = divScalar(temp1_dW,(double)num_examples);
     
     free2d(temp1_dW);
@@ -206,7 +222,7 @@ void backward_pass_DENSE(){
     printf("\033[1;31mValue Error : \033[93mInvalid lambda value specified\033[0m\n");
     exit(EXIT_FAILURE);
   }
-
+  //Now we have calculated the gradients with respect to the weights
   //calculate gradients with respect to the layer biases
   dARRAY * temp1_db = sum(layer->dZ,1);
   layer->db = divScalar(temp1_db,(double)num_examples);
@@ -214,9 +230,12 @@ void backward_pass_DENSE(){
   free2d(temp1_db);
   temp1_db = NULL;
 
+  //Finally we need to calculate the gradients of the prev layer activation
   //calculate gradients of activation of prev layer
   if(m->current_layer->prev_layer->type!=INPUT){
+    //local gradient would be just the current layer weights
     dARRAY * weight_transpose = transpose(layer->weights);
+    //chaining with the global or incomming gradient
     dARRAY * prev_layer_A_temp = dot(weight_transpose,layer->dZ);
     if(layer->dropout_mask==NULL){
       prev_layer->dA = prev_layer_A_temp;

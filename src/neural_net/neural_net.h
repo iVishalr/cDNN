@@ -17,6 +17,7 @@ typedef struct computational_graph{
   {
     Dense_layer * DENSE;
     Input_layer * INPUT;
+    cross_entropy_loss_layer * LOSS;
   };
 }Computation_Graph;
 

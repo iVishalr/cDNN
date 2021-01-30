@@ -160,4 +160,5 @@ void (cross_entropy_loss)(){
   loss_layer->forward = forward_pass_L2_LOSS;
   loss_layer->backward = backward_pass_L2_LOSS;
   loss_layer->gnd_truth = NULL;
+  append_graph(loss_layer,"loss")
 }

@@ -7,13 +7,17 @@ Computation_Graph * new_node(void * layer, char * type){
   Computation_Graph * new = (Computation_Graph*)malloc(sizeof(Computation_Graph));
   new->next_layer = NULL;
   new->prev_layer = NULL;
-  if(!strcmp(type,"Dense")){
+  if(!strcasecmp(type,"Dense")){
     new->DENSE = (Dense_layer*)layer;
     new->type = DENSE;
   } 
-  else if(!strcmp(type,"Input")){
+  else if(!strcasecmp(type,"Input")){
     new->INPUT = (Input_layer*)layer;
     new->type = INPUT;
+  }
+  else if(!strcasecmp(type,"Loss")){
+    new->LOSS = (cross_entropy_loss_layer*)layer;
+    new->type = LOSS;
   }
   return new;
 }
@@ -42,6 +46,8 @@ void printComputation_Graph(Computation_Graph * G){
       printf("DENSE\n");
     else if(temp->type==INPUT)
       printf("INPUT\n");
+    else if(temp->type==LOSS)
+      printf("LOSS\n");
     else printf("NULL\n");
     temp = temp->next_layer;
   }
@@ -56,24 +62,35 @@ Computation_Graph * destroy_G(Computation_Graph * G){
     temp = temp->next_layer;
     if(prev->type==DENSE){
       Dense_layer * layer = prev->DENSE;
-      free(layer->weights);
+      if(layer->weights)
+        free2d(layer->weights);
+  
       layer->weights = NULL;
-      free(layer->bias);
+      if(layer->bias)
+        free2d(layer->bias);
       layer->bias = NULL;
-      free(layer->cache);
+      if(layer->cache)
+        free2d(layer->cache);
       layer->cache = NULL;
-      free(layer->dA);
+      if(layer->dA)
+        free2d(layer->dA);
       layer->dA = NULL;
-      free(layer->A);
+      if(layer->A)
+        free2d(layer->A);
       layer->A = NULL;
-      free(layer->dropout_mask);
+      if(layer->dropout_mask)
+        free2d(layer->dropout_mask);
       layer->dropout_mask = NULL;
-      free(layer->db);
+      if(layer->db)
+        free2d(layer->db);
       layer->db = NULL;
-      free(layer->dZ);
+      if(layer->dZ)
+        free2d(layer->dZ);
       layer->dZ = NULL;
-      free(layer->dW);
+      if(layer->dW)
+        free2d(layer->dW);
       layer->dW = NULL;
+
       free(prev->DENSE);
       prev->DENSE = NULL;
       prev->prev_layer = NULL;
@@ -81,11 +98,20 @@ Computation_Graph * destroy_G(Computation_Graph * G){
     }
     else if(prev->type==INPUT){
       Input_layer * layer = prev->INPUT;
-      free(layer->A);
+      if(layer->A)
+        free2d(layer->A);
       layer->A = NULL;
       prev->prev_layer = NULL;
       free(prev->INPUT);
       layer=NULL;
+    }
+    else if(prev->type==LOSS){
+      cross_entropy_loss_layer * layer = prev->LOSS;
+      if(layer->grad_out) free2d(layer->grad_out);
+      if(layer->gnd_truth) free2d(layer->gnd_truth);
+      prev->prev_layer = NULL;
+      free(prev->LOSS);
+      layer = NULL;
     }
     free(prev);
   }
