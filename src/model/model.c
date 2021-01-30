@@ -8,6 +8,7 @@ void __init__(){
   m->train_accuracy = 0.0;
   m->train_cost = 0.0;
   m->cross_val_accuracy = 0.0;
+  m->iter_cost = 0.0;
   m->output = NULL;
   __initialize_params__();
 }

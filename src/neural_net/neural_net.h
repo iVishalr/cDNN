@@ -4,7 +4,7 @@
 #include "../layers/Dense.h"
 #include "../layers/Input.h"
 #include "../utils/utils.h"
-#include "../loss_functions/loss_functions.h"
+#include "../loss_functions/cross_entropy_loss.h"
 #include "../optimizers/gradient_descent.h"
 #include "../plot/plot.h"
 

@@ -80,7 +80,7 @@ dARRAY * init_bias(int * bias_dims){
   return bias;
 }
 
-void forward_pass(){
+void forward_pass_DENSE(){
   //Compute Z = W.A + b
   //Z is the linear output of the gate
   //W is the weights of the current layer
@@ -123,7 +123,7 @@ void forward_pass(){
     m->output = m->current_layer->DENSE->A;
 }
 
-void backward_pass(){
+void backward_pass_DENSE(){
   double num_examples = m->num_of_training_examples;
 
   Dense_layer * layer = m->current_layer->DENSE; 
@@ -245,8 +245,8 @@ void (Dense)(dense_args dense_layer_args){
   layer->initalize_params = init_params;
   layer->initializer = dense_layer_args.initializer;
   layer->cache = NULL;
-  layer->forward = forward_pass;
-  layer->backward = backward_pass;
+  layer->forward = forward_pass_DENSE;
+  layer->backward = backward_pass_DENSE;
   layer->dropout_mask = NULL;
   layer->dropout = dense_layer_args.dropout;
   layer->lambda = dense_layer_args.lambda;

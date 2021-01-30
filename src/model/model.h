@@ -94,6 +94,7 @@ typedef struct model{
   int output_size;
   long int total_parameters;
   double train_cost;
+  double iter_cost;
   double train_accuracy;
   double test_accuracy;
   double cross_val_accuracy;
