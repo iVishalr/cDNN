@@ -119,7 +119,7 @@ void forward_pass_DENSE(){
   Z=NULL;
 
   //set output of model to be activation of the last layer
-  if(m->current_layer->next_layer==NULL)
+  if(m->current_layer->next_layer->type==LOSS)
     m->output = m->current_layer->DENSE->A;
 }
 
@@ -157,11 +157,12 @@ void backward_pass_DENSE(){
     //If we are on the last layer, then the gradient flowing
     //into the Z computation block will be by chain rule
     //dZ = local_act_grad * global_grad (loss_layer->grad_out)
-    layer->dZ = multiply(local_act_grad,m->current_layer->next_layer->LOSS->grad_out);
+    // layer->dZ = multiply(local_act_grad,m->current_layer->next_layer->LOSS->grad_out);
     
     free2d(local_act_grad);
     free2d(m->current_layer->next_layer->LOSS->grad_out);
-    local_act_grad = m->current_layer->next_layer->LOSS->grad_out = NULL;
+    // local_act_grad = m->current_layer->next_layer->LOSS->grad_out = NULL;
+    layer->dZ = subtract(layer->A,m->Y_train);
   }
   else{
     //If we are not on the last layer then, we need to calculate dZ differently
@@ -201,7 +202,7 @@ void backward_pass_DENSE(){
 
   if(m->lambda>(double)0.0){
     double mul_factor = m->lambda/(double)num_examples;
-    dARRAY * regularization_grad = mulScalar(temp1_dW,(double)num_examples);
+    dARRAY * regularization_grad = mulScalar(temp1_dW,mul_factor);
     dARRAY * dW_temp = divScalar(temp1_dW,(double)num_examples);
     
     free2d(temp1_dW);

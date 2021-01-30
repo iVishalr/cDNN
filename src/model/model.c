@@ -23,8 +23,10 @@ void __initialize_params__(){
   if(!strcasecmp(m->optimizer,"rmsprop")) flag = 2;
   while(temp!=NULL){
     m->current_layer = temp;
-    temp->DENSE->initalize_params();
-    if(flag==1){
+    if(temp->type==DENSE){
+      temp->DENSE->initalize_params();
+    }
+    if(flag==1 && temp->type!=LOSS){
       int dims_dW[] = {temp->DENSE->weights->shape[0],temp->DENSE->weights->shape[1]};
       int dims_db[] = {temp->DENSE->bias->shape[0],temp->DENSE->bias->shape[1]};
       m->m_t_dW[index] = zeros(dims_dW);
@@ -33,7 +35,7 @@ void __initialize_params__(){
       m->v_t_db[index] = zeros(dims_db);
       index++;
     }
-    else if(flag==2){
+    else if(flag==2 && temp->type!=LOSS){
       int dims_dW[] = {temp->DENSE->weights->shape[0],temp->DENSE->weights->shape[1]};
       int dims_db[] = {temp->DENSE->bias->shape[0],temp->DENSE->bias->shape[1]};
       m->cache_dW[index] = zeros(dims_dW);
@@ -47,10 +49,11 @@ void __initialize_params__(){
 
 void __forward__(){
   Computation_Graph * temp = m->graph;
-  temp = temp->next_layer;
   while(temp!=NULL){
     m->current_layer = temp;
-    temp->DENSE->forward();
+    if(temp->type==INPUT){ temp->INPUT->forward();}
+    else if(temp->type==DENSE) {temp->DENSE->forward();}
+    else if(temp->type==LOSS) {temp->LOSS->forward();}
     temp = temp->next_layer;
   }
 }
@@ -59,7 +62,9 @@ void __backward__(){
   Computation_Graph * temp = m->current_layer;
   while(temp->prev_layer!=NULL){
     m->current_layer = temp;
-    temp->DENSE->backward();
+    if(temp->type==INPUT) temp->INPUT->backward();
+    else if(temp->type==DENSE) temp->DENSE->backward();
+    else if(temp->type==LOSS) temp->LOSS->backward();
     temp = temp->prev_layer;
   }
 }
@@ -148,7 +153,7 @@ void __fit__(){
   double sum_train_val_acc = 0.0;
   while(i<=m->num_iter){
     __forward__();
-    sum_cost += cross_entropy_loss(m->output,m->Y_train);
+    sum_cost += m->iter_cost;
     sum_train_acc += calculate_accuracy(m->output,m->Y_train);
     // sum_train_val_acc += calculate_train_val_acc();
     if(m->print_cost){
@@ -164,9 +169,12 @@ void __fit__(){
       append_to_file(m->train_accuracy,"./bin/train_acc.data","ab+");
       // append_to_file(m->cross_val_accuracy,"./bin/val_acc.data","ab+");
     }
+    // printf("backproping\n");
     __backward__();
+    // printf("done backproping\n");
     GD(m->learning_rate);
     i++;
+    // printf("performed parameter update\n");
   }
 }
 
@@ -372,8 +380,10 @@ long int get_total_params(){
   long int total_params = 0;
   Computation_Graph * temp = m->graph->next_layer;
   while(temp!=NULL){
-    total_params+= temp->DENSE->weights->shape[0]*temp->DENSE->weights->shape[1];
-    total_params+= temp->DENSE->bias->shape[0]*temp->DENSE->bias->shape[1];
+    if(temp->type==DENSE){
+      total_params+= temp->DENSE->weights->shape[0]*temp->DENSE->weights->shape[1];
+      total_params+= temp->DENSE->bias->shape[0]*temp->DENSE->bias->shape[1];
+    }
     temp = temp->next_layer;
   }
   return total_params;
@@ -447,7 +457,6 @@ void (Model)(Model_args model_args){
   m->fit = __fit__;
   m->predict = __predict__;
   m->summary = __summary__;
-
   m->init();
   m->total_parameters = get_total_params();
   printf("Total Trainable Parameters : %ld\n",m->total_parameters);

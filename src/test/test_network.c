@@ -21,9 +21,11 @@ int main(){
   // Dense(.layer_size=16,.activation="relu",.initializer="he",.layer_type="hidden");
   // Dense(.layer_size=8,.activation="relu",.initializer="he",.layer_type="hidden");
   // Dense(.layer_size=20,.activation="relu",.initializer="he",.layer_type="hidden");
-  Dense(.layer_size=5,.activation="relu",.initializer="he",.layer_type="hidden");
+  // Dense(.layer_size=5,.activation="relu",.initializer="he",.layer_type="hidden");
   Dense(.layer_size=1,.activation="sigmoid",.initializer="random",.layer_type="output");
-  Model(.x_train=m->x_train,.Y_train=m->Y_train,.x_cv=m->x_cv,.Y_cv=m->Y_cv,.num_iter=50000,.learning_rate=0.05);
+  cross_entropy_loss();
+  Model(.x_train=m->x_train,.Y_train=m->Y_train,.x_cv=m->x_cv,.Y_cv=m->Y_cv,.num_iter=5000,.learning_rate=0.05);
+  printComputation_Graph(m->graph);
   // m->load_model("model_dogsvscats64.t7");
   m->fit();
   // m->save_model("model_dogsvscats64_with_dropout.t7");

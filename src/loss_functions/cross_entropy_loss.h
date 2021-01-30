@@ -24,6 +24,11 @@ typedef struct cross_entropy_loss_layer{
   __compute backward;
 }cross_entropy_loss_layer;
 
-#define cross_entropy_loss(...) cross_entropy_loss();
+typedef struct cross_entropy_loss_args{
+  dARRAY * gnd_truth;
+  int isValdiation;
+}cross_entropy_loss_args;
+
+#define cross_entropy_loss(...) cross_entropy_loss((cross_entropy_loss_args){.gnd_truth=m->Y_train,.isValdiation=0,__VA_ARGS__});
 
 #endif //CROSS_ENTROPY_LOSS_H

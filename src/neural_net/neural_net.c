@@ -36,10 +36,12 @@ void append_graph(void * layer, char * type){
   //now we are on the last node
   temp->next_layer = new;
   new->prev_layer = temp;
-  m->number_of_layers++;
+  if(strcasecmp(type,"loss")!=0)
+    m->number_of_layers++;
 }
 
 void printComputation_Graph(Computation_Graph * G){
+  printf("printing graph\n");
   Computation_Graph * temp = m->graph;
   while(temp!=NULL){
     if(temp->type==DENSE)

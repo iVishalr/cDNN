@@ -122,7 +122,6 @@ void forward_pass_L2_LOSS(){
 
     free2d(cost);
     cost = NULL;
-
     m->iter_cost = total_cost;
   }
 }
@@ -153,12 +152,12 @@ void backward_pass_L2_LOSS(){
   lgrad1 = lgrad2 = temp_local_grad = NULL;
 }
 
-void (cross_entropy_loss)(){
+void (cross_entropy_loss)(cross_entropy_loss_args args){
   loss_layer = (cross_entropy_loss_layer*)malloc(sizeof(cross_entropy_loss_layer));
   loss_layer->cost = 0.0;
   loss_layer->grad_out = NULL;
   loss_layer->forward = forward_pass_L2_LOSS;
   loss_layer->backward = backward_pass_L2_LOSS;
-  loss_layer->gnd_truth = NULL;
-  append_graph(loss_layer,"loss")
+  loss_layer->gnd_truth = m->Y_train;
+  append_graph(loss_layer,"loss");
 }
