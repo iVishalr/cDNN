@@ -221,19 +221,19 @@ dARRAY * add(dARRAY * MatrixA, dARRAY * MatrixB){
     printf("\033[1;31mError:\033[93m One of the input matrices is empty. Call add() only after initializing dARRAY object\033[0m\n");
     return NULL;
   }
-  dARRAY * temp = NULL;
+  dARRAY * bcast_arr = NULL;
   int x = size(MatrixA);
   int y = size(MatrixB);
   int flag=0;
   if(x>y){ 
-    temp = b_cast(MatrixA,MatrixB); 
+    bcast_arr = b_cast(MatrixA,MatrixB); 
     flag=1;
   }
   else if(x<y){
-    temp = b_cast(MatrixB,MatrixA);
+    bcast_arr = b_cast(MatrixB,MatrixA);
     flag=1;
   }
-  if(temp==NULL && flag){
+  if(bcast_arr==NULL && flag){
     printf("\033[1;31mError:\033[93m Could not perform add(). Please check shape of input matrices.\033[0m\n");
     return NULL;
   }
@@ -247,11 +247,14 @@ dARRAY * add(dARRAY * MatrixA, dARRAY * MatrixB){
   }
   else{
     for(int i=0;i<MatrixA->shape[0]*MatrixA->shape[1];i++)
-        result->matrix[i] = x>y ? MatrixA->matrix[i] + temp->matrix[i] : temp->matrix[i] + MatrixB->matrix[i];
+        result->matrix[i] = x>y ? MatrixA->matrix[i] + bcast_arr->matrix[i] : bcast_arr->matrix[i] + MatrixB->matrix[i];
   }
-  if(temp!=NULL)
-    free2d(temp);
-  temp = NULL;
+  
+  // printf("freeing temp\n");
+  if(bcast_arr!=NULL)
+  free2d(bcast_arr);
+  // bcast_arr = NULL;
+  // printf("freed temp\n");
   result->shape[0] = MatrixA->shape[0];
   result->shape[1] = MatrixA->shape[1];
   return result;
@@ -269,19 +272,19 @@ dARRAY * subtract(dARRAY * MatrixA, dARRAY * MatrixB){
     printf("\033[1;31mError:\033[93m One of the input matrices is empty. Call subtract() only after initializing dARRAY object\033[0m\n");
     return NULL;
   }
-  dARRAY * temp = NULL;
+  dARRAY * bcast_arr = NULL;
   int x = size(MatrixA);
   int y = size(MatrixB);
   int flag=0;
   if(x>y){ 
-    temp = b_cast(MatrixA,MatrixB); 
+    bcast_arr = b_cast(MatrixA,MatrixB); 
     flag=1;
   }
   else if(x<y){
-    temp = b_cast(MatrixB,MatrixA);
+    bcast_arr = b_cast(MatrixB,MatrixA);
     flag=1;
   }
-  if(temp==NULL && flag==1){
+  if(bcast_arr==NULL && flag==1){
     printf("\033[1;31mError:\033[93m Could not perform subtract(). Please check shape of input matrices.\033[0m\n");
     return NULL;
   }
@@ -295,11 +298,11 @@ dARRAY * subtract(dARRAY * MatrixA, dARRAY * MatrixB){
   }
   else{
     for(int i=0;i<MatrixA->shape[0]*MatrixA->shape[1];i++)
-        result->matrix[i] = x>y ? MatrixA->matrix[i] - temp->matrix[i] : temp->matrix[i] - MatrixB->matrix[i];
+        result->matrix[i] = x>y ? MatrixA->matrix[i] - bcast_arr->matrix[i] : bcast_arr->matrix[i] - MatrixB->matrix[i];
   }
-  if(temp!=NULL)
-    free2d(temp);
-  temp = NULL;
+  if(bcast_arr!=NULL)
+    free2d(bcast_arr);
+  bcast_arr = NULL;
   result->shape[0] = MatrixA->shape[0];
   result->shape[1] = MatrixA->shape[1];
   return result;
@@ -426,14 +429,15 @@ dARRAY * power(dARRAY * matrix, int power){
 */
 dARRAY * b_cast(dARRAY * MatrixA, dARRAY * MatrixB){
   dARRAY * b_castArr = NULL;
+  
   if(MatrixA->shape[1]==MatrixB->shape[1] && MatrixB->shape[0]==1 && MatrixA->shape[0]>MatrixB->shape[0]){
     //B matrix has the shape of (1,n) 
     //we need to copy B m times
     //M(5,4) B(1,4)  repeat 5 * 4 = 20 times
     b_castArr = (dARRAY*)malloc(sizeof(dARRAY));
-    b_castArr->matrix = (double*)malloc(sizeof(double)*MatrixA->shape[0]*MatrixB->shape[1]);
+    b_castArr->matrix = (double*)calloc(MatrixA->shape[0]*MatrixA->shape[1],sizeof(double));
     omp_set_num_threads(4);
-    #pragma omp parallel for
+    #pragma omp parallel for shared(MatrixA,MatrixB)
     for(int i=0;i<MatrixA->shape[0]*MatrixB->shape[1];i++){
       b_castArr->matrix[i] = MatrixB->matrix[(i%MatrixB->shape[1])];
     }
@@ -443,9 +447,9 @@ dARRAY * b_cast(dARRAY * MatrixA, dARRAY * MatrixB){
   else if(MatrixA->shape[0]==MatrixB->shape[0] && MatrixB->shape[1]==1 && MatrixA->shape[1]>MatrixB->shape[1]){
     //B is of the form (m,1)
     //A is of (m,n)
-    //copy column wise
+    //copy column wise.
     b_castArr = (dARRAY*)malloc(sizeof(dARRAY));
-    b_castArr->matrix = (double*)malloc(sizeof(double)*MatrixA->shape[0]*MatrixA->shape[1]);
+    b_castArr->matrix = (double*)calloc(MatrixA->shape[0]*MatrixA->shape[1],sizeof(double));
     int k=0;
     omp_set_num_threads(4);
     #pragma omp parallel for shared(MatrixA,MatrixB,k)
@@ -686,7 +690,7 @@ void free2d(dARRAY * matrix){
   }
   free(matrix->matrix);
   free(matrix);
-  matrix = NULL;
+  // matrix = NULL;
   return;
 }
 

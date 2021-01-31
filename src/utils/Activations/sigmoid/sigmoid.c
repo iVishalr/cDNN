@@ -4,19 +4,27 @@
 extern __Model__ * m;
 
 dARRAY * forward_pass_sigmoid(){
-  dARRAY * sigmoid_out = (dARRAY*)malloc(sizeof(dARRAY));
-  sigmoid_out->matrix = (double*)calloc(m->current_layer->DENSE->cache->shape[0]*m->current_layer->DENSE->cache->shape[1],sizeof(double));
+  dARRAY * sigmoid_outf = NULL;
+  sigmoid_outf = (dARRAY*)malloc(sizeof(dARRAY));
+  sigmoid_outf->matrix = (double*)calloc(m->current_layer->DENSE->cache->shape[0]*m->current_layer->DENSE->cache->shape[1],sizeof(double));
   omp_set_num_threads(4);
   #pragma omp parallel for
   for(int i=0;i<m->current_layer->DENSE->cache->shape[0]*m->current_layer->DENSE->cache->shape[1];i++)
-    sigmoid_out->matrix[i] = (double)(1/(1+exp(-1*m->current_layer->DENSE->cache->matrix[i])));
-  sigmoid_out->shape[0] = m->current_layer->DENSE->cache->shape[0];
-  sigmoid_out->shape[1] = m->current_layer->DENSE->cache->shape[1];
-  return sigmoid_out;
+    sigmoid_outf->matrix[i] = (double)(1.0/(double)(1+exp((double)(-1.0*m->current_layer->DENSE->cache->matrix[i]))));
+  sigmoid_outf->shape[0] = m->current_layer->DENSE->cache->shape[0];
+  sigmoid_outf->shape[1] = m->current_layer->DENSE->cache->shape[1];
+  return sigmoid_outf;
 }
 
 dARRAY * backward_pass_sigmoid(){
-  dARRAY * sigmoid_out = NULL;
+  // printf("Current layer's (sigmoid) activation : \n");
+  // for(int i=0;i<m->current_layer->DENSE->A->shape[0];i++){
+  //   for(int j=0;j<m->current_layer->DENSE->A->shape[1];j++){
+  //     printf("%lf ",m->current_layer->DENSE->A->matrix[i*m->current_layer->DENSE->A->shape[1]+j]);
+  //   }
+  //   printf("\n");
+  // }
+  dARRAY * sigmoid_outb = NULL;
   dARRAY * temp = NULL;
   dARRAY * one = NULL;
   int dims[] = {m->current_layer->DENSE->A->shape[0],m->current_layer->DENSE->A->shape[1]};
@@ -26,10 +34,10 @@ dARRAY * backward_pass_sigmoid(){
   free2d(one);
   one=NULL;
 
-  sigmoid_out = multiply(m->current_layer->DENSE->A,temp);
+  sigmoid_outb = multiply(m->current_layer->DENSE->A,temp);
   free2d(temp);
   temp = NULL;
-  return sigmoid_out;
+  return sigmoid_outb;
 }
 
 Sigmoid * Sigmoid__init__(dARRAY * layer_matrix){

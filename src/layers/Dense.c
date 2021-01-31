@@ -95,9 +95,11 @@ void forward_pass_DENSE(){
   else 
     Wx = \
     dot(m->current_layer->DENSE->weights, m->current_layer->prev_layer->DENSE->A);
-
+  // printf("done with dot\n");
   //Store Z in cache as we will require it in backward pass
+  // printf("adding bias\n");
   dARRAY * Z = m->current_layer->DENSE->cache = add(Wx,m->current_layer->DENSE->bias);//Z
+  // printf("added bias\n");
   //Done with Wx, free it.
   free2d(Wx);
   Wx = NULL;
@@ -141,22 +143,27 @@ void backward_pass_DENSE(){
   //g' is the differentiation of the activation function
   //.status=1 - indicates that the activation function must perform backward pass
   dARRAY * local_act_grad = NULL;
+  // printf("computing g'(Z)\n");
   if(!strcasecmp(layer->activation,"relu")){
     //local grad of relu gate
+    // printf("executing relu\n");
     local_act_grad = relu(.input=layer->cache,.status=1);
   }
   else if(!strcasecmp(layer->activation,"sigmoid")){
     //local grad of sigmoid gate
+    // printf("executing sigmoid\n");
     local_act_grad = sigmoid(.input=layer->cache,.status=1);
   }
   else if(!strcasecmp(layer->activation,"tanh")){
     //local grad of tanh gate
+    // printf("executing tanh\n");
     local_act_grad = TanH(.input=layer->cache,.status=1);
   }
-  // printf("local act grad : \n");
-  // for(int i=0;i<local_act_grad->shape[0];i++){
-  //   for(int j=0;j<local_act_grad->shape[1];j++){
-  //     printf("%lf ",local_act_grad->matrix[i*local_act_grad->shape[1]+j]);
+  // printf("done computing g'(Z)\n");
+  // printf("output : \n");
+  // for(int i=0;i<m->output->shape[0];i++){
+  //   for(int j=0;j<m->output->shape[1];j++){
+  //     printf("%lf ",m->output->matrix[i*m->output->shape[1]+j]);
   //   }
   //   printf("\n");
   // }
@@ -181,11 +188,11 @@ void backward_pass_DENSE(){
     //   }
     //   printf("\n");
     // }
+    // printf("freeing local_grad and grad_out\n");
     free2d(local_act_grad);
-    // free2d(trans);
-    // free2d(temp);
     free2d(m->current_layer->next_layer->LOSS->grad_out);
     local_act_grad = m->current_layer->next_layer->LOSS->grad_out = NULL;
+    // printf("freed\n");
     // dARRAY * tempo = subtract(layer->A,m->Y_train);
     // printf("Actual layer dZ : \n");
     // for(int i=0;i<tempo->shape[0];i++){
@@ -203,21 +210,29 @@ void backward_pass_DENSE(){
     //[1], [2] - represents layers, 1 - first layer, 2 - second layer so on...
     
     //calculating W[2].dZ[2]
+    // dARRAY * weight_trans = NULL;
+    // printf("current layer size and activation %d - %s",m->current_layer->DENSE->num_of_computation_nodes,m->current_layer->DENSE->activation);
+    if(m->current_layer->next_layer->DENSE->weights==NULL) {
+      // printf("next layer weights were null\n");
+    }
     dARRAY * weight_trans = transpose(m->current_layer->next_layer->DENSE->weights);
-    dARRAY * temp_dz = dot(weight_trans,m->current_layer->next_layer->DENSE->dZ);
-
+    dARRAY * temp_dz = NULL;
+    temp_dz = dot(weight_trans,m->current_layer->next_layer->DENSE->dZ);
+    // printf("freeing wT\n");
     free2d(weight_trans);
     weight_trans = NULL;
+    // printf("freed\n");
     
     //now we have the global gradient computed. We need to chain it with
     //the local gradient and make it flow to dZ[1]
-    layer->dZ = multiply(temp_dz,local_act_grad);
+    layer->dZ = multiply(local_act_grad,temp_dz);
 
     free2d(temp_dz);
     temp_dz = NULL;
-
+    // printf("freeing local_grad\n");
     free2d(local_act_grad);
     local_act_grad = NULL;
+    // printf("freed\n");
   }
 
   //We have calculated dZ[current layer now] we can use it to calculate the remaining grads
@@ -228,7 +243,8 @@ void backward_pass_DENSE(){
     prev_A_transpose = transpose(prev_layer_in_features->A);
   else prev_A_transpose = transpose(prev_layer->A);
 
-  dARRAY * temp1_dW = dot(layer->dZ,prev_A_transpose);
+  dARRAY * temp1_dW = NULL;
+  temp1_dW = dot(layer->dZ,prev_A_transpose);
 
   free2d(prev_A_transpose);
   prev_A_transpose = NULL;
@@ -268,9 +284,11 @@ void backward_pass_DENSE(){
   //calculate gradients of activation of prev layer
   if(m->current_layer->prev_layer->type!=INPUT){
     //local gradient would be just the current layer weights
-    dARRAY * weight_transpose = transpose(layer->weights);
+    dARRAY * weight_transpose = NULL;
+    weight_transpose = transpose(layer->weights);
     //chaining with the global or incomming gradient
-    dARRAY * prev_layer_A_temp = dot(weight_transpose,layer->dZ);
+    dARRAY * prev_layer_A_temp = NULL;
+    prev_layer_A_temp = dot(weight_transpose,layer->dZ);
     if(layer->dropout_mask==NULL){
       prev_layer->dA = prev_layer_A_temp;
       prev_layer_A_temp = NULL;
@@ -288,6 +306,8 @@ void backward_pass_DENSE(){
     free2d(weight_transpose);
     weight_transpose = NULL;
   }
+  layer = NULL;
+  prev_layer = NULL;
 }
 
 void (Dense)(dense_args dense_layer_args){

@@ -169,13 +169,10 @@ void __fit__(){
       append_to_file(m->train_accuracy,"./bin/train_acc.data","ab+");
       // append_to_file(m->cross_val_accuracy,"./bin/val_acc.data","ab+");
     }
-    // printf("backproping\n");
     __backward__();
-    // printf("done backproping\n");
     GD(m->learning_rate);
     i++;
     // if(i==5) break;
-    // printf("performed parameter update\n");
   }
 }
 
