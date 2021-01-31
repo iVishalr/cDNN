@@ -153,16 +153,49 @@ void backward_pass_DENSE(){
     //local grad of tanh gate
     local_act_grad = TanH(.input=layer->cache,.status=1);
   }
+  // printf("local act grad : \n");
+  // for(int i=0;i<local_act_grad->shape[0];i++){
+  //   for(int j=0;j<local_act_grad->shape[1];j++){
+  //     printf("%lf ",local_act_grad->matrix[i*local_act_grad->shape[1]+j]);
+  //   }
+  //   printf("\n");
+  // }
+  // printf("local act grad : \n");
+  // for(int i=0;i<local_act_grad->shape[0];i++){
+  //   for(int j=0;j<local_act_grad->shape[1];j++){
+  //     printf("%lf ",local_act_grad->matrix[i*local_act_grad->shape[1]+j]);
+  //   }
+  //   printf("\n");
+  // }
   if(m->current_layer->next_layer->type==LOSS){
     //If we are on the last layer, then the gradient flowing
     //into the Z computation block will be by chain rule
-    //dZ = local_act_grad * global_grad (loss_layer->grad_out)
-    // layer->dZ = multiply(local_act_grad,m->current_layer->next_layer->LOSS->grad_out);
-    
+    // dZ = local_act_grad * global_grad (loss_layer->grad_out)
+    // dARRAY * trans = transpose(local_act_grad);
+
+    layer->dZ = multiply(local_act_grad,m->current_layer->next_layer->LOSS->grad_out);
+    // printf("Chained dZ : \n");
+    // for(int i=0;i<layer->dZ->shape[0];i++){
+    //   for(int j=0;j<layer->dZ->shape[1];j++){
+    //     printf("%lf ",layer->dZ->matrix[i*layer->dZ->shape[1]+j]);
+    //   }
+    //   printf("\n");
+    // }
     free2d(local_act_grad);
+    // free2d(trans);
+    // free2d(temp);
     free2d(m->current_layer->next_layer->LOSS->grad_out);
-    // local_act_grad = m->current_layer->next_layer->LOSS->grad_out = NULL;
-    layer->dZ = subtract(layer->A,m->Y_train);
+    local_act_grad = m->current_layer->next_layer->LOSS->grad_out = NULL;
+    // dARRAY * tempo = subtract(layer->A,m->Y_train);
+    // printf("Actual layer dZ : \n");
+    // for(int i=0;i<tempo->shape[0];i++){
+    //   for(int j=0;j<tempo->shape[1];j++){
+    //     printf("%lf ",tempo->matrix[i*tempo->shape[1]+j]);
+    //   }
+    //   printf("\n");
+    // }
+    // free2d(tempo);
+    // tempo=NULL;
   }
   else{
     //If we are not on the last layer then, we need to calculate dZ differently

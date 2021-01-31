@@ -21,28 +21,27 @@ typedef struct{
 #ifdef __cplusplus
 extern "C"{
 #endif
-  typedef dARRAY* (*__forward)(dARRAY * layer_matrix);
-  typedef dARRAY* (*__backward)(dARRAY * layer_matrix);
+  typedef dARRAY * (*__compute_act)();
 
   typedef struct relu{
     int in_dims[2];
     int out_dims[2];
-    __forward forward;
-    __backward backward;
+    __compute_act forward;
+    __compute_act backward;
   }ReLu;
 
   typedef struct sigmoid{
     int in_dims[2];
     int out_dims[2];
-    __forward forward;
-    __backward backward;
+    __compute_act forward;
+    __compute_act backward;
   }Sigmoid;
 
   typedef struct tanh{
     int in_dims[2];
     int out_dims[2];
-    __forward forward;
-    __backward backward;
+    __compute_act forward;
+    __compute_act backward;
   }Tanh;
 
   ReLu * ReLu__init__(dARRAY * linear_matrix);
@@ -52,6 +51,13 @@ extern "C"{
   dARRAY * (relu)(ReLu_args args);
   dARRAY * (sigmoid)(Sigmoid_args args);
   dARRAY * (TanH)(Tanh_args args);
+
+  dARRAY * forward_pass_relu();
+  dARRAY * forward_pass_sigmoid();
+  dARRAY * forward_pass_tanh();
+  dARRAY * backward_pass_relu();
+  dARRAY * backward_pass_sigmoid();
+  dARRAY * backward_pass_tanh();
 
 #ifdef __cplusplus
 }

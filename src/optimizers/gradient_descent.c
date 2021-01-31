@@ -81,7 +81,7 @@ void GD(double lr){
       if(temp->DENSE->dZ!=NULL)
         free2d(temp->DENSE->dZ);
       grad_W = grad_b = layer_weights = layer_biases = mul_lr_W = mul_lr_b = temp->DENSE->dA\
-      =temp->DENSE->cache = temp->DENSE->A = temp->DENSE->dropout_mask = temp->DENSE->dZ = NULL;
+      =temp->DENSE->cache = temp->DENSE->A = m->output = temp->DENSE->dropout_mask = temp->DENSE->dZ = NULL;
     }
     else if(temp->type==LOSS){
       if(temp->LOSS->grad_out){

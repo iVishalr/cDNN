@@ -715,7 +715,7 @@ void shape(dARRAY * A){
     printf("\033[1;31mError:\033[93m Matrix is Empty. Call shape() only after intializing dARRAY object.\033[0m\n");
     return;
   }
-  printf("first element of matrix is : %lf\n",A->matrix[0]);
+  //printf("first element of matrix is : %lf\n",A->matrix[0]);
   printf("(%d,%d)\n",A->shape[0],A->shape[1]);
 }
 

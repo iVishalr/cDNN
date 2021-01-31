@@ -5,40 +5,62 @@ extern __Model__ * m;
 cross_entropy_loss_layer * loss_layer = NULL;
 
 void forward_pass_L2_LOSS(){
+  // printf("output : \n");
+  //   for(int i=0;i<m->output->shape[0];i++){
+  //     for(int j=0;j<m->output->shape[1];j++){
+  //       printf("%lf ",m->output->matrix[i*m->output->shape[1]+j]);
+  //     }
+  //     printf("\n");
+  //   }
+  // shape(m->output);
   //Store the number of training examples in a variable
   int number_of_examples = m->Y_train->shape[1];
   dARRAY * Y = loss_layer->gnd_truth;
   //we will also store prev layer activation dims
-  int act_dims[] = {m->current_layer->prev_layer->DENSE->A->shape[0],m->current_layer->prev_layer->DENSE->A->shape[0]};
+  int act_dims[] = {m->output->shape[0],m->output->shape[1]};
 
   dARRAY * log_y_hat= NULL;
   log_y_hat = (dARRAY *)malloc(sizeof(dARRAY));
   log_y_hat->matrix = (double*)calloc(act_dims[0]*act_dims[1],sizeof(double));
   //calculate log(y_pred)
-  omp_set_num_threads(4);
-  #pragma omp parallel for
+  // omp_set_num_threads(4);
+  // #pragma omp parallel for
   for(int i=0;i<act_dims[0]*act_dims[1];i++){
-    log_y_hat->matrix[i] = log(m->current_layer->prev_layer->DENSE->A->matrix[i]);
+    log_y_hat->matrix[i] = log(m->output->matrix[i]);
   }
   log_y_hat->shape[0] = act_dims[0];
   log_y_hat->shape[1] = act_dims[1];
-
+  // printf("log_y_hat : \n");
+  // for(int i=0;i<log_y_hat->shape[0];i++){
+  //   for(int j=0;j<log_y_hat->shape[1];j++){
+  //     printf("%lf ",log_y_hat->matrix[i*log_y_hat->shape[1]+j]);
+  //   }
+  //   printf("\n");
+  // }
+  // shape(log_y_hat);
   //calculating (1-y_pred)
   dARRAY * temp_ones = ones(act_dims);
-  dARRAY * temp_sub = subtract(temp_ones,m->current_layer->prev_layer->DENSE->A);
+  dARRAY * temp_sub = subtract(temp_ones,m->output);
   
   dARRAY * log_one_y_hat = NULL;
   log_one_y_hat = (dARRAY *)malloc(sizeof(dARRAY));
   log_one_y_hat->matrix = (double*)calloc(act_dims[0]*act_dims[1],sizeof(double));
   //calculate log(1-y_pred)
-  omp_set_num_threads(4);
-  #pragma omp parallel for
+  // omp_set_num_threads(4);
+  // #pragma omp parallel for
   for(int i=0;i<act_dims[0]*act_dims[1];i++){
     log_one_y_hat->matrix[i] = log(temp_sub->matrix[i]);
   }
   log_one_y_hat->shape[0] = act_dims[0];
   log_one_y_hat->shape[1] = act_dims[1];
-
+  // printf("log_one_y_hat : \n");
+  // for(int i=0;i<log_one_y_hat->shape[0];i++){
+  //   for(int j=0;j<log_one_y_hat->shape[1];j++){
+  //     printf("%lf ",log_one_y_hat->matrix[i*log_one_y_hat->shape[1]+j]);
+  //   }
+  //   printf("\n");
+  // }
+  // shape(log_one_y_hat);
   free2d(temp_sub);
   temp_sub = NULL;
   //calculate y*log(y^)
@@ -68,7 +90,13 @@ void forward_pass_L2_LOSS(){
   free2d(loss_term_1);
   free2d(loss_term_2);
   loss_term_1 = loss_term_2 = NULL;
-
+  // printf("loss : \n");
+  // for(int i=0;i<loss->shape[0];i++){
+  //   for(int j=0;j<loss->shape[1];j++){
+  //     printf("%lf ",loss->matrix[i*loss->shape[1]+j]);
+  //   }
+  //   printf("\n");
+  // }
   dARRAY * sum_of_losses = sum(loss,1);
 
   free2d(loss);
@@ -124,32 +152,61 @@ void forward_pass_L2_LOSS(){
     cost = NULL;
     m->iter_cost = total_cost;
   }
+  // double loss1 = (m->Y_train->matrix[0] * log(m->output->matrix[0])) + ((1-m->Y_train->matrix[0])*log((1-m->output->matrix[0])));
+  // printf("loss 1 : %lf\n",loss1);
+  // double loss2 = (m->Y_train->matrix[1] * log(m->output->matrix[1])) + ((1-m->Y_train->matrix[1])*log((1-m->output->matrix[1])));
+  // printf("loss 2 : %lf\n",loss2);
+  // double cost_manual = -1*(loss1+loss2)/(double)m->num_of_training_examples;
+  // printf("cost using manual method : %lf\n",cost_manual);
 }
 
 void backward_pass_L2_LOSS(){
-  dARRAY * lgrad1 = divison(m->Y_train,m->current_layer->prev_layer->DENSE->A);
+  // dARRAY * lgrad1 = divison(m->Y_train,m->output);
 
-  int act_dims[] = {m->current_layer->prev_layer->DENSE->A->shape[0],m->current_layer->prev_layer->DENSE->A->shape[0]};
+  int act_dims[] = {m->output->shape[0],m->output->shape[1]};
   dARRAY * one = ones(act_dims);
-  dARRAY * temp1 = subtract(one,m->Y_train);
-  dARRAY * temp2 = subtract(one,m->current_layer->prev_layer->DENSE->A);
-
+  dARRAY * temp1 = subtract(m->Y_train,m->output);
+  // printf("Y-A : \n");
+  // for(int i=0;i<temp1->shape[0];i++){
+  //   for(int j=0;j<temp1->shape[1];j++){
+  //     printf("%lf ",temp1->matrix[i*temp1->shape[1]+j]);
+  //   }
+  //   printf("\n");
+  // }
+  dARRAY * temp2 = subtract(one,m->output);
+  dARRAY * temp3 = multiply(m->output,temp2);
+  // printf("A(1-A) : \n");
+  // for(int i=0;i<temp3->shape[0];i++){
+  //   for(int j=0;j<temp3->shape[1];j++){
+  //     printf("%lf ",temp3->matrix[i*temp3->shape[1]+j]);
+  //   }
+  //   printf("\n");
+  // }
   free2d(one);
   one = NULL;
 
-  dARRAY * lgrad2 = divison(temp1,temp2);
+  dARRAY * lgrad2 = divison(temp1,temp3);
 
   free2d(temp1);
   free2d(temp2);
-  temp1 = temp2 = NULL;
+  free2d(temp3);
+  temp1 = temp2 = temp3 = NULL;
 
-  dARRAY * temp_local_grad = subtract(lgrad1,lgrad2);
-  loss_layer->grad_out = mulScalar(temp_local_grad,-1.0);
+  // dARRAY * temp_local_grad = subtract(lgrad1,lgrad2);
+  loss_layer->grad_out = mulScalar(lgrad2,-1.0);
+  // printf("Grad Out : \n");
+  // for(int i=0;i<loss_layer->grad_out->shape[0];i++){
+  //   for(int j=0;j<loss_layer->grad_out->shape[1];j++){
+  //     printf("%lf ",loss_layer->grad_out->matrix[i*loss_layer->grad_out->shape[1]+j]);
+  //   }
+  //   printf("\n");
+  // }
 
-  free2d(lgrad1);
+  // free2d(lgrad1);
   free2d(lgrad2);
-  free2d(temp_local_grad);
-  lgrad1 = lgrad2 = temp_local_grad = NULL;
+  // free2d(temp_local_grad);
+  // lgrad1 = lgrad2 = temp_local_grad = NULL;
+  lgrad2 = NULL;
 }
 
 void (cross_entropy_loss)(cross_entropy_loss_args args){

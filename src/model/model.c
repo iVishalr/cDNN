@@ -174,6 +174,7 @@ void __fit__(){
     // printf("done backproping\n");
     GD(m->learning_rate);
     i++;
+    // if(i==5) break;
     // printf("performed parameter update\n");
   }
 }

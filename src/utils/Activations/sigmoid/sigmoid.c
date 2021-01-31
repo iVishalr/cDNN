@@ -1,34 +1,34 @@
 #include "../activations.h"
+#include "../../../model/model.h"
 
-dARRAY * forward_pass_sigmoid(dARRAY * linear_matrix){
+extern __Model__ * m;
+
+dARRAY * forward_pass_sigmoid(){
   dARRAY * sigmoid_out = (dARRAY*)malloc(sizeof(dARRAY));
-  sigmoid_out->matrix = (double*)calloc(linear_matrix->shape[0]*linear_matrix->shape[1],sizeof(double));
-  #pragma omp parallel for shared(linear_matrix,sigmoid_out)
-  for(int i=0;i<linear_matrix->shape[0]*linear_matrix->shape[1];i++)
-    sigmoid_out->matrix[i] = (double)(1/(1+exp(-1*linear_matrix->matrix[i])));
-  sigmoid_out->shape[0] = linear_matrix->shape[0];
-  sigmoid_out->shape[1] = linear_matrix->shape[1];
+  sigmoid_out->matrix = (double*)calloc(m->current_layer->DENSE->cache->shape[0]*m->current_layer->DENSE->cache->shape[1],sizeof(double));
+  omp_set_num_threads(4);
+  #pragma omp parallel for
+  for(int i=0;i<m->current_layer->DENSE->cache->shape[0]*m->current_layer->DENSE->cache->shape[1];i++)
+    sigmoid_out->matrix[i] = (double)(1/(1+exp(-1*m->current_layer->DENSE->cache->matrix[i])));
+  sigmoid_out->shape[0] = m->current_layer->DENSE->cache->shape[0];
+  sigmoid_out->shape[1] = m->current_layer->DENSE->cache->shape[1];
   return sigmoid_out;
 }
 
-dARRAY * backward_pass_sigmoid(dARRAY * linear_matrix){
+dARRAY * backward_pass_sigmoid(){
   dARRAY * sigmoid_out = NULL;
   dARRAY * temp = NULL;
   dARRAY * one = NULL;
-  omp_set_num_threads(4);
-  int dims[] = {linear_matrix->shape[0],linear_matrix->shape[1]};
+  int dims[] = {m->current_layer->DENSE->A->shape[0],m->current_layer->DENSE->A->shape[1]};
   one = ones(dims);
-  temp = subtract(one,linear_matrix);
+  temp = subtract(one,m->current_layer->DENSE->A);
 
   free2d(one);
   one=NULL;
 
-  sigmoid_out = multiply(linear_matrix,temp);
+  sigmoid_out = multiply(m->current_layer->DENSE->A,temp);
   free2d(temp);
   temp = NULL;
-
-  sigmoid_out->shape[0] = linear_matrix->shape[0];
-  sigmoid_out->shape[1] = linear_matrix->shape[1];
   return sigmoid_out;
 }
 
@@ -48,4 +48,6 @@ dARRAY * (sigmoid)(Sigmoid_args args){
     return s->forward(args.input);
   else
     return s->backward(args.input);
+  free(s);
+  s=NULL;
 }
