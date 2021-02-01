@@ -47,6 +47,9 @@ extern "C"{
   void __predict__();
   double calculate_accuracy(dARRAY * predicted, dARRAY * gnd_truth);
   double calculate_train_val_acc();
+  dARRAY * relu_val(dARRAY * linear_matrix);
+  dARRAY * sigmoid_val(dARRAY * linear_matrix);
+  dARRAY * tanh_val(dARRAY * linear_matrix);
   void load_x_train(int * dims);
   void load_y_train(int * dims);
   void load_x_cv(int * dims);

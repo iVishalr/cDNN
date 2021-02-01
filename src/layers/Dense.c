@@ -81,6 +81,7 @@ dARRAY * init_bias(int * bias_dims){
 }
 
 void forward_pass_DENSE(){
+  // printf("dense forward\n");
   //Compute Z = W.A + b
   //Z is the linear output of the gate
   //W is the weights of the current layer

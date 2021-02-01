@@ -14,6 +14,7 @@ void forward_pass_L2_LOSS(){
   //   }
   // shape(m->output);
   //Store the number of training examples in a variable
+  // printf("loss forward\n");
   int number_of_examples = m->Y_train->shape[1];
   dARRAY * Y = loss_layer->gnd_truth;
   //we will also store prev layer activation dims
@@ -105,6 +106,9 @@ void forward_pass_L2_LOSS(){
   dARRAY * cost = NULL;
   dARRAY * cross_entropy_cost = divScalar(sum_of_losses,(double)(-1 * number_of_examples));
 
+  free2d(sum_of_losses);
+  sum_of_losses = NULL;
+
   double reg_cost=0.0;
   Computation_Graph * temp = NULL;
   
@@ -112,19 +116,19 @@ void forward_pass_L2_LOSS(){
     temp = m->graph->next_layer;
     if(!strcasecmp(m->regularization,"L2")){
       double layer_frobenius = 0.0;
-      while(temp!=NULL){
+      while(temp->next_layer->type!=LOSS){
         layer_frobenius += frobenius_norm(temp->DENSE->weights);
         temp = temp->next_layer;
       }
-      reg_cost = m->lambda*layer_frobenius/(2*number_of_examples);
+      reg_cost = m->lambda*layer_frobenius/(2.0*number_of_examples);
     }
     else if(!strcasecmp(m->regularization,"L1")){
       double layer_manhattan = 0.0;
-      while(temp!=NULL){
+      while(temp->next_layer->type!=LOSS){
         layer_manhattan += Manhattan_distance(temp->DENSE->weights);
         temp = temp->next_layer;
       }
-      reg_cost = m->lambda * layer_manhattan/(2*number_of_examples);
+      reg_cost = m->lambda * layer_manhattan/(2.0*number_of_examples);
     }
   }
   if(m->regularization!=NULL){
@@ -133,9 +137,6 @@ void forward_pass_L2_LOSS(){
 
     free2d(cross_entropy_cost);
     cross_entropy_cost = NULL;
-
-    free2d(sum_of_losses);
-    sum_of_losses = NULL;
 
     double total_cost = cost->matrix[0];
     
@@ -158,6 +159,7 @@ void forward_pass_L2_LOSS(){
   // printf("loss 2 : %lf\n",loss2);
   // double cost_manual = -1*(loss1+loss2)/(double)m->num_of_training_examples;
   // printf("cost using manual method : %lf\n",cost_manual);
+  // printf("loss forward done\n");
 }
 
 void backward_pass_L2_LOSS(){

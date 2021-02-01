@@ -87,6 +87,48 @@ double calculate_accuracy(dARRAY * predicted, dARRAY * gnd_truth){
   return success/(double)predicted->shape[1];
 }
 
+dARRAY * relu_val(dARRAY * linear_matrix){
+  dARRAY * relu_outf = NULL;
+  relu_outf = (dARRAY*)malloc(sizeof(dARRAY));
+  relu_outf->matrix = (double*)calloc(linear_matrix->shape[0]*linear_matrix->shape[1],sizeof(double));
+  omp_set_num_threads(4);
+  #pragma omp parallel for
+  for(int i=0;i<linear_matrix->shape[0]*linear_matrix->shape[1];i++)
+    relu_outf->matrix[i] = linear_matrix->matrix[i]>(double)0.0 ?(double)linear_matrix->matrix[i] : (double)0.0;
+  relu_outf->shape[0] = linear_matrix->shape[0];
+  relu_outf->shape[1] = linear_matrix->shape[1];
+  return relu_outf;
+}
+
+dARRAY * sigmoid_val(dARRAY * linear_matrix){
+  dARRAY * sigmoid_outf = NULL;
+  sigmoid_outf = (dARRAY*)malloc(sizeof(dARRAY));
+  sigmoid_outf->matrix = (double*)calloc(linear_matrix->shape[0]*linear_matrix->shape[1],sizeof(double));
+  omp_set_num_threads(4);
+  #pragma omp parallel for
+  for(int i=0;i<linear_matrix->shape[0]*linear_matrix->shape[1];i++)
+    sigmoid_outf->matrix[i] = (double)(1.0/(double)(1+exp((double)(-1.0*linear_matrix->matrix[i]))));
+  sigmoid_outf->shape[0] = linear_matrix->shape[0];
+  sigmoid_outf->shape[1] = linear_matrix->shape[1];
+  return sigmoid_outf;
+}
+
+dARRAY * tanh_val(dARRAY * linear_matrix){
+  dARRAY * tanh_out = (dARRAY*)malloc(sizeof(dARRAY));
+  tanh_out->matrix = (double*)calloc(linear_matrix->shape[0]*linear_matrix->shape[1],sizeof(double));
+  omp_set_num_threads(4);
+  #pragma omp parallel for
+  for(int i=0;i<linear_matrix->shape[0]*linear_matrix->shape[1];i++){
+    //Computing the tanh function
+    double exp_res1 = exp(linear_matrix->matrix[i]);
+    double exp_res2 = exp(-1*linear_matrix->matrix[i]);
+    tanh_out->matrix[i] = (exp_res1 - exp_res2)/(exp_res1 + exp_res2);
+  }
+  tanh_out->shape[0] = linear_matrix->shape[0];
+  tanh_out->shape[1] = linear_matrix->shape[1];
+  return tanh_out;
+}
+
 double calculate_train_val_acc(){
   dARRAY * weight_input_res = NULL;
   dARRAY * output = NULL;
@@ -95,35 +137,38 @@ double calculate_train_val_acc(){
   Computation_Graph * temp = m->graph->next_layer;
   int layer=0;
   while(temp!=NULL){
-    if(temp->prev_layer->type==INPUT) weight_input_res = dot(temp->DENSE->weights, m->x_cv);
-    else weight_input_res = dot(temp->DENSE->weights, activation_temp);
-    
+    if(temp->prev_layer->type==INPUT){ 
+    weight_input_res = dot(temp->DENSE->weights, m->x_cv); 
+    }
+    else{ 
+      weight_input_res = dot(temp->DENSE->weights, activation_temp);
+    }
     if(activation_temp!=NULL){
        free2d(activation_temp);
        activation_temp = NULL;
     }
-    
     dARRAY * Z = add(weight_input_res,temp->DENSE->bias);//Z
     free2d(weight_input_res);
     weight_input_res = NULL;
-    
-    if(!strcmp(temp->DENSE->activation,"relu")){
-      activation_temp = relu(.input=Z);
+    if(!strcasecmp(temp->DENSE->activation,"relu")){
+      activation_temp = relu_val(Z);
       free2d(Z);
     }
-    else if(!strcmp(temp->DENSE->activation,"sigmoid")){
-      activation_temp = sigmoid(.input=Z);
+    else if(!strcasecmp(temp->DENSE->activation,"sigmoid")){
+      activation_temp = sigmoid_val(Z);
       free2d(Z);
     }
-    else if(!strcmp(temp->DENSE->activation,"tanh")){
-      activation_temp = TanH(.input=Z);
+    else if(!strcasecmp(temp->DENSE->activation,"tanh")){
+      activation_temp = tanh_val(Z);
       free2d(Z);
     }
     else{
       activation_temp = Z;
     }
-    if(temp->next_layer==NULL){
+    if(temp->next_layer->type==LOSS){
       output = activation_temp;
+      Z = NULL;
+      break;
     }
     layer++;
     temp = temp->next_layer;
@@ -135,14 +180,15 @@ double calculate_train_val_acc(){
   return val_acc;
 }
 
-void append_to_file(double value,char * filename,char * mode){
+void append_to_file(double * arr ,char * filename,char * mode){
   FILE * fp = NULL;
   fp = fopen(filename,mode);
   if(fp==NULL){
     printf("\033[1;31mFile Error : \033[93m Could not open the specified file!\033[0m\n");
     exit(EXIT_FAILURE);
   }
-  fprintf(fp,"%lf ",value);
+  for(int i=0;i<m->num_iter;i++)
+    fprintf(fp,"%lf ",arr[i]);
   fclose(fp);
 }
 
@@ -151,29 +197,34 @@ void __fit__(){
   double sum_cost = 0.0;
   double sum_train_acc = 0.0;
   double sum_train_val_acc = 0.0;
+  double * train_cost_arr = (double*)calloc(m->num_iter,sizeof(double));
+  double * train_acc_arr = (double*)calloc(m->num_iter,sizeof(double));
+  double * val_acc_arr = (double*)calloc(m->num_iter,sizeof(double));
   while(i<=m->num_iter){
     __forward__();
     sum_cost += m->iter_cost;
     sum_train_acc += calculate_accuracy(m->output,m->Y_train);
-    // sum_train_val_acc += calculate_train_val_acc();
+    sum_train_val_acc += calculate_train_val_acc();
     if(m->print_cost){
       m->train_cost = sum_cost/(double)i;
       m->train_accuracy = sum_train_acc/(double)i;
-      // m->cross_val_accuracy = sum_train_val_acc/(double)i;
+      m->cross_val_accuracy = sum_train_val_acc/(double)i;
+      train_cost_arr[i] = m->train_cost;
+      train_acc_arr[i] = m->train_accuracy;
+      val_acc_arr[i] = m->cross_val_accuracy;
 
       printf("\033[96m%d. Cost : \033[0m%lf ",i,m->train_cost);
-      printf("\033[96m train_acc : \033[0m%lf \n",m->train_accuracy);
-      // printf("\033[96m val_acc : \033[0m%lf\n",m->cross_val_accuracy);
-      
-      append_to_file(m->train_cost,"./bin/cost.data","ab+");
-      append_to_file(m->train_accuracy,"./bin/train_acc.data","ab+");
-      // append_to_file(m->cross_val_accuracy,"./bin/val_acc.data","ab+");
+      printf("\033[96m train_acc : \033[0m%lf ",m->train_accuracy);
+      printf("\033[96m val_acc : \033[0m%lf\n",m->cross_val_accuracy);
     }
     __backward__();
     GD(m->learning_rate);
     i++;
     // if(i==5) break;
   }
+  append_to_file(train_cost_arr,"./bin/cost.data","ab+");
+  append_to_file(train_acc_arr,"./bin/train_acc.data","ab+");
+  append_to_file(val_acc_arr,"./bin/val_acc.data","ab+");
 }
 
 void __predict__(dARRAY * input_feature){
@@ -415,6 +466,8 @@ void (Model)(Model_args model_args){
   m->loss = model_args.loss;
   m->lambda = model_args.lambda;
   m->regularization = model_args.regularization;
+
+  if(!strcasecmp(m->loss,"cross_entropy_loss")) cross_entropy_loss();
 
   //initialize hyperparameters for various optimizers
   m->optimizer = model_args.optimizer; // Optimizer choice

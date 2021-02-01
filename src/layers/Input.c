@@ -5,6 +5,7 @@ extern __Model__ * m;
 
 //This will just be an identity mapping of input features
 void forward_pass_input(){
+  // printf("input forward\n");
   m->graph->INPUT->A = m->x_train;
 }
 
