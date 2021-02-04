@@ -7,8 +7,8 @@ dARRAY * forward_pass_sigmoid(){
   dARRAY * sigmoid_outf = NULL;
   sigmoid_outf = (dARRAY*)malloc(sizeof(dARRAY));
   sigmoid_outf->matrix = (double*)calloc(m->current_layer->DENSE->cache->shape[0]*m->current_layer->DENSE->cache->shape[1],sizeof(double));
-  omp_set_num_threads(4);
-  #pragma omp parallel for
+  omp_set_num_threads(8);
+  #pragma omp parallel for num_threads(8) shared(m,sigmoid_outf) schedule(static)
   for(int i=0;i<m->current_layer->DENSE->cache->shape[0]*m->current_layer->DENSE->cache->shape[1];i++)
     sigmoid_outf->matrix[i] = (double)(1.0/(double)(1+exp((double)(-1.0*m->current_layer->DENSE->cache->matrix[i]))));
   sigmoid_outf->shape[0] = m->current_layer->DENSE->cache->shape[0];

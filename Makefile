@@ -1,6 +1,6 @@
 CC=gcc-10
 CCL=clang 
-ATTR= -funroll-loops -O3 -fopenmp
+ATTR= -funroll-loops -O3 -fopenmp -Ofast -ffp-contract=fast -faggressive-loop-optimizations
 CFLAGS=-c -Wall -Wrestrict
 BUILD=build
 SRC=src

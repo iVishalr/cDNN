@@ -177,7 +177,7 @@ double calculate_train_val_acc(){
   double val_acc = calculate_accuracy(output,m->Y_cv);
   free2d(output);
   output = NULL;
-  return val_acc;
+  return (1-val_acc);
 }
 
 void append_to_file(double * arr ,char * filename,char * mode){
@@ -202,6 +202,8 @@ void __fit__(){
   double * val_acc_arr = (double*)calloc(m->num_iter,sizeof(double));
   while(i<=m->num_iter){
     __forward__();
+    __backward__();
+    
     sum_cost += m->iter_cost;
     sum_train_acc += calculate_accuracy(m->output,m->Y_train);
     sum_train_val_acc += calculate_train_val_acc();
@@ -217,7 +219,6 @@ void __fit__(){
       printf("\033[96m train_acc : \033[0m%lf ",m->train_accuracy);
       printf("\033[96m val_acc : \033[0m%lf\n",m->cross_val_accuracy);
     }
-    __backward__();
     GD(m->learning_rate);
     i++;
     // if(i==5) break;

@@ -90,12 +90,14 @@ void forward_pass_DENSE(){
   dARRAY * Wx = NULL;
   //if the pevious layer is an input layer, we want to dot product the weights with the input
   //features and not the activations
+  // printf("performing dot product\n");
   if(m->current_layer->prev_layer->type==INPUT) 
     Wx = \
     dot(m->current_layer->DENSE->weights, m->current_layer->prev_layer->INPUT->A);
   else 
     Wx = \
     dot(m->current_layer->DENSE->weights, m->current_layer->prev_layer->DENSE->A);
+  // printf("done\n");
   // printf("done with dot\n");
   //Store Z in cache as we will require it in backward pass
   // printf("adding bias\n");

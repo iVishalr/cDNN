@@ -87,14 +87,9 @@ void GD(double lr){
     }
     else if(temp->type==LOSS){
       if(temp->LOSS->grad_out!=NULL){
-        // printf("freeing grad_out\n");
-        // free2d(temp->LOSS->grad_out);
         temp->LOSS->grad_out = NULL;
-        // printf("done\n");
       }
-      // temp->LOSS->grad_out = NULL;
     }
     temp = temp->next_layer;
   }
-  // printf("done parameter update\n");
 }

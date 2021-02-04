@@ -1,5 +1,5 @@
 #include "./utils.h"
-
+#include <math.h>
 double cache;
 int return_cache;
 
@@ -71,7 +71,7 @@ dARRAY * transpose(dARRAY * restrict Matrix){
   dARRAY * matrix = (dARRAY*)malloc(sizeof(dARRAY));
   matrix->matrix = (double*)calloc(Matrix->shape[0]*Matrix->shape[1],sizeof(double));
   omp_set_num_threads(8);
-  #pragma omp parallel for shared(Matrix,matrix)
+  #pragma omp parallel for num_threads(8) collapse(1) shared(Matrix,matrix) schedule(static)
   for(int i=0;i<Matrix->shape[0];i++)
     for(int j=0;j<Matrix->shape[1];j++)
       matrix->matrix[j*Matrix->shape[0]+i] = Matrix->matrix[i*Matrix->shape[1]+j];
@@ -87,7 +87,7 @@ dARRAY * transpose(dARRAY * restrict Matrix){
  * @result Returns a pointer to the result of dot(MatrixA,MatrixB) 
  * @return A pointer to the result of dot(MatrixA,MatrixB) 
 */
-dARRAY * dot(dARRAY * restrict MatrixA, dARRAY * restrict MatrixB){
+dARRAY * dot(dARRAY * MatrixA, dARRAY * MatrixB){
   if(MatrixA->shape[1]!=MatrixB->shape[0]){
     printf("\033[1;31mError:\033[93m Shape error while performing dot(). Matrix dimensions do not align. %d(dim1) != %d(dim0)\033[0m\n",MatrixA->shape[1],MatrixB->shape[0]);
     return NULL;
@@ -102,7 +102,7 @@ dARRAY * dot(dARRAY * restrict MatrixA, dARRAY * restrict MatrixB){
   result->matrix = (double*)calloc(MatrixA->shape[0]*MatrixB->shape[1],sizeof(double));
   BT = transpose(MatrixB);
   omp_set_num_threads(8);
-  #pragma omp parallel for collapse(1) shared(MatrixA,MatrixB)
+  #pragma omp parallel for num_threads(8) collapse(1) schedule(static)
   for(int i=0;i<MatrixA->shape[0];i++){
     for(int j=0;j<MatrixB->shape[1];j++){
       for(int k=0;k<MatrixB->shape[0];k++){
@@ -110,6 +110,7 @@ dARRAY * dot(dARRAY * restrict MatrixA, dARRAY * restrict MatrixB){
       }
     }
   }
+  
   free2d(BT);
   BT = NULL;
   result->shape[0] = MatrixA->shape[0];
@@ -149,15 +150,15 @@ dARRAY * multiply(dARRAY * restrict MatrixA, dARRAY * restrict MatrixB){
   dARRAY * result = (dARRAY*)malloc(sizeof(dARRAY));
   result->matrix = (double*)calloc(MatrixA->shape[0]*MatrixA->shape[1],sizeof(double));
   if(x==y){
-    omp_set_num_threads(4);
-    #pragma omp parallel for 
+    omp_set_num_threads(8);
+    #pragma omp parallel for num_threads(8) shared(MatrixA,MatrixB,result) schedule(static)
     for(int i=0;i<MatrixA->shape[0]*MatrixA->shape[1];i++){
       result->matrix[i] = MatrixA->matrix[i] * MatrixB->matrix[i];
     }
   }
   else{
-    omp_set_num_threads(4);
-    #pragma omp parallel for 
+    omp_set_num_threads(8);
+    #pragma omp parallel for num_threads(8) shared(MatrixA,MatrixB,temp,result) schedule(static)
     for(int i=0;i<MatrixA->shape[0]*MatrixA->shape[1];i++)
         result->matrix[i] = x>y ? MatrixA->matrix[i] * temp->matrix[i] : temp->matrix[i] * MatrixB->matrix[i];
   }
@@ -201,15 +202,15 @@ dARRAY * divison(dARRAY * restrict MatrixA, dARRAY * restrict MatrixB){
   dARRAY * result = (dARRAY*)malloc(sizeof(dARRAY));
   result->matrix = (double*)calloc(MatrixA->shape[0]*MatrixA->shape[1],sizeof(double));
   if(x==y){
-    omp_set_num_threads(4);
-    #pragma omp parallel for 
+    omp_set_num_threads(8);
+    #pragma omp parallel for num_threads(8) shared(MatrixA,MatrixB,result) schedule(static)
     for(int i=0;i<MatrixA->shape[0]*MatrixA->shape[1];i++){
       result->matrix[i] = MatrixA->matrix[i] / MatrixB->matrix[i];
     }
   }
   else{
-    omp_set_num_threads(4);
-    #pragma omp parallel for 
+    omp_set_num_threads(8);
+    #pragma omp parallel for num_threads(8) shared(MatrixA,MatrixB,temp,result) schedule(static)
     for(int i=0;i<MatrixA->shape[0]*MatrixA->shape[1];i++)
         result->matrix[i] = x>y ? MatrixA->matrix[i] / temp->matrix[i] : temp->matrix[i] / MatrixB->matrix[i];
   }
@@ -253,24 +254,20 @@ dARRAY * add(dARRAY * MatrixA, dARRAY * MatrixB){
   dARRAY * result = (dARRAY*)malloc(sizeof(dARRAY));
   result->matrix = (double*)calloc(MatrixA->shape[0]*MatrixA->shape[1],sizeof(double));
   if(x==y){
-    omp_set_num_threads(4);
-    #pragma omp parallel for 
+    omp_set_num_threads(8);
+    #pragma omp parallel for num_threads(8) shared(MatrixA,MatrixB,result) schedule(static)
     for(int i=0;i<MatrixA->shape[0]*MatrixA->shape[1];i++){
       result->matrix[i] = MatrixA->matrix[i] + MatrixB->matrix[i];
     }
   }
   else{
-    omp_set_num_threads(4);
-    #pragma omp parallel for 
+    omp_set_num_threads(8);
+    #pragma omp parallel for num_threads(8) shared(MatrixA,MatrixB,bcast_arr,result) schedule(static)
     for(int i=0;i<MatrixA->shape[0]*MatrixA->shape[1];i++)
         result->matrix[i] = x>y ? MatrixA->matrix[i] + bcast_arr->matrix[i] : bcast_arr->matrix[i] + MatrixB->matrix[i];
   }
-  
-  // printf("freeing temp\n");
   if(bcast_arr!=NULL)
   free2d(bcast_arr);
-  // bcast_arr = NULL;
-  // printf("freed temp\n");
   result->shape[0] = MatrixA->shape[0];
   result->shape[1] = MatrixA->shape[1];
   return result;
@@ -308,15 +305,15 @@ dARRAY * subtract(dARRAY * MatrixA, dARRAY * MatrixB){
   dARRAY * result = (dARRAY*)malloc(sizeof(dARRAY));
   result->matrix = (double*)calloc(MatrixA->shape[0]*MatrixA->shape[1],sizeof(double));
   if(x==y){
-    omp_set_num_threads(4);
-    #pragma omp parallel for 
+    omp_set_num_threads(8);
+    #pragma omp parallel for num_threads(8) shared(MatrixA,MatrixB,result) schedule(static)
     for(int i=0;i<MatrixA->shape[0]*MatrixA->shape[1];i++){
       result->matrix[i] = MatrixA->matrix[i] - MatrixB->matrix[i];
     }
   }
   else{
-    omp_set_num_threads(4);
-    #pragma omp parallel for 
+    omp_set_num_threads(8);
+    #pragma omp parallel for num_threads(8) shared(MatrixA,MatrixB,bcast_arr,result) schedule(static)
     for(int i=0;i<MatrixA->shape[0]*MatrixA->shape[1];i++)
         result->matrix[i] = x>y ? MatrixA->matrix[i] - bcast_arr->matrix[i] : bcast_arr->matrix[i] - MatrixB->matrix[i];
   }
@@ -342,8 +339,8 @@ dARRAY * addScalar(dARRAY * matrix, double scalar){
   }
   dARRAY * result = (dARRAY*)malloc(sizeof(dARRAY));
   result->matrix = (double*)calloc(matrix->shape[0]*matrix->shape[1],sizeof(double));
-  omp_set_num_threads(4);
-  #pragma omp parallel for 
+  omp_set_num_threads(8);
+  #pragma omp parallel for num_threads(8) shared(matrix,result,scalar) schedule(static)
   for(int i=0; i<matrix->shape[0]*matrix->shape[1];  i++){
     result->matrix[i] = matrix->matrix[i] + scalar;
   }
@@ -366,8 +363,8 @@ dARRAY * subScalar(dARRAY * matrix, double scalar){
   }
   dARRAY * result = (dARRAY*)malloc(sizeof(dARRAY));
   result->matrix = (double*)calloc(matrix->shape[0]*matrix->shape[1],sizeof(double));
-  omp_set_num_threads(4);
-  #pragma omp parallel for 
+  omp_set_num_threads(8);
+  #pragma omp parallel for num_threads(8) shared(matrix,result,scalar) schedule(static)
   for(int i=0; i<matrix->shape[0]*matrix->shape[1];  i++){
     result->matrix[i] = matrix->matrix[i] - scalar;
   }
@@ -390,8 +387,8 @@ dARRAY * mulScalar(dARRAY * matrix, double scalar){
   }
   dARRAY * result = (dARRAY*)malloc(sizeof(dARRAY));
   result->matrix = (double*)calloc(matrix->shape[0]*matrix->shape[1],sizeof(double));
-  omp_set_num_threads(4);
-  #pragma omp parallel for 
+  omp_set_num_threads(8);
+  #pragma omp parallel for num_threads(8) shared(matrix,result,scalar) schedule(static)
   for(int i=0; i<matrix->shape[0]*matrix->shape[1];  i++){
     result->matrix[i] = matrix->matrix[i] * scalar;
   }
@@ -414,8 +411,8 @@ dARRAY * divScalar(dARRAY * matrix, double scalar){
   }
   dARRAY * result = (dARRAY*)malloc(sizeof(dARRAY));
   result->matrix = (double*)calloc(matrix->shape[0]*matrix->shape[1],sizeof(double));
-  omp_set_num_threads(4);
-  #pragma omp parallel for 
+  omp_set_num_threads(8);
+  #pragma omp parallel for num_threads(8) shared(matrix,result,scalar) schedule(static)
   for(int i=0; i<matrix->shape[0]*matrix->shape[1];  i++){
     result->matrix[i] = matrix->matrix[i] / scalar;
   }
@@ -438,8 +435,8 @@ dARRAY * power(dARRAY * matrix, int power){
   }
   dARRAY * result = (dARRAY*)malloc(sizeof(dARRAY));
   result->matrix = (double*)calloc(matrix->shape[0]*matrix->shape[1],sizeof(double));
-  omp_set_num_threads(4);
-  #pragma omp parallel for 
+  omp_set_num_threads(8);
+  #pragma omp parallel for num_threads(8) shared(matrix,result,power) schedule(static)
   for(int i=0; i<matrix->shape[0]*matrix->shape[1];  i++){
     result->matrix[i] = pow(matrix->matrix[i],power);
   }
@@ -466,8 +463,8 @@ dARRAY * b_cast(dARRAY * MatrixA, dARRAY * MatrixB){
     //M(5,4) B(1,4)  repeat 5 * 4 = 20 times
     b_castArr = (dARRAY*)malloc(sizeof(dARRAY));
     b_castArr->matrix = (double*)calloc(MatrixA->shape[0]*MatrixA->shape[1],sizeof(double));
-    omp_set_num_threads(4);
-    #pragma omp parallel for shared(MatrixA,MatrixB)
+    omp_set_num_threads(8);
+    #pragma omp parallel for num_threads(8) shared(MatrixA,MatrixB,b_castArr) schedule(static)
     for(int i=0;i<MatrixA->shape[0]*MatrixB->shape[1];i++){
       b_castArr->matrix[i] = MatrixB->matrix[(i%MatrixB->shape[1])];
     }
@@ -481,8 +478,8 @@ dARRAY * b_cast(dARRAY * MatrixA, dARRAY * MatrixB){
     b_castArr = (dARRAY*)malloc(sizeof(dARRAY));
     b_castArr->matrix = (double*)calloc(MatrixA->shape[0]*MatrixA->shape[1],sizeof(double));
     int k=0;
-    omp_set_num_threads(4);
-    #pragma omp parallel for shared(MatrixA,MatrixB,k)
+    omp_set_num_threads(8);
+    #pragma omp parallel for num_threads(8) shared(MatrixA,MatrixB,b_castArr,k) schedule(static)
     for(int i=0;i<MatrixA->shape[0];i++){
       //copy b n times
       for(int j=0;j<MatrixA->shape[1];j++){
@@ -515,7 +512,7 @@ dARRAY * sum(dARRAY * matrix, int axis){
   if(axis==0){
     new->matrix = (double*)calloc(matrix->shape[1],sizeof(double));
     omp_set_num_threads(8);
-    #pragma omp parallel for collapse(1)
+    #pragma omp parallel for num_threads(8) collapse(1) shared(matrix,new) schedule(static)
     for(int i = 0; i<matrix->shape[0];i++){
       double temp = 0.0;
       for(int j=0;j<matrix->shape[1];j++){
@@ -529,7 +526,7 @@ dARRAY * sum(dARRAY * matrix, int axis){
   else if(axis==1){
     new->matrix = (double*)calloc(matrix->shape[0],sizeof(double));
     omp_set_num_threads(8);
-    #pragma omp parallel for collapse(1)
+    #pragma omp parallel for num_threads(8) collapse(1) shared(matrix,new) schedule(static)
     for(int i=0;i<matrix->shape[0];i++){
       double temp = 0.0;
       for(int j=0;j<matrix->shape[1];j++){
@@ -545,8 +542,8 @@ dARRAY * sum(dARRAY * matrix, int axis){
 
 double frobenius_norm(dARRAY * matrix){
   double frobenius_norm = 0.0;
-  omp_set_num_threads(4);
-  #pragma omp parallel for
+  omp_set_num_threads(8);
+  #pragma omp parallel for num_threads(8) shared(matrix) schedule(static)
   for(int i=0;i<matrix->shape[0]*matrix->shape[1];i++){
     frobenius_norm += pow(matrix->matrix[i],2);
   }
@@ -555,8 +552,8 @@ double frobenius_norm(dARRAY * matrix){
 
 double Manhattan_distance(dARRAY * matrix){
   double dist = 0.0;
-  omp_set_num_threads(4);
-  #pragma omp parallel for
+  omp_set_num_threads(8);
+  #pragma omp parallel for num_threads(8) shared(matrix) schedule(static)
   for(int i=0;i<matrix->shape[0]*matrix->shape[1];i++){
     dist += abs(matrix->matrix[i]);
   }
