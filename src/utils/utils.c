@@ -2,6 +2,7 @@
 #include <math.h>
 double cache;
 int return_cache;
+extern void dgemm_(char*, char*, int*, int*,int*, double*, double*, int*, double*, int*, double*, double*, int*);
 
 /**!
  * Creates a matrix filled with zeros. 
@@ -87,7 +88,7 @@ dARRAY * transpose(dARRAY * restrict Matrix){
  * @result Returns a pointer to the result of dot(MatrixA,MatrixB) 
  * @return A pointer to the result of dot(MatrixA,MatrixB) 
 */
-dARRAY * dot(dARRAY * MatrixA, dARRAY * MatrixB){
+dARRAY * dotm(dARRAY * MatrixA, dARRAY * MatrixB){
   if(MatrixA->shape[1]!=MatrixB->shape[0]){
     printf("\033[1;31mError:\033[93m Shape error while performing dot(). Matrix dimensions do not align. %d(dim1) != %d(dim0)\033[0m\n",MatrixA->shape[1],MatrixB->shape[0]);
     return NULL;
@@ -115,6 +116,37 @@ dARRAY * dot(dARRAY * MatrixA, dARRAY * MatrixB){
   BT = NULL;
   result->shape[0] = MatrixA->shape[0];
   result->shape[1] = MatrixB->shape[1];
+  return result;
+}
+
+dARRAY * dot(dARRAY * MatrixA, dARRAY * MatrixB){
+  if(MatrixA->shape[1]!=MatrixB->shape[0]){
+    printf("\033[1;31mError:\033[93m Shape error while performing dot(). Matrix dimensions do not align. %d(dim1) != %d(dim0)\033[0m\n",MatrixA->shape[1],MatrixB->shape[0]);
+    return NULL;
+  }
+  if(MatrixB == NULL || MatrixA == NULL){
+    printf("\033[1;31mError:\033[93m One of the input matrices is empty. Call dot() only after initializing dARRAY object\033[0m\n");
+    return NULL;
+  }
+  // printf("came to do dot\n");
+  //a - (1,12288)
+  //b - (12288,50)
+  //c - (1,50)
+  int m = MatrixA->shape[0];
+  int n = MatrixB->shape[1];
+  int k = MatrixB->shape[0];
+  char ta = 'N';
+  char tb = 'N';
+  double alpha = 1.0;
+  double beta = 0.0;
+  dARRAY * result = NULL;
+  result = (dARRAY *)malloc(sizeof(dARRAY));
+  result->matrix = (double*)calloc(MatrixA->shape[0]*MatrixB->shape[1],sizeof(double));
+  dgemm_(&ta, &tb, &m, &n, &k, &alpha, MatrixB->matrix, &m, MatrixA->matrix, &k, &beta, result->matrix, &m);
+  // printf("done with dot\n");
+  result->shape[0] = m;
+  result->shape[1] = n;
+  // shape(result);
   return result;
 }
 

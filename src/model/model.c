@@ -342,7 +342,7 @@ void __save_model__(char * filename){
 
 void load_x_train(int * dims){
   FILE * fp = NULL;
-  fp = fopen("X_train.data","rb");
+  fp = fopen("./data/X_train.data","rb");
   if(fp==NULL){
     printf("\033[1;31mFile Error : \033[93m Could not open the specified file!\033[0m\n");
     exit(EXIT_FAILURE);
@@ -363,7 +363,7 @@ void load_x_train(int * dims){
 
 void load_y_train(int * dims){
   FILE * fp = NULL;
-  fp = fopen("y_train.data","rb");
+  fp = fopen("./data/y_train.data","rb");
   if(fp==NULL){
     printf("\033[1;31mFile Error : \033[93m Could not open the specified file!\033[0m\n");
     exit(EXIT_FAILURE);
@@ -384,7 +384,7 @@ void load_y_train(int * dims){
 
 void load_x_cv(int * dims){
   FILE * fp = NULL;
-  fp = fopen("X_cv.data","rb");
+  fp = fopen("./data/X_cv.data","rb");
   if(fp==NULL){
     printf("\033[1;31mFile Error : \033[93m Could not open the specified file!\033[0m\n");
     exit(EXIT_FAILURE);
@@ -405,7 +405,7 @@ void load_x_cv(int * dims){
 
 void load_y_cv(int * dims){
   FILE * fp = NULL;
-  fp = fopen("y_cv.data","rb");
+  fp = fopen("./data/y_cv.data","rb");
   if(fp==NULL){
     printf("\033[1;31mFile Error : \033[93m Could not open the specified file!\033[0m\n");
     exit(EXIT_FAILURE);

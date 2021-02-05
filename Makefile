@@ -1,6 +1,7 @@
 CC=gcc-10
 CCL=clang 
-ATTR= -funroll-loops -O3 -fopenmp -Ofast -ffp-contract=fast -faggressive-loop-optimizations
+ATTR= -funroll-loops -O3 -fopenmp -Ofast -ffp-contract=fast -I /opt/OpenBLAS/include/ -L/opt/OpenBLAS/lib -lopenblas
+# ATTR= -Xpreprocessor -fopenmp -I/usr/local/include -L/usr/local/lib -framework Accelerate
 CFLAGS=-c -Wall -Wrestrict
 BUILD=build
 SRC=src
@@ -24,6 +25,8 @@ all:
   	fi;
 	@$(MAKE) start
 # $(BUILD)/test_utils.o	
+# env:
+# 	export OPENBLAS_NUM_THREADS=4
 
 start:  $(BUILD)/utils.o $(BUILD)/relu.o $(BUILD)/sigmoid.o $(BUILD)/tanh.o \
 $(BUILD)/neural_net.o $(BUILD)/Dense.o $(BUILD)/Input.o $(BUILD)/cross_entropy_loss.o \

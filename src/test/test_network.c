@@ -17,9 +17,9 @@ int main(){
 
   Input(.layer_size=12288);
   // Dense(.layer_size=64,.activation="relu",.initializer="he",.layer_type="hidden");
-  Dense(.layer_size=20,.activation="relu",.initializer="he",.layer_type="hidden");
+  // Dense(.layer_size=20,.activation="relu",.initializer="he",.layer_type="hidden");
   Dense(.layer_size=1,.activation="sigmoid",.initializer="random",.layer_type="output");
-  Model(.x_train=m->x_train,.Y_train=m->Y_train,.x_cv=m->x_cv,.Y_cv=m->Y_cv,.num_iter=4000,.learning_rate=0.007,.lambda=0.00005,.regularization="L2");
+  Model(.x_train=m->x_train,.Y_train=m->Y_train,.x_cv=m->x_cv,.Y_cv=m->Y_cv,.num_iter=4000,.learning_rate=0.007);
   // printComputation_Graph(m->graph);
   // m->load_model("new_model_no_bugs.t7");
   m->fit();
