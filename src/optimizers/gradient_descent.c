@@ -72,12 +72,18 @@ void GD(double lr){
       free2d(mul_lr_b);
       free2d(grad_b);
 
-      if(temp->DENSE->dropout_mask!=NULL)
+      if(temp->DENSE->dropout<1.0){
+        // printf("freeing mask in GD\n");
         free2d(temp->DENSE->dropout_mask);
-      if(temp->DENSE->A!=NULL)
+        // printf("done in GD\n");
+      }
+
+      if(temp->DENSE->A!=NULL){
         free2d(temp->DENSE->A);
-      if(temp->DENSE->cache!=NULL)
+      }
+      if(temp->DENSE->cache!=NULL){
         free2d(temp->DENSE->cache);
+      }
       if(temp->DENSE->dA!=NULL)
         free2d(temp->DENSE->dA);
       if(temp->DENSE->dZ!=NULL)

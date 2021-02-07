@@ -72,7 +72,7 @@ dARRAY * transpose(dARRAY * restrict Matrix){
   dARRAY * matrix = (dARRAY*)malloc(sizeof(dARRAY));
   matrix->matrix = (double*)calloc(Matrix->shape[0]*Matrix->shape[1],sizeof(double));
   omp_set_num_threads(8);
-  #pragma omp parallel for num_threads(8) collapse(1) shared(Matrix,matrix) schedule(static)
+  #pragma omp parallel for num_threads(8) shared(Matrix,matrix) schedule(static)
   for(int i=0;i<Matrix->shape[0];i++)
     for(int j=0;j<Matrix->shape[1];j++)
       matrix->matrix[j*Matrix->shape[0]+i] = Matrix->matrix[i*Matrix->shape[1]+j];
@@ -132,6 +132,8 @@ dARRAY * dot(dARRAY * MatrixA, dARRAY * MatrixB){
   //a - (1,12288)
   //b - (12288,50)
   //c - (1,50)
+  dARRAY * A = transpose(MatrixA);
+  dARRAY * B = transpose(MatrixB);
   int m = MatrixA->shape[0];
   int n = MatrixB->shape[1];
   int k = MatrixB->shape[0];
@@ -142,10 +144,13 @@ dARRAY * dot(dARRAY * MatrixA, dARRAY * MatrixB){
   dARRAY * result = NULL;
   result = (dARRAY *)malloc(sizeof(dARRAY));
   result->matrix = (double*)calloc(MatrixA->shape[0]*MatrixB->shape[1],sizeof(double));
-  dgemm_(&ta, &tb, &m, &n, &k, &alpha, MatrixB->matrix, &m, MatrixA->matrix, &k, &beta, result->matrix, &m);
+  dgemm_(&ta, &tb, &m, &n, &k, &alpha, A->matrix, &m, B->matrix, &k, &beta, result->matrix, &m);
   // printf("done with dot\n");
   result->shape[0] = m;
   result->shape[1] = n;
+  free2d(A);
+  free2d(B);
+  A = B = NULL;
   // shape(result);
   return result;
 }

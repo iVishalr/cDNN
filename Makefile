@@ -23,10 +23,10 @@ all:
 	@if ! test -d bin; \
 		then echo "\033[93msetting up bin directory...\033[0m"; mkdir -p bin; \
   	fi;
-	@$(MAKE) start
+	@$(MAKE) env start
 # $(BUILD)/test_utils.o	
-# env:
-# 	export OPENBLAS_NUM_THREADS=4
+env:
+	export OPENBLAS_NUM_THREADS=4
 
 start:  $(BUILD)/utils.o $(BUILD)/relu.o $(BUILD)/sigmoid.o $(BUILD)/tanh.o \
 $(BUILD)/neural_net.o $(BUILD)/Dense.o $(BUILD)/Input.o $(BUILD)/cross_entropy_loss.o \

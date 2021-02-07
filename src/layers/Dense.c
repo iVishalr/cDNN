@@ -96,27 +96,80 @@ void forward_pass_DENSE(){
   else 
     Wx = \
     dot(m->current_layer->DENSE->weights, m->current_layer->prev_layer->DENSE->A);
-  // printf("done with dot\n");
   //Store Z in cache as we will require it in backward pass
-  // printf("adding bias\n");
   dARRAY * Z = m->current_layer->DENSE->cache = add(Wx,m->current_layer->DENSE->bias);//Z
-  // printf("added bias\n");
   //Done with Wx, free it.
   free2d(Wx);
   Wx = NULL;
+
+  dARRAY * Z_drop_out = NULL;
+  if(m->current_layer->DENSE->dropout<(double)1.0){
+    //If dropout has been applied to the layer we need to create a dropout mask
+    // printf("creating fropout msak\n");
+    int dropout_mask_dims[] = {Z->shape[0],Z->shape[1]};
+    dARRAY * dropout_mask_temp = NULL;
+    dropout_mask_temp = randn(dropout_mask_dims);
+    
+    // #pragma omp parallel for num_threads(8) shared(dropout_mask_temp)
+    for(int i=0;i<dropout_mask_dims[0]*dropout_mask_dims[1];i++){
+      // printf("iteration %d\n",i);
+      dropout_mask_temp->matrix[i] = dropout_mask_temp->matrix[i]<m->current_layer->DENSE->dropout ? 0 : 1;
+    }
+    m->current_layer->DENSE->dropout_mask = dropout_mask_temp;
+    //we need to scale our activations so that loss doesnt change in the end as we will be forward propagating through
+    //less neurons. This will change loss if activations are not scaled.
+    Z_drop_out = divScalar(m->current_layer->DENSE->dropout_mask,m->current_layer->DENSE->dropout);
+    // printf("done with dropout\n");
+    // free2d(dropout_mask_temp);
+    dropout_mask_temp = NULL;
+  }
   //Compute the activation of this layer depending on the choice of activation selected.
   if(!strcasecmp(m->current_layer->DENSE->activation,"relu")){
-    m->current_layer->DENSE->A = relu(.input=Z);
+    if(m->current_layer->DENSE->dropout==1.0) {
+      m->current_layer->DENSE->A = relu(.input=Z); 
+    }
+    else{
+      // printf("dropout enabled!\n");
+      m->current_layer->DENSE->A = relu(.input=Z_drop_out);
+      free2d(Z_drop_out);
+      Z_drop_out = NULL;
+    }
   }
   else if(!strcasecmp(m->current_layer->DENSE->activation,"sigmoid")){
-    m->current_layer->DENSE->A = sigmoid(.input=Z);
+    if(m->current_layer->DENSE->dropout==1.0) {
+      m->current_layer->DENSE->A = sigmoid(.input=Z); 
+    }
+    else{
+      // printf("dropout enabled!\n");
+      m->current_layer->DENSE->A = sigmoid(.input=Z_drop_out);
+      free2d(Z_drop_out);
+      Z_drop_out = NULL;
+    }
   }
   else if(!strcasecmp(m->current_layer->DENSE->activation,"tanh")){
-    m->current_layer->DENSE->A = TanH(.input=Z);
+    if(m->current_layer->DENSE->dropout==1.0) {
+      m->current_layer->DENSE->A = TanH(.input=Z); 
+    }
+    else{
+      // printf("dropout enabled!\n");
+      m->current_layer->DENSE->A = TanH(.input=Z_drop_out);
+      free2d(Z_drop_out);
+      Z_drop_out = NULL;
+    }
   }
   else{
     //if user didn't want to use any activation, pass Z itself as the output
     m->current_layer->DENSE->A = Z;
+    if(m->current_layer->DENSE->dropout==1.0) {
+      
+      m->current_layer->DENSE->A = Z; 
+    }
+    else{
+      // printf("dropout enabled!\n");
+      m->current_layer->DENSE->A = Z_drop_out;
+      // free2d(Z_drop_out);
+      Z_drop_out = NULL;
+    }
   }
 
   Z=NULL;
@@ -128,6 +181,7 @@ void forward_pass_DENSE(){
 
 void backward_pass_DENSE(){
   //Store the number of training examples in a variable
+  // printf("in BP\n");
   double num_examples = m->num_of_training_examples;
   //Assign pointers to the respective layers
   Dense_layer * layer = m->current_layer->DENSE; 
@@ -147,63 +201,25 @@ void backward_pass_DENSE(){
   // printf("computing g'(Z)\n");
   if(!strcasecmp(layer->activation,"relu")){
     //local grad of relu gate
-    // printf("executing relu\n");
     local_act_grad = relu(.input=layer->cache,.status=1);
   }
   else if(!strcasecmp(layer->activation,"sigmoid")){
     //local grad of sigmoid gate
-    // printf("executing sigmoid\n");
     local_act_grad = sigmoid(.input=layer->cache,.status=1);
   }
   else if(!strcasecmp(layer->activation,"tanh")){
     //local grad of tanh gate
-    // printf("executing tanh\n");
     local_act_grad = TanH(.input=layer->cache,.status=1);
   }
-  // printf("done computing g'(Z)\n");
-  // printf("output : \n");
-  // for(int i=0;i<m->output->shape[0];i++){
-  //   for(int j=0;j<m->output->shape[1];j++){
-  //     printf("%lf ",m->output->matrix[i*m->output->shape[1]+j]);
-  //   }
-  //   printf("\n");
-  // }
-  // printf("local act grad : \n");
-  // for(int i=0;i<local_act_grad->shape[0];i++){
-  //   for(int j=0;j<local_act_grad->shape[1];j++){
-  //     printf("%lf ",local_act_grad->matrix[i*local_act_grad->shape[1]+j]);
-  //   }
-  //   printf("\n");
-  // }
   if(m->current_layer->next_layer->type==LOSS){
     //If we are on the last layer, then the gradient flowing
     //into the Z computation block will be by chain rule
     // dZ = local_act_grad * global_grad (loss_layer->grad_out)
-    // dARRAY * trans = transpose(local_act_grad);
 
     layer->dZ = multiply(local_act_grad,m->current_layer->next_layer->LOSS->grad_out);
-    // printf("Chained dZ : \n");
-    // for(int i=0;i<layer->dZ->shape[0];i++){
-    //   for(int j=0;j<layer->dZ->shape[1];j++){
-    //     printf("%lf ",layer->dZ->matrix[i*layer->dZ->shape[1]+j]);
-    //   }
-    //   printf("\n");
-    // }
-    // printf("freeing local_grad and grad_out\n");
     free2d(local_act_grad);
     free2d(m->current_layer->next_layer->LOSS->grad_out);
     local_act_grad = m->current_layer->next_layer->LOSS->grad_out = NULL;
-    // printf("freed\n");
-    // dARRAY * tempo = subtract(layer->A,m->Y_train);
-    // printf("Actual layer dZ : \n");
-    // for(int i=0;i<tempo->shape[0];i++){
-    //   for(int j=0;j<tempo->shape[1];j++){
-    //     printf("%lf ",tempo->matrix[i*tempo->shape[1]+j]);
-    //   }
-    //   printf("\n");
-    // }
-    // free2d(tempo);
-    // tempo=NULL;
   }
   else{
     //If we are not on the last layer then, we need to calculate dZ differently
@@ -211,18 +227,11 @@ void backward_pass_DENSE(){
     //[1], [2] - represents layers, 1 - first layer, 2 - second layer so on...
     
     //calculating W[2].dZ[2]
-    // dARRAY * weight_trans = NULL;
-    // printf("current layer size and activation %d - %s",m->current_layer->DENSE->num_of_computation_nodes,m->current_layer->DENSE->activation);
-    if(m->current_layer->next_layer->DENSE->weights==NULL) {
-      // printf("next layer weights were null\n");
-    }
     dARRAY * weight_trans = transpose(m->current_layer->next_layer->DENSE->weights);
     dARRAY * temp_dz = NULL;
     temp_dz = dot(weight_trans,m->current_layer->next_layer->DENSE->dZ);
-    // printf("freeing wT\n");
     free2d(weight_trans);
     weight_trans = NULL;
-    // printf("freed\n");
     
     //now we have the global gradient computed. We need to chain it with
     //the local gradient and make it flow to dZ[1]
@@ -230,10 +239,8 @@ void backward_pass_DENSE(){
 
     free2d(temp_dz);
     temp_dz = NULL;
-    // printf("freeing local_grad\n");
     free2d(local_act_grad);
     local_act_grad = NULL;
-    // printf("freed\n");
   }
 
   //We have calculated dZ[current layer now] we can use it to calculate the remaining grads
@@ -290,16 +297,22 @@ void backward_pass_DENSE(){
     //chaining with the global or incomming gradient
     dARRAY * prev_layer_A_temp = NULL;
     prev_layer_A_temp = dot(weight_transpose,layer->dZ);
-    if(layer->dropout_mask==NULL){
+    if(layer->dropout==(double)1.0){
       prev_layer->dA = prev_layer_A_temp;
       prev_layer_A_temp = NULL;
     }
     else{
+      // printf("multiplying mask in backprop\n");
       dARRAY * prev_layer_A_masked = multiply(prev_layer_A_temp,prev_layer->dropout_mask);
       prev_layer->dA = divScalar(prev_layer_A_masked,prev_layer->dropout);
       
       free2d(prev_layer_A_temp);
       prev_layer_A_temp = NULL; 
+
+      // printf("freeing mask\n");
+      // free2d(prev_layer->dropout_mask);
+      // prev_layer->dropout_mask = NULL;
+      // printf("freed mask\n");
       
       free2d(prev_layer_A_masked);
       prev_layer_A_masked = NULL;
