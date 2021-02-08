@@ -51,9 +51,9 @@ void __forward__(){
   Computation_Graph * temp = m->graph;
   while(temp!=NULL){
     m->current_layer = temp;
-    if(temp->type==INPUT){ temp->INPUT->forward();}
-    else if(temp->type==DENSE) {temp->DENSE->forward();}
-    else if(temp->type==LOSS) {temp->LOSS->forward();}
+    if(temp->type==INPUT) temp->INPUT->forward();
+    else if(temp->type==DENSE) temp->DENSE->forward();
+    else if(temp->type==LOSS) temp->LOSS->forward();
     temp = temp->next_layer;
   }
 }
@@ -91,8 +91,7 @@ dARRAY * relu_val(dARRAY * linear_matrix){
   dARRAY * relu_outf = NULL;
   relu_outf = (dARRAY*)malloc(sizeof(dARRAY));
   relu_outf->matrix = (double*)calloc(linear_matrix->shape[0]*linear_matrix->shape[1],sizeof(double));
-  omp_set_num_threads(4);
-  #pragma omp parallel for
+  #pragma omp parallel for num_threads(8) shared(relu_outf,linear_matrix)
   for(int i=0;i<linear_matrix->shape[0]*linear_matrix->shape[1];i++)
     relu_outf->matrix[i] = linear_matrix->matrix[i]>(double)0.0 ?(double)linear_matrix->matrix[i] : (double)0.0;
   relu_outf->shape[0] = linear_matrix->shape[0];
@@ -104,8 +103,7 @@ dARRAY * sigmoid_val(dARRAY * linear_matrix){
   dARRAY * sigmoid_outf = NULL;
   sigmoid_outf = (dARRAY*)malloc(sizeof(dARRAY));
   sigmoid_outf->matrix = (double*)calloc(linear_matrix->shape[0]*linear_matrix->shape[1],sizeof(double));
-  omp_set_num_threads(4);
-  #pragma omp parallel for
+  #pragma omp parallel for num_threads(8) shared(sigmoid_outf,linear_matrix)
   for(int i=0;i<linear_matrix->shape[0]*linear_matrix->shape[1];i++)
     sigmoid_outf->matrix[i] = (double)(1.0/(double)(1+exp((double)(-1.0*linear_matrix->matrix[i]))));
   sigmoid_outf->shape[0] = linear_matrix->shape[0];
@@ -116,10 +114,8 @@ dARRAY * sigmoid_val(dARRAY * linear_matrix){
 dARRAY * tanh_val(dARRAY * linear_matrix){
   dARRAY * tanh_out = (dARRAY*)malloc(sizeof(dARRAY));
   tanh_out->matrix = (double*)calloc(linear_matrix->shape[0]*linear_matrix->shape[1],sizeof(double));
-  omp_set_num_threads(4);
-  #pragma omp parallel for
+  #pragma omp parallel for num_threads(8) shared(tanh_out,linear_matrix)
   for(int i=0;i<linear_matrix->shape[0]*linear_matrix->shape[1];i++){
-    //Computing the tanh function
     double exp_res1 = exp(linear_matrix->matrix[i]);
     double exp_res2 = exp(-1*linear_matrix->matrix[i]);
     tanh_out->matrix[i] = (exp_res1 - exp_res2)/(exp_res1 + exp_res2);
@@ -147,7 +143,7 @@ double calculate_train_val_acc(){
        free2d(activation_temp);
        activation_temp = NULL;
     }
-    dARRAY * Z = add(weight_input_res,temp->DENSE->bias);//Z
+    dARRAY * Z = add(weight_input_res,temp->DENSE->bias);
     free2d(weight_input_res);
     weight_input_res = NULL;
     if(!strcasecmp(temp->DENSE->activation,"relu")){
@@ -209,9 +205,9 @@ void __fit__(){
       m->train_cost = sum_cost/(double)i;
       m->train_accuracy = sum_train_acc/(double)i;
       m->cross_val_accuracy = sum_train_val_acc/(double)i;
-      train_cost_arr[i] = m->train_cost;
-      train_acc_arr[i] = m->train_accuracy;
-      val_acc_arr[i] = m->cross_val_accuracy;
+      train_cost_arr[i-1] = m->train_cost;
+      train_acc_arr[i-1] = m->train_accuracy;
+      val_acc_arr[i-1] = m->cross_val_accuracy;
 
       printf("\033[96m%d. Cost : \033[0m%lf ",i,m->train_cost);
       printf("\033[96m train_acc : \033[0m%lf ",m->train_accuracy);
@@ -220,7 +216,6 @@ void __fit__(){
     __backward__();
     GD(m->learning_rate);
     i++;
-    // if(i==5) break;
   }
   append_to_file(train_cost_arr,"./bin/cost.data","ab+");
   append_to_file(train_acc_arr,"./bin/train_acc.data","ab+");
@@ -450,7 +445,13 @@ void (create_model)(){
 }
 
 void (destroy_model)(){
-
+  destroy_Graph(m->graph);
+  free2d(m->x_train);
+  free2d(m->Y_train);
+  free2d(m->x_cv);
+  free2d(m->Y_cv);
+  free2d(m->output);
+  m = NULL;
 }
 
 void (Model)(Model_args model_args){

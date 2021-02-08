@@ -27,7 +27,7 @@ extern "C"{
   Computation_Graph * new_node(void * layer, char * type);
   void append_graph(void * layer, char * type);
   void printComputation_Graph(Computation_Graph * G);
-  Computation_Graph * destroy_G(Computation_Graph * G);
+  Computation_Graph * destroy_Graph(Computation_Graph * G);
 #ifdef __cplusplus
 }
 #endif

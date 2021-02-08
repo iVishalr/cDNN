@@ -73,9 +73,7 @@ void GD(double lr){
       free2d(grad_b);
 
       if(temp->DENSE->dropout<1.0){
-        // printf("freeing mask in GD\n");
         free2d(temp->DENSE->dropout_mask);
-        // printf("done in GD\n");
       }
 
       if(temp->DENSE->A!=NULL){
@@ -88,8 +86,18 @@ void GD(double lr){
         free2d(temp->DENSE->dA);
       if(temp->DENSE->dZ!=NULL)
         free2d(temp->DENSE->dZ);
-      grad_W = grad_b = layer_weights = layer_biases = mul_lr_W = mul_lr_b = temp->DENSE->dA\
-      =temp->DENSE->cache = temp->DENSE->A = m->output = temp->DENSE->dropout_mask = temp->DENSE->dZ = NULL;
+      grad_W = NULL;
+      grad_b = NULL;
+      layer_weights = NULL;
+      layer_biases = NULL;
+      mul_lr_W = NULL;
+      mul_lr_b = NULL;
+      temp->DENSE->dA = NULL;
+      temp->DENSE->cache = NULL;
+      temp->DENSE->dropout_mask = NULL;
+      temp->DENSE->A = NULL;
+      m->output = NULL;
+      temp->DENSE->dZ = NULL;
     }
     else if(temp->type==LOSS){
       if(temp->LOSS->grad_out!=NULL){

@@ -33,7 +33,6 @@ void append_graph(void * layer, char * type){
   Computation_Graph * temp = m->graph;
   while(temp->next_layer!=NULL)
     temp = temp->next_layer;
-  //now we are on the last node
   temp->next_layer = new;
   new->prev_layer = temp;
   if(strcasecmp(type,"loss")!=0)
@@ -56,7 +55,7 @@ void printComputation_Graph(Computation_Graph * G){
   return;
 }
 
-Computation_Graph * destroy_G(Computation_Graph * G){
+Computation_Graph * destroy_Graph(Computation_Graph * G){
   Computation_Graph * temp = m->graph;
   Computation_Graph * prev;
   while(temp!=NULL){
@@ -64,34 +63,34 @@ Computation_Graph * destroy_G(Computation_Graph * G){
     temp = temp->next_layer;
     if(prev->type==DENSE){
       Dense_layer * layer = prev->DENSE;
-      if(layer->weights)
+      if(layer->weights!=NULL)
         free2d(layer->weights);
-  
-      layer->weights = NULL;
-      if(layer->bias)
+      if(layer->bias!=NULL)
         free2d(layer->bias);
-      layer->bias = NULL;
-      if(layer->cache)
+      if(layer->cache!=NULL)
         free2d(layer->cache);
-      layer->cache = NULL;
-      if(layer->dA)
+      if(layer->dA!=NULL)
         free2d(layer->dA);
-      layer->dA = NULL;
-      if(layer->A)
+      if(layer->A!=NULL)
         free2d(layer->A);
-      layer->A = NULL;
-      if(layer->dropout_mask)
+      if(layer->dropout_mask!=NULL)
         free2d(layer->dropout_mask);
-      layer->dropout_mask = NULL;
-      if(layer->db)
+      if(layer->db!=NULL)
         free2d(layer->db);
-      layer->db = NULL;
-      if(layer->dZ)
+      if(layer->dZ!=NULL)
         free2d(layer->dZ);
-      layer->dZ = NULL;
-      if(layer->dW)
+      if(layer->dW!=NULL)
         free2d(layer->dW);
+
       layer->dW = NULL;
+      layer->weights = NULL;
+      layer->bias = NULL;
+      layer->cache = NULL;
+      layer->dA = NULL;
+      layer->A = NULL;
+      layer->dropout_mask = NULL;
+      layer->db = NULL;
+      layer->dZ = NULL;
 
       free(prev->DENSE);
       prev->DENSE = NULL;
@@ -100,7 +99,7 @@ Computation_Graph * destroy_G(Computation_Graph * G){
     }
     else if(prev->type==INPUT){
       Input_layer * layer = prev->INPUT;
-      if(layer->A)
+      if(layer->A!=NULL)
         free2d(layer->A);
       layer->A = NULL;
       prev->prev_layer = NULL;
@@ -115,7 +114,8 @@ Computation_Graph * destroy_G(Computation_Graph * G){
       free(prev->LOSS);
       layer = NULL;
     }
-    free(prev);
+    prev = NULL;
+    // free(prev);
   }
   prev = NULL;
   temp = NULL;

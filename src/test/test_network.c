@@ -16,15 +16,10 @@ int main(){
   load_y_cv(y_cv_dims);
 
   Input(.layer_size=12288);
-  // Dense(.layer_size=32,.activation="relu",.initializer="he",.layer_type="hidden",.dropout=1.0);
-  Dense(.layer_size=10,.activation="relu",.initializer="he",.layer_type="hidden");
+  Dense(.layer_size=10,.activation="relu",.initializer="he",.layer_type="hidden",.dropout=0.5);
   Dense(.layer_size=1,.activation="sigmoid",.initializer="random",.layer_type="output");
-  Model(.x_train=m->x_train,.Y_train=m->Y_train,.x_cv=m->x_cv,.Y_cv=m->Y_cv,.num_iter=10000,.learning_rate=0.009);
-  // printComputation_Graph(m->graph);
-  // m->load_model("new_model_no_bugs.t7");
+  Model(.x_train=m->x_train,.Y_train=m->Y_train,.x_cv=m->x_cv,.Y_cv=m->Y_cv,.num_iter=100,.learning_rate=0.009);
   m->fit();
-  // m->save_model("new_model_no_bugs_reg.t7");
   plot_train_scores();
-  printComputation_Graph(m->graph);
-  destroy_G(m->graph);
+  destroy_model();
 }
