@@ -125,7 +125,7 @@ dARRAY * tanh_val(dARRAY * linear_matrix){
   return tanh_out;
 }
 
-double calculate_train_val_acc(){
+double calculate_val_test_acc(dARRAY * input_features,dARRAY * gnd_truth){
   dARRAY * weight_input_res = NULL;
   dARRAY * output = NULL;
   dARRAY * activation_temp = NULL;
@@ -134,7 +134,7 @@ double calculate_train_val_acc(){
   int layer=0;
   while(temp!=NULL){
     if(temp->prev_layer->type==INPUT){ 
-    weight_input_res = dot(temp->DENSE->weights, m->x_cv); 
+    weight_input_res = dot(temp->DENSE->weights, input_features); 
     }
     else{ 
       weight_input_res = dot(temp->DENSE->weights, activation_temp);
@@ -170,10 +170,10 @@ double calculate_train_val_acc(){
     temp = temp->next_layer;
     Z = NULL;
   }
-  double val_acc = calculate_accuracy(output,m->Y_cv);
+  double acc = calculate_accuracy(output,gnd_truth);
   free2d(output);
   output = NULL;
-  return val_acc;
+  return acc;
 }
 
 void append_to_file(double * arr ,char * filename,char * mode){
@@ -200,7 +200,7 @@ void __fit__(){
     __forward__();
     sum_cost += m->iter_cost;
     sum_train_acc += calculate_accuracy(m->output,m->Y_train);
-    sum_train_val_acc += calculate_train_val_acc();
+    sum_train_val_acc += calculate_val_test_acc(m->x_cv,m->Y_cv);
     if(m->print_cost){
       m->train_cost = sum_cost/(double)i;
       m->train_accuracy = sum_train_acc/(double)i;
@@ -226,6 +226,11 @@ void __predict__(dARRAY * input_feature){
   m->graph->INPUT->A = input_feature;
   m->predicting = 1;
   __forward__();
+}
+
+void __test__(){
+  double acc = calculate_val_test_acc(m->x_test,m->Y_test);
+  printf("\033[96mTest Accuracy : \033[0m%lf\n",acc);
 }
 
 
@@ -418,6 +423,47 @@ void load_y_cv(int * dims){
   fclose(fp);
 }
 
+void load_x_test(int * dims){
+  FILE * fp = NULL;
+  fp = fopen("./data/X_test.data","rb");
+  if(fp==NULL){
+    printf("\033[1;31mFile Error : \033[93m Could not open the specified file!\033[0m\n");
+    exit(EXIT_FAILURE);
+  }
+  dARRAY * x_test_temp = (dARRAY*)malloc(sizeof(dARRAY));
+  x_test_temp->matrix = (double*)calloc(dims[0]*dims[1],sizeof(double));
+  for(int j=0;j<dims[0]*dims[1];j++){
+    fscanf(fp,"%lf ",&x_test_temp->matrix[j]);
+  }
+  x_test_temp->shape[0] = dims[1];
+  x_test_temp->shape[1] = dims[0];
+  m->x_test = transpose(x_test_temp);
+  free2d(x_test_temp);
+  x_test_temp = NULL;
+  fclose(fp);
+}
+
+void load_y_test(int * dims){
+  FILE * fp = NULL;
+  fp = fopen("./data/y_test.data","rb");
+  if(fp==NULL){
+    printf("\033[1;31mFile Error : \033[93m Could not open the specified file!\033[0m\n");
+    exit(EXIT_FAILURE);
+  }
+  dARRAY * Y_test = (dARRAY*)malloc(sizeof(dARRAY));
+  Y_test->matrix = (double*)calloc(dims[0]*dims[1],sizeof(double));
+  for(int j=0;j<dims[0]*dims[1];j++){
+    fscanf(fp,"%lf ",&Y_test->matrix[j]);
+  }
+  Y_test->shape[0] = dims[1];
+  Y_test->shape[1] = dims[0];
+
+  m->Y_test = transpose(Y_test);
+  free2d(Y_test);
+  Y_test = NULL;
+  fclose(fp);
+}
+
 void __summary__(){}
 
 long int get_total_params(){
@@ -509,6 +555,7 @@ void (Model)(Model_args model_args){
   m->fit = __fit__;
   m->predict = __predict__;
   m->summary = __summary__;
+  m->test = __test__;
   m->init();
   m->total_parameters = get_total_params();
   printf("Total Trainable Parameters : %ld\n",m->total_parameters);

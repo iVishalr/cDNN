@@ -34,6 +34,7 @@ extern "C"{
   typedef void (*__model_summary__)();
   typedef void (*__model_forward__)();
   typedef void (*__model_backward__)();
+  typedef void (*__model_test__)();
   void __initialize_params__();
   void (create_model)();
   void (Model)(Model_args model_args);
@@ -45,8 +46,9 @@ extern "C"{
   void __save_model__();
   void __summary__();
   void __predict__();
+  void __test__();
   double calculate_accuracy(dARRAY * predicted, dARRAY * gnd_truth);
-  double calculate_train_val_acc();
+  double calculate_test_val_acc(dARRAY * input_features,dARRAY * gnd_truth);
   dARRAY * relu_val(dARRAY * linear_matrix);
   dARRAY * sigmoid_val(dARRAY * linear_matrix);
   dARRAY * tanh_val(dARRAY * linear_matrix);
@@ -54,6 +56,8 @@ extern "C"{
   void load_y_train(int * dims);
   void load_x_cv(int * dims);
   void load_y_cv(int * dims);
+  void load_x_test(int * dims);
+  void load_y_test(int * dims);
   void (destroy_model)();
 #ifdef __cplusplus
 }
@@ -106,6 +110,7 @@ typedef struct model{
   __model_init__ init;
   __model_fit__ fit;
   __model_predict__ predict;
+  __model_test__ test;
   __model_save__ save_model;
   __model_load__ load_model;
   __model_summary__ summary;

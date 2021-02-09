@@ -119,42 +119,6 @@ dARRAY * dot(dARRAY * MatrixA, dARRAY * MatrixB){
   return result;
 }
 
-// dARRAY * dotm(dARRAY * MatrixA, dARRAY * MatrixB){
-//   if(MatrixA->shape[1]!=MatrixB->shape[0]){
-//     printf("\033[1;31mError:\033[93m Shape error while performing dot(). Matrix dimensions do not align. %d(dim1) != %d(dim0)\033[0m\n",MatrixA->shape[1],MatrixB->shape[0]);
-//     return NULL;
-//   }
-//   if(MatrixB == NULL || MatrixA == NULL){
-//     printf("\033[1;31mError:\033[93m One of the input matrices is empty. Call dot() only after initializing dARRAY object\033[0m\n");
-//     return NULL;
-//   }
-//   // printf("came to do dot\n");
-//   //a - (1,12288)
-//   //b - (12288,50)
-//   //c - (1,50)
-//   dARRAY * A = transpose(MatrixA);
-//   dARRAY * B = transpose(MatrixB);
-//   int m = MatrixA->shape[0];
-//   int n = MatrixB->shape[1];
-//   int k = MatrixB->shape[0];
-//   char ta = 'N';
-//   char tb = 'N';
-//   double alpha = 1.0;
-//   double beta = 0.0;
-//   dARRAY * result = NULL;
-//   result = (dARRAY *)malloc(sizeof(dARRAY));
-//   result->matrix = (double*)calloc(MatrixA->shape[0]*MatrixB->shape[1],sizeof(double));
-//   dgemm_(&ta, &tb, &m, &n, &k, &alpha, A->matrix, &m, B->matrix, &k, &beta, result->matrix, &m);
-//   // printf("done with dot\n");
-//   result->shape[0] = m;
-//   result->shape[1] = n;
-//   free2d(A);
-//   free2d(B);
-//   A = B = NULL;
-//   // shape(result);
-//   return result;
-// }
-
 /**!
  * Function performs element-wise multiplication on two matrices. 
  * @param MatrixA First Matrix (double *) 
