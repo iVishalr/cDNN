@@ -170,10 +170,13 @@ double calculate_val_test_acc(dARRAY * input_features,dARRAY * gnd_truth){
     temp = temp->next_layer;
     Z = NULL;
   }
-  double acc = calculate_accuracy(output,gnd_truth);
-  free2d(output);
-  output = NULL;
-  return acc;
+  if(m->predicting) return output->matrix[0];
+  else{
+    double acc = calculate_accuracy(output,gnd_truth);
+    free2d(output);
+    output = NULL;
+    return acc;
+  }
 }
 
 void append_to_file(double * arr ,char * filename,char * mode){
@@ -225,7 +228,11 @@ void __fit__(){
 void __predict__(dARRAY * input_feature){
   m->graph->INPUT->A = input_feature;
   m->predicting = 1;
-  __forward__();
+  double prediction = calculate_val_test_acc(input_feature,NULL);
+  printf("Score : %lf\n",prediction);
+  if(prediction<0.5) printf("CAT\n");
+  else printf("DOG\n");
+  m->predicting=0;
 }
 
 void __test__(){
@@ -462,6 +469,25 @@ void load_y_test(int * dims){
   free2d(Y_test);
   Y_test = NULL;
   fclose(fp);
+}
+
+dARRAY * load_test_image(char * filename){
+  FILE * fp = NULL;
+  fp = fopen(filename,"rb");
+  if(fp==NULL){
+    printf("\033[1;31mFile Error : \033[93m Could not open the specified file!\033[0m\n");
+    exit(EXIT_FAILURE);
+  }
+  dARRAY * image = (dARRAY*)malloc(sizeof(dARRAY));
+  image->matrix = (double*)calloc(12288*1,sizeof(double));
+  for(int j=0;j<12288;j++){
+    fscanf(fp,"%lf ",&image->matrix[j]);
+  }
+  image->shape[0] = 12288;
+  image->shape[1] = 1;
+  fclose(fp);
+  fp=NULL;
+  return image;
 }
 
 void __summary__(){}

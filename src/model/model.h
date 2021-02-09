@@ -58,6 +58,7 @@ extern "C"{
   void load_y_cv(int * dims);
   void load_x_test(int * dims);
   void load_y_test(int * dims);
+  dARRAY * load_test_image(char * filename);
   void (destroy_model)();
 #ifdef __cplusplus
 }
