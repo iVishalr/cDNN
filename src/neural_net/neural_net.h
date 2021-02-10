@@ -6,6 +6,9 @@
 #include "../utils/utils.h"
 #include "../loss_functions/cross_entropy_loss.h"
 #include "../optimizers/gradient_descent.h"
+#include "../optimizers/adam.h"
+#include "../optimizers/adagrad.h"
+#include "../optimizers/rmsprop.h"
 #include "../plot/plot.h"
 
 enum layer_type {NONE, INPUT, DENSE, LOSS, OPTIMIZER};

@@ -3,7 +3,7 @@
 
 extern __Model__ * m;
 
-void GD(double lr){
+void SGD(){
   Computation_Graph * temp = m->graph;
   dARRAY *layer_weights, *layer_biases, *grad_W, *grad_b;
   layer_weights = layer_biases = grad_W = grad_b = NULL;
@@ -34,7 +34,7 @@ void GD(double lr){
       grad_b = temp->DENSE->db;
 
       dARRAY * mul_lr_W = NULL;
-      mul_lr_W = mulScalar(grad_W,lr);
+      mul_lr_W = mulScalar(grad_W,m->learning_rate);
 
       if(m->lambda==0.0){
       // { printf("updating weights\n");
@@ -63,7 +63,7 @@ void GD(double lr){
       free2d(grad_W);
       
       dARRAY * mul_lr_b = NULL;
-      mul_lr_b = mulScalar(grad_b,lr);
+      mul_lr_b = mulScalar(grad_b,m->learning_rate);
 
       temp->DENSE->bias = NULL;
       temp->DENSE->bias = subtract(layer_biases,mul_lr_b);
@@ -75,7 +75,6 @@ void GD(double lr){
       if(temp->DENSE->dropout<1.0){
         free2d(temp->DENSE->dropout_mask);
       }
-
       if(temp->DENSE->A!=NULL){
         free2d(temp->DENSE->A);
       }

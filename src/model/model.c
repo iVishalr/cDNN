@@ -217,7 +217,19 @@ void __fit__(){
       printf("\033[96m val_acc : \033[0m%lf\n",m->cross_val_accuracy);
     }
     __backward__();
-    GD(m->learning_rate);
+    if(!strcasecmp(m->optimizer,"adam")){
+      m->time_step += 1;
+      adam();
+    }
+    else if(!strcasecmp(m->optimizer,"rmsprop")){
+      RMSProp();
+    }
+    else if(!strcasecmp(m->optimizer,"adagrad")){
+      adagrad();
+    }
+    else if(!strcasecmp(m->optimizer,"sgd")){
+      SGD();
+    }
     i++;
   }
   append_to_file(train_cost_arr,"./bin/cost.data","ab+");

@@ -6,7 +6,7 @@ extern __Model__ * m;
 void adagrad(){
   Computation_Graph * temp = m->graph->next_layer;
   int layer=0;
-  while(temp!=NULL){
+  while(temp->next_layer->type!=LOSS){
     dARRAY * scaled_grads_dW = power(temp->DENSE->dW,2);
     dARRAY * scaled_grads_db = power(temp->DENSE->db,2);
     dARRAY * ptr_cache_dW = m->cache_dW[layer];
@@ -25,14 +25,18 @@ void adagrad(){
     dARRAY * div_factor_temp_db = power(m->cache_db[layer],0.5);
 
     dARRAY * div_factor_dW = addScalar(div_factor_temp_dW,m->epsilon);
-    dARRAY * div_factor_db = addScalar(div_factor_db,m->epsilon);
+    dARRAY * div_factor_db = addScalar(div_factor_temp_db,m->epsilon);
 
     free2d(div_factor_temp_dW);
     free2d(div_factor_temp_db);
     div_factor_temp_dW = div_factor_temp_db = NULL;
 
     dARRAY * mul_lr_w = mulScalar(temp->DENSE->dW,m->learning_rate);
-    dARRAY * mul_lr_b = mulScalar(temp->DENSE->bias,m->learning_rate);
+    dARRAY * mul_lr_b = mulScalar(temp->DENSE->db,m->learning_rate);
+
+    free2d(temp->DENSE->dW);
+    free2d(temp->DENSE->db);
+    temp->DENSE->dW = temp->DENSE->db = NULL;
 
     dARRAY * update_term_w = divison(mul_lr_w,div_factor_dW);
     dARRAY * update_term_b = divison(mul_lr_b,div_factor_db);
@@ -65,8 +69,7 @@ void adagrad(){
       free2d(temp->DENSE->dA);
     if(temp->DENSE->dZ!=NULL)
       free2d(temp->DENSE->dZ);
-    temp->DENSE->dA=temp->DENSE->cache = temp->DENSE->A = temp->DENSE->dropout_mask = temp->DENSE->dZ = NULL;
-    
+    temp->DENSE->dA = temp->DENSE->cache = temp->DENSE->A = temp->DENSE->dropout_mask = temp->DENSE->dZ = m->output = NULL;
     layer++;
     temp = temp->next_layer;
   }

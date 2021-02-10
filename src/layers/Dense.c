@@ -299,11 +299,6 @@ void backward_pass_DENSE(){
       
       free2d(prev_layer_A_temp);
       prev_layer_A_temp = NULL; 
-
-      // printf("freeing mask\n");
-      // free2d(prev_layer->dropout_mask);
-      // prev_layer->dropout_mask = NULL;
-      // printf("freed mask\n");
       
       free2d(prev_layer_A_masked);
       prev_layer_A_masked = NULL;

@@ -6,7 +6,7 @@
 #ifdef __cplusplus
 extern "C"{
 #endif
-  void GD(double lr);
+  void SGD();
 #ifdef __cplusplus
 }
 #endif

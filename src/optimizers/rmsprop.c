@@ -6,7 +6,7 @@ extern __Model__ * m;
 void RMSProp(){
   Computation_Graph * temp = m->graph->next_layer;
   int layer = 0;
-  while(temp!=NULL){
+  while(temp->next_layer->type!=LOSS){
     dARRAY * scaled_dW = power(temp->DENSE->dW,2);
     dARRAY * scaled_db = power(temp->DENSE->db,2);
 
@@ -58,7 +58,9 @@ void RMSProp(){
     free2d(div_factor_db);
     free2d(mul_lr_w);
     free2d(mul_lr_b);
-    div_factor_dW = div_factor_db = mul_lr_w = mul_lr_b = NULL;
+    free2d(temp->DENSE->dW);
+    free2d(temp->DENSE->db);
+    div_factor_dW = div_factor_db = mul_lr_w = mul_lr_b = temp->DENSE->dW = temp->DENSE->db = NULL;
 
     dARRAY * grad_W = temp->DENSE->weights;
     dARRAY * grad_b = temp->DENSE->bias;
@@ -82,7 +84,7 @@ void RMSProp(){
       free2d(temp->DENSE->dA);
     if(temp->DENSE->dZ!=NULL)
       free2d(temp->DENSE->dZ);
-    temp->DENSE->dA=temp->DENSE->cache = temp->DENSE->A = temp->DENSE->dropout_mask = temp->DENSE->dZ = NULL;
+    temp->DENSE->dA=temp->DENSE->cache = temp->DENSE->A = temp->DENSE->dropout_mask = temp->DENSE->dZ = m->output = NULL;
     
     layer++;
     temp = temp->next_layer;

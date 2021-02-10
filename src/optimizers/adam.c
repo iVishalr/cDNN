@@ -6,7 +6,7 @@ extern __Model__ * m;
 void adam(){
   Computation_Graph * temp = m->graph->next_layer;
   int layer = 0;
-  while(temp!=NULL){
+  while(temp->next_layer->type!=LOSS){
     //calculate first momentum
     //m_dW
     double mul_factor = 1-m->beta1;
@@ -68,6 +68,10 @@ void adam(){
     free2d(term1);
     free2d(term2);
     term1 = term2 = NULL;
+    
+    free2d(temp->DENSE->dW);
+    free2d(temp->DENSE->db);
+    temp->DENSE->dW = temp->DENSE->db = NULL;
 
     double first_momentum_scaling_factor = 1-pow(m->beta1,m->time_step);
     double second_momentum_scaling_factor = 1-pow(m->beta2,m->time_step);
