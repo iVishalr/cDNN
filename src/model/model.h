@@ -21,6 +21,7 @@ typedef struct model_args{
   double beta;
   double beta1;
   double beta2;
+  int checkpoint_every;
 }Model_args;
 
 #ifdef __cplusplus
@@ -107,6 +108,7 @@ typedef struct model{
   double test_accuracy;
   double cross_val_accuracy;
   int predicting;
+  int ckpt_every;
 
   __model_init__ init;
   __model_fit__ fit;
@@ -135,7 +137,8 @@ typedef struct model{
 .beta=0.9,\
 .beta1=0.9,\
 .beta2=0.999,\
-.loss="cross_entropy_loss",__VA_ARGS__});
+.loss="cross_entropy_loss",\
+.checkpoint_every=2500,__VA_ARGS__});
 
 #define destroy_model(...) destroy_model();
 

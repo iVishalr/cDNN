@@ -4,9 +4,13 @@
 extern __Model__ * m;
 //cache = cache * decay_rate + (1-decay_rate) * dx^2
 void RMSProp(){
-  Computation_Graph * temp = m->graph->next_layer;
+  Computation_Graph * temp = m->graph;
   int layer = 0;
-  while(temp->next_layer->type!=LOSS){
+  while(temp!=NULL){
+    if(temp->type==LOSS || temp->type==INPUT){
+      temp = temp->next_layer;
+      continue;
+    }
     dARRAY * scaled_dW = power(temp->DENSE->dW,2);
     dARRAY * scaled_db = power(temp->DENSE->db,2);
 

@@ -4,9 +4,13 @@
 extern __Model__ * m;
 
 void adam(){
-  Computation_Graph * temp = m->graph->next_layer;
+  Computation_Graph * temp = m->graph;
   int layer = 0;
-  while(temp->next_layer->type!=LOSS){
+  while(temp!=NULL){
+    if(temp->type==LOSS || temp->type==INPUT){
+      temp = temp->next_layer;
+      continue;
+    }
     //calculate first momentum
     //m_dW
     double mul_factor = 1-m->beta1;

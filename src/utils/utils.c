@@ -1,8 +1,7 @@
 #include "./utils.h"
-#include <math.h>
+
 double cache;
 int return_cache;
-extern void dgemm_(char*, char*, int*, int*,int*, double*, double*, int*, double*, int*, double*, double*, int*);
 
 /**!
  * Creates a matrix filled with zeros. 

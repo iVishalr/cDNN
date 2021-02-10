@@ -193,13 +193,18 @@ void append_to_file(double * arr ,char * filename,char * mode){
 
 void __fit__(){
   int i = 1;
+  int iterations=0;
   double sum_cost = 0.0;
   double sum_train_acc = 0.0;
   double sum_train_val_acc = 0.0;
-  double * train_cost_arr = (double*)calloc(m->num_iter,sizeof(double));
-  double * train_acc_arr = (double*)calloc(m->num_iter,sizeof(double));
-  double * val_acc_arr = (double*)calloc(m->num_iter,sizeof(double));
-  while(i<=m->num_iter){
+  double * train_cost_arr = (double*)calloc(m->num_iter==-1?1000000:m->num_iter,sizeof(double));
+  double * train_acc_arr = (double*)calloc(m->num_iter==-1?1000000:m->num_iter,sizeof(double));
+  double * val_acc_arr = (double*)calloc(m->num_iter==-1?1000000:m->num_iter,sizeof(double));
+  if(m->num_iter==-1){
+    iterations = i;
+  }
+  else iterations = m->num_iter;
+  while(i<=iterations){
     __forward__();
     sum_cost += m->iter_cost;
     sum_train_acc += calculate_accuracy(m->output,m->Y_train);
@@ -211,7 +216,6 @@ void __fit__(){
       train_cost_arr[i-1] = m->train_cost;
       train_acc_arr[i-1] = m->train_accuracy;
       val_acc_arr[i-1] = m->cross_val_accuracy;
-
       printf("\033[96m%d. Cost : \033[0m%lf ",i,m->train_cost);
       printf("\033[96m train_acc : \033[0m%lf ",m->train_accuracy);
       printf("\033[96m val_acc : \033[0m%lf\n",m->cross_val_accuracy);
@@ -230,7 +234,19 @@ void __fit__(){
     else if(!strcasecmp(m->optimizer,"sgd")){
       SGD();
     }
+    if(m->ckpt_every!=-1 && (i%m->ckpt_every==0 || (i==m->num_iter && m->num_iter!=-1))){
+      time_t rawtime;
+      struct tm * timeinfo;
+
+      time ( &rawtime );
+      timeinfo = localtime ( &rawtime );
+  
+      char buffer[1024];
+      snprintf(buffer,sizeof(buffer),"model_%d_%s.t7",i,asctime (timeinfo));
+      __save_model__(buffer);
+    }
     i++;
+    if(m->num_iter==-1) iterations = i;
   }
   append_to_file(train_cost_arr,"./bin/cost.data","ab+");
   append_to_file(train_acc_arr,"./bin/train_acc.data","ab+");
@@ -546,6 +562,8 @@ void (Model)(Model_args model_args){
   m->Y_train = model_args.Y_train;
   m->Y_test = model_args.Y_test;
   m->Y_cv = model_args.Y_cv;
+
+  m->ckpt_every = model_args.checkpoint_every;
 
   //initialize regualrization hyperparameters
   m->loss = model_args.loss;
