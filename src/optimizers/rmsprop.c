@@ -14,7 +14,7 @@ void RMSProp(){
     dARRAY * scaled_dW = power(temp->DENSE->dW,2);
     dARRAY * scaled_db = power(temp->DENSE->db,2);
 
-    double mul_factor = 1-m->beta;
+    float mul_factor = 1-m->beta;
     dARRAY * wavg_term2_dW = mulScalar(scaled_dW,mul_factor);
     dARRAY * wavg_term2_db = mulScalar(scaled_db,mul_factor);
 

@@ -13,7 +13,7 @@ void forward_pass_L2_LOSS(){
 
   dARRAY * log_y_hat= NULL;
   log_y_hat = (dARRAY *)malloc(sizeof(dARRAY));
-  log_y_hat->matrix = (double*)calloc(act_dims[0]*act_dims[1],sizeof(double));
+  log_y_hat->matrix = (float*)calloc(act_dims[0]*act_dims[1],sizeof(float));
   //calculate log(y_pred)
   #pragma omp parallel for num_threads(8)
   for(int i=0;i<act_dims[0]*act_dims[1];i++){
@@ -27,7 +27,7 @@ void forward_pass_L2_LOSS(){
   
   dARRAY * log_one_y_hat = NULL;
   log_one_y_hat = (dARRAY *)malloc(sizeof(dARRAY));
-  log_one_y_hat->matrix = (double*)calloc(act_dims[0]*act_dims[1],sizeof(double));
+  log_one_y_hat->matrix = (float*)calloc(act_dims[0]*act_dims[1],sizeof(float));
   //calculate log(1-y_pred)
   #pragma omp parallel for num_threads(8)
   for(int i=0;i<act_dims[0]*act_dims[1];i++){
@@ -70,18 +70,18 @@ void forward_pass_L2_LOSS(){
   loss = NULL;
 
   dARRAY * cost = NULL;
-  dARRAY * cross_entropy_cost = divScalar(sum_of_losses,(double)(-1 * number_of_examples));
+  dARRAY * cross_entropy_cost = divScalar(sum_of_losses,(float)(-1 * number_of_examples));
 
   free2d(sum_of_losses);
   sum_of_losses = NULL;
 
-  double reg_cost=0.0;
+  float reg_cost=0.0;
   Computation_Graph * temp = NULL;
   
   if(m->regularization!=NULL){
     temp = m->graph->next_layer;
     if(!strcasecmp(m->regularization,"L2")){
-      double layer_frobenius = 0.0;
+      float layer_frobenius = 0.0;
       while(temp->next_layer->type!=LOSS){
         layer_frobenius += frobenius_norm(temp->DENSE->weights);
         temp = temp->next_layer;
@@ -89,7 +89,7 @@ void forward_pass_L2_LOSS(){
       reg_cost = m->lambda*layer_frobenius/(2.0*number_of_examples);
     }
     else if(!strcasecmp(m->regularization,"L1")){
-      double layer_manhattan = 0.0;
+      float layer_manhattan = 0.0;
       while(temp->next_layer->type!=LOSS){
         layer_manhattan += Manhattan_distance(temp->DENSE->weights);
         temp = temp->next_layer;
@@ -104,7 +104,7 @@ void forward_pass_L2_LOSS(){
     free2d(cross_entropy_cost);
     cross_entropy_cost = NULL;
 
-    double total_cost = cost->matrix[0];
+    float total_cost = cost->matrix[0];
     
     free2d(cost);
     cost = NULL;
@@ -113,7 +113,7 @@ void forward_pass_L2_LOSS(){
   }
   else{
     cost = cross_entropy_cost;
-    double total_cost = cost->matrix[0];
+    float total_cost = cost->matrix[0];
 
     free2d(cost);
     cost = NULL;

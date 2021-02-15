@@ -8,8 +8,8 @@ typedef struct dense_arg{
   int layer_size;
   char * activation;
   char * initializer;
-  double dropout;
-  double lambda;
+  float dropout;
+  float lambda;
   char * layer_type;
 }dense_args; 
 
@@ -43,8 +43,8 @@ typedef struct dense{
   __compute backward;
   __init_params initalize_params;
   char * initializer;
-  double dropout;
-  double lambda;
+  float dropout;
+  float lambda;
   dARRAY * dropout_mask;
   int isTraining;
   char * layer_type;

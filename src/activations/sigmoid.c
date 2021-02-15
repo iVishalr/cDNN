@@ -6,11 +6,11 @@ extern __Model__ * m;
 dARRAY * forward_pass_sigmoid(){
   dARRAY * sigmoid_outf = NULL;
   sigmoid_outf = (dARRAY*)malloc(sizeof(dARRAY));
-  sigmoid_outf->matrix = (double*)calloc(m->current_layer->DENSE->cache->shape[0]*m->current_layer->DENSE->cache->shape[1],sizeof(double));
+  sigmoid_outf->matrix = (float*)calloc(m->current_layer->DENSE->cache->shape[0]*m->current_layer->DENSE->cache->shape[1],sizeof(float));
   omp_set_num_threads(8);
   #pragma omp parallel for num_threads(8) shared(m,sigmoid_outf) schedule(static)
   for(int i=0;i<m->current_layer->DENSE->cache->shape[0]*m->current_layer->DENSE->cache->shape[1];i++)
-    sigmoid_outf->matrix[i] = (double)(1.0/(double)(1+exp((double)(-1.0*m->current_layer->DENSE->cache->matrix[i]))));
+    sigmoid_outf->matrix[i] = (float)(1.0/(float)(1+exp((float)(-1.0*m->current_layer->DENSE->cache->matrix[i]))));
   sigmoid_outf->shape[0] = m->current_layer->DENSE->cache->shape[0];
   sigmoid_outf->shape[1] = m->current_layer->DENSE->cache->shape[1];
   return sigmoid_outf;

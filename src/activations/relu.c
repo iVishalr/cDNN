@@ -6,11 +6,11 @@ extern __Model__ * m;
 dARRAY * forward_pass_relu(){
   dARRAY * relu_outf = NULL;
   relu_outf = (dARRAY*)malloc(sizeof(dARRAY));
-  relu_outf->matrix = (double*)calloc(m->current_layer->DENSE->cache->shape[0]*m->current_layer->DENSE->cache->shape[1],sizeof(double));
+  relu_outf->matrix = (float*)calloc(m->current_layer->DENSE->cache->shape[0]*m->current_layer->DENSE->cache->shape[1],sizeof(float));
   omp_set_num_threads(8);
   #pragma omp parallel for num_threads(8) shared(m,relu_outf) schedule(static)
   for(int i=0;i<m->current_layer->DENSE->cache->shape[0]*m->current_layer->DENSE->cache->shape[1];i++)
-    relu_outf->matrix[i] = m->current_layer->DENSE->cache->matrix[i]>(double)0.0 ?(double)m->current_layer->DENSE->cache->matrix[i] : (double)0.0;
+    relu_outf->matrix[i] = m->current_layer->DENSE->cache->matrix[i]>(float)0.0 ?(float)m->current_layer->DENSE->cache->matrix[i] : (float)0.0;
   relu_outf->shape[0] = m->current_layer->DENSE->cache->shape[0];
   relu_outf->shape[1] = m->current_layer->DENSE->cache->shape[1];
   return relu_outf;
@@ -19,11 +19,11 @@ dARRAY * forward_pass_relu(){
 dARRAY * backward_pass_relu(){
   dARRAY * relu_outb = NULL;
   relu_outb = (dARRAY*)malloc(sizeof(dARRAY));
-  relu_outb->matrix = (double*)calloc(m->current_layer->DENSE->A->shape[0]*m->current_layer->DENSE->A->shape[1],sizeof(double));
+  relu_outb->matrix = (float*)calloc(m->current_layer->DENSE->A->shape[0]*m->current_layer->DENSE->A->shape[1],sizeof(float));
   omp_set_num_threads(8);
   #pragma omp parallel for num_threads(8) shared(m,relu_outb) schedule(static)
   for(int i=0;i<m->current_layer->DENSE->A->shape[0]*m->current_layer->DENSE->A->shape[1];i++)
-    relu_outb->matrix[i] = m->current_layer->DENSE->A->matrix[i]>(double)0.0 ? (double)1.0 : (double)0.0;
+    relu_outb->matrix[i] = m->current_layer->DENSE->A->matrix[i]>(float)0.0 ? (float)1.0 : (float)0.0;
   relu_outb->shape[0] = m->current_layer->DENSE->A->shape[0];
   relu_outb->shape[1] = m->current_layer->DENSE->A->shape[1];
   return relu_outb;

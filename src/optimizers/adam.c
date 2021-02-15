@@ -13,7 +13,7 @@ void adam(){
     }
     //calculate first momentum
     //m_dW
-    double mul_factor = 1-m->beta1;
+    float mul_factor = 1-m->beta1;
     dARRAY * term1 = mulScalar(temp->DENSE->dW,mul_factor);
     mul_factor = m->beta1;
     dARRAY * term2 = mulScalar(m->m_t_dW[layer],mul_factor);
@@ -77,8 +77,8 @@ void adam(){
     free2d(temp->DENSE->db);
     temp->DENSE->dW = temp->DENSE->db = NULL;
 
-    double first_momentum_scaling_factor = 1-pow(m->beta1,m->time_step);
-    double second_momentum_scaling_factor = 1-pow(m->beta2,m->time_step);
+    float first_momentum_scaling_factor = 1-pow(m->beta1,m->time_step);
+    float second_momentum_scaling_factor = 1-pow(m->beta2,m->time_step);
     
     dARRAY * m_t_dW_corrected = divScalar(m->m_t_dW[layer],first_momentum_scaling_factor);
     dARRAY * m_t_db_corrected = divScalar(m->m_t_db[layer],first_momentum_scaling_factor);

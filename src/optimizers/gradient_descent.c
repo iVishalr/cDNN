@@ -15,7 +15,7 @@ void SGD(){
       layer_biases = temp->DENSE->bias;
 
       if(m->lambda>0.0){
-        double mul_val = m->lambda /(double)m->Y_train->shape[1];
+        float mul_val = m->lambda /(float)m->Y_train->shape[1];
         
         dARRAY * temp_reg_weight = NULL;
         temp_reg_weight = mulScalar(layer_weights,mul_val);
@@ -44,7 +44,7 @@ void SGD(){
       else{
 
         dARRAY * reg_weight_decay = NULL;
-        double mul_value = m->lambda * m->learning_rate / m->Y_train->shape[1];
+        float mul_value = m->lambda * m->learning_rate / m->Y_train->shape[1];
         reg_weight_decay = mulScalar(layer_weights,mul_value);
         
         dARRAY * temp_weight_update = subtract(layer_weights,reg_weight_decay);

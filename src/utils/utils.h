@@ -15,7 +15,7 @@ extern "C"{
 #endif
 
   typedef struct array{
-    double * matrix;
+    float * matrix;
     int shape[2];
   }dARRAY;
 
@@ -24,29 +24,29 @@ extern "C"{
   dARRAY * eye(int * dims);
   dARRAY * randn(int * dims);
   dARRAY * add(dARRAY * MatrixA, dARRAY * MatrixB);
-  dARRAY * addScalar(dARRAY * matrix, double scalar);
+  dARRAY * addScalar(dARRAY * matrix, float scalar);
   dARRAY * subtract(dARRAY * MatrixA, dARRAY * MatrixB);
-  dARRAY * subScalar(dARRAY * matrix, double scalar);
+  dARRAY * subScalar(dARRAY * matrix, float scalar);
   dARRAY * sum(dARRAY * matrix, int axis);
   dARRAY * transpose(dARRAY *  Matrix);
   dARRAY * dot(dARRAY *  MatrixA, dARRAY *  MatrixB);
   dARRAY * multiply(dARRAY * MatrixA, dARRAY * MatrixB);
-  dARRAY * mulScalar(dARRAY * matrix, double scalar);
+  dARRAY * mulScalar(dARRAY * matrix, float scalar);
   dARRAY * divison(dARRAY * MatrixA, dARRAY * MatrixB);
-  dARRAY * divScalar(dARRAY * matrix, double scalar);
+  dARRAY * divScalar(dARRAY * matrix, float scalar);
   dARRAY * power(dARRAY * matrix, int power);
   dARRAY * b_cast(dARRAY * MatrixA, dARRAY * MatrixB);
   dARRAY * reshape(dARRAY * matrix, int * dims);
 
-  double mean(dARRAY * matrix);
-  double var(dARRAY * matrix, char * type);
-  double std(dARRAY * matrix, char * type);
-  double gaussGenerator(double * cache, int * return_cache);
-  double gaussRandom();
-  double rand_norm(double mu, double std);
+  float mean(dARRAY * matrix);
+  float var(dARRAY * matrix, char * type);
+  float std(dARRAY * matrix, char * type);
+  float gaussGenerator(float * cache, int * return_cache);
+  float gaussRandom();
+  float rand_norm(float mu, float std);
 
-  double frobenius_norm(dARRAY * matrix);
-  double Manhattan_distance(dARRAY * matrix);
+  float frobenius_norm(dARRAY * matrix);
+  float Manhattan_distance(dARRAY * matrix);
 
   int size(dARRAY * A);
   void shape(dARRAY * A);

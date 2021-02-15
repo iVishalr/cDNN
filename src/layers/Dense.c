@@ -32,7 +32,7 @@ dARRAY * init_weights(int * weights_dims,const char * init_type){
   //create a scaling factor which will be used for proper
   //initialization of layer weights according to the
   //type of activation used for the layer.
-  double scaling_factor = 0.0;
+  float scaling_factor = 0.0;
   scaling_factor = \
   m->current_layer->prev_layer->type!=INPUT ? \
   m->current_layer->prev_layer->DENSE->num_of_computation_nodes : \
@@ -103,7 +103,7 @@ void forward_pass_DENSE(){
   Wx = NULL;
 
   dARRAY * Z_drop_out = NULL;
-  if(m->current_layer->DENSE->dropout<(double)1.0){
+  if(m->current_layer->DENSE->dropout<(float)1.0){
     //If dropout has been applied to the layer we need to create a dropout mask
     // printf("creating fropout msak\n");
     int dropout_mask_dims[] = {Z->shape[0],Z->shape[1]};
@@ -113,7 +113,7 @@ void forward_pass_DENSE(){
     // #pragma omp parallel for num_threads(8) shared(dropout_mask_temp)
     for(int i=0;i<dropout_mask_dims[0]*dropout_mask_dims[1];i++){
       // printf("iteration %d\n",i);
-      dropout_mask_temp->matrix[i] = dropout_mask_temp->matrix[i]<m->current_layer->DENSE->dropout ? (double)1.0 : (double)0.0;
+      dropout_mask_temp->matrix[i] = dropout_mask_temp->matrix[i]<m->current_layer->DENSE->dropout ? (float)1.0 : (float)0.0;
     }
     m->current_layer->DENSE->dropout_mask = dropout_mask_temp;
     //we need to scale our activations so that loss doesnt change in the end as we will be forward propagating through
@@ -176,7 +176,7 @@ void forward_pass_DENSE(){
 
 void backward_pass_DENSE(){
   //Store the number of training examples in a variable
-  double num_examples = m->num_of_training_examples;
+  float num_examples = m->num_of_training_examples;
   //Assign pointers to the respective layers
   Dense_layer * layer = m->current_layer->DENSE; 
   Input_layer * prev_layer_in_features = NULL;
@@ -249,10 +249,10 @@ void backward_pass_DENSE(){
   free2d(prev_A_transpose);
   prev_A_transpose = NULL;
 
-  if(m->lambda>(double)0.0){
-    double mul_factor = m->lambda/(double)num_examples;
+  if(m->lambda>(float)0.0){
+    float mul_factor = m->lambda/(float)num_examples;
     dARRAY * regularization_grad = mulScalar(temp1_dW,mul_factor);
-    dARRAY * dW_temp = divScalar(temp1_dW,(double)num_examples);
+    dARRAY * dW_temp = divScalar(temp1_dW,(float)num_examples);
     
     free2d(temp1_dW);
     temp1_dW = NULL;
@@ -264,7 +264,7 @@ void backward_pass_DENSE(){
     regularization_grad = dW_temp = NULL;
   }
   else if(m->lambda==0.0){
-    layer->dW = divScalar(temp1_dW,(double)num_examples);
+    layer->dW = divScalar(temp1_dW,(float)num_examples);
     free2d(temp1_dW);
     temp1_dW = NULL;
   }
@@ -275,7 +275,7 @@ void backward_pass_DENSE(){
   //Now we have calculated the gradients with respect to the weights
   //calculate gradients with respect to the layer biases
   dARRAY * temp1_db = sum(layer->dZ,1);
-  layer->db = divScalar(temp1_db,(double)num_examples);
+  layer->db = divScalar(temp1_db,(float)num_examples);
   
   free2d(temp1_db);
   temp1_db = NULL;
@@ -289,7 +289,7 @@ void backward_pass_DENSE(){
     //chaining with the global or incomming gradient
     dARRAY * prev_layer_A_temp = NULL;
     prev_layer_A_temp = dot(weight_transpose,layer->dZ);
-    if(layer->dropout==(double)1.0){
+    if(layer->dropout==(float)1.0){
       prev_layer->dA = prev_layer_A_temp;
       prev_layer_A_temp = NULL;
     }

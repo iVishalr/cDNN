@@ -69,10 +69,10 @@ void __backward__(){
   }
 }
 
-double calculate_accuracy(dARRAY * predicted, dARRAY * gnd_truth){
+float calculate_accuracy(dARRAY * predicted, dARRAY * gnd_truth){
   int success = 0;
   dARRAY * temp = (dARRAY*)malloc(sizeof(dARRAY));
-  temp->matrix = (double*)calloc(predicted->shape[0]*predicted->shape[1],sizeof(double));
+  temp->matrix = (float*)calloc(predicted->shape[0]*predicted->shape[1],sizeof(float));
   for(int i = 0;i<predicted->shape[0]*predicted->shape[1];i++){
     temp->matrix[i] = predicted->matrix[i]<0.5 ? 0 : 1;
   }
@@ -84,16 +84,16 @@ double calculate_accuracy(dARRAY * predicted, dARRAY * gnd_truth){
   }
   free2d(temp);
   temp = NULL;
-  return success/(double)predicted->shape[1];
+  return success/(float)predicted->shape[1];
 }
 
 dARRAY * relu_val(dARRAY * linear_matrix){
   dARRAY * relu_outf = NULL;
   relu_outf = (dARRAY*)malloc(sizeof(dARRAY));
-  relu_outf->matrix = (double*)calloc(linear_matrix->shape[0]*linear_matrix->shape[1],sizeof(double));
+  relu_outf->matrix = (float*)calloc(linear_matrix->shape[0]*linear_matrix->shape[1],sizeof(float));
   #pragma omp parallel for num_threads(8) shared(relu_outf,linear_matrix)
   for(int i=0;i<linear_matrix->shape[0]*linear_matrix->shape[1];i++)
-    relu_outf->matrix[i] = linear_matrix->matrix[i]>(double)0.0 ?(double)linear_matrix->matrix[i] : (double)0.0;
+    relu_outf->matrix[i] = linear_matrix->matrix[i]>(float)0.0 ?(float)linear_matrix->matrix[i] : (float)0.0;
   relu_outf->shape[0] = linear_matrix->shape[0];
   relu_outf->shape[1] = linear_matrix->shape[1];
   return relu_outf;
@@ -102,10 +102,10 @@ dARRAY * relu_val(dARRAY * linear_matrix){
 dARRAY * sigmoid_val(dARRAY * linear_matrix){
   dARRAY * sigmoid_outf = NULL;
   sigmoid_outf = (dARRAY*)malloc(sizeof(dARRAY));
-  sigmoid_outf->matrix = (double*)calloc(linear_matrix->shape[0]*linear_matrix->shape[1],sizeof(double));
+  sigmoid_outf->matrix = (float*)calloc(linear_matrix->shape[0]*linear_matrix->shape[1],sizeof(float));
   #pragma omp parallel for num_threads(8) shared(sigmoid_outf,linear_matrix)
   for(int i=0;i<linear_matrix->shape[0]*linear_matrix->shape[1];i++)
-    sigmoid_outf->matrix[i] = (double)(1.0/(double)(1+exp((double)(-1.0*linear_matrix->matrix[i]))));
+    sigmoid_outf->matrix[i] = (float)(1.0/(float)(1+exp((float)(-1.0*linear_matrix->matrix[i]))));
   sigmoid_outf->shape[0] = linear_matrix->shape[0];
   sigmoid_outf->shape[1] = linear_matrix->shape[1];
   return sigmoid_outf;
@@ -113,11 +113,11 @@ dARRAY * sigmoid_val(dARRAY * linear_matrix){
 
 dARRAY * tanh_val(dARRAY * linear_matrix){
   dARRAY * tanh_out = (dARRAY*)malloc(sizeof(dARRAY));
-  tanh_out->matrix = (double*)calloc(linear_matrix->shape[0]*linear_matrix->shape[1],sizeof(double));
+  tanh_out->matrix = (float*)calloc(linear_matrix->shape[0]*linear_matrix->shape[1],sizeof(float));
   #pragma omp parallel for num_threads(8) shared(tanh_out,linear_matrix)
   for(int i=0;i<linear_matrix->shape[0]*linear_matrix->shape[1];i++){
-    double exp_res1 = exp(linear_matrix->matrix[i]);
-    double exp_res2 = exp(-1*linear_matrix->matrix[i]);
+    float exp_res1 = exp(linear_matrix->matrix[i]);
+    float exp_res2 = exp(-1*linear_matrix->matrix[i]);
     tanh_out->matrix[i] = (exp_res1 - exp_res2)/(exp_res1 + exp_res2);
   }
   tanh_out->shape[0] = linear_matrix->shape[0];
@@ -125,7 +125,7 @@ dARRAY * tanh_val(dARRAY * linear_matrix){
   return tanh_out;
 }
 
-double calculate_val_test_acc(dARRAY * input_features,dARRAY * gnd_truth){
+float calculate_val_test_acc(dARRAY * input_features,dARRAY * gnd_truth){
   dARRAY * weight_input_res = NULL;
   dARRAY * output = NULL;
   dARRAY * activation_temp = NULL;
@@ -172,14 +172,14 @@ double calculate_val_test_acc(dARRAY * input_features,dARRAY * gnd_truth){
   }
   if(m->predicting) return output->matrix[0];
   else{
-    double acc = calculate_accuracy(output,gnd_truth);
+    float acc = calculate_accuracy(output,gnd_truth);
     free2d(output);
     output = NULL;
     return acc;
   }
 }
 
-void append_to_file(double * arr ,char * filename,char * mode){
+void append_to_file(float * arr ,char * filename,char * mode){
   FILE * fp = NULL;
   fp = fopen(filename,mode);
   if(fp==NULL){
@@ -187,19 +187,19 @@ void append_to_file(double * arr ,char * filename,char * mode){
     exit(EXIT_FAILURE);
   }
   for(int i=0;i<m->num_iter;i++)
-    fprintf(fp,"%lf ",arr[i]);
+    fprintf(fp,"%f ",arr[i]);
   fclose(fp);
 }
 
 void __fit__(){
   int i = 1;
   int iterations=0;
-  double sum_cost = 0.0;
-  double sum_train_acc = 0.0;
-  double sum_train_val_acc = 0.0;
-  double * train_cost_arr = (double*)calloc(m->num_iter==-1?1000000:m->num_iter,sizeof(double));
-  double * train_acc_arr = (double*)calloc(m->num_iter==-1?1000000:m->num_iter,sizeof(double));
-  double * val_acc_arr = (double*)calloc(m->num_iter==-1?1000000:m->num_iter,sizeof(double));
+  float sum_cost = 0.0;
+  float sum_train_acc = 0.0;
+  float sum_train_val_acc = 0.0;
+  float * train_cost_arr = (float*)calloc(m->num_iter==-1?1000000:m->num_iter,sizeof(float));
+  float * train_acc_arr = (float*)calloc(m->num_iter==-1?1000000:m->num_iter,sizeof(float));
+  float * val_acc_arr = (float*)calloc(m->num_iter==-1?1000000:m->num_iter,sizeof(float));
   if(m->num_iter==-1){
     iterations = i;
   }
@@ -210,15 +210,15 @@ void __fit__(){
     sum_train_acc += calculate_accuracy(m->output,m->Y_train);
     sum_train_val_acc += calculate_val_test_acc(m->x_cv,m->Y_cv);
     if(m->print_cost){
-      m->train_cost = sum_cost/(double)i;
-      m->train_accuracy = sum_train_acc/(double)i;
-      m->cross_val_accuracy = sum_train_val_acc/(double)i;
+      m->train_cost = sum_cost/(float)i;
+      m->train_accuracy = sum_train_acc/(float)i;
+      m->cross_val_accuracy = sum_train_val_acc/(float)i;
       train_cost_arr[i-1] = m->train_cost;
       train_acc_arr[i-1] = m->train_accuracy;
       val_acc_arr[i-1] = m->cross_val_accuracy;
-      printf("\033[96m%d. Cost : \033[0m%lf ",i,m->train_cost);
-      printf("\033[96m train_acc : \033[0m%lf ",m->train_accuracy);
-      printf("\033[96m val_acc : \033[0m%lf\n",m->cross_val_accuracy);
+      printf("\033[96m%d. Cost : \033[0m%f ",i,m->train_cost);
+      printf("\033[96m train_acc : \033[0m%f ",m->train_accuracy);
+      printf("\033[96m val_acc : \033[0m%f\n",m->cross_val_accuracy);
     }
     __backward__();
     if(!strcasecmp(m->optimizer,"adam")){
@@ -256,16 +256,16 @@ void __fit__(){
 void __predict__(dARRAY * input_feature){
   m->graph->INPUT->A = input_feature;
   m->predicting = 1;
-  double prediction = calculate_val_test_acc(input_feature,NULL);
-  printf("Score : %lf\n",prediction);
+  float prediction = calculate_val_test_acc(input_feature,NULL);
+  printf("Score : %f\n",prediction);
   if(prediction<0.5) printf("CAT\n");
   else printf("DOG\n");
   m->predicting=0;
 }
 
 void __test__(){
-  double acc = calculate_val_test_acc(m->x_test,m->Y_test);
-  printf("\033[96mTest Accuracy : \033[0m%lf\n",acc);
+  float acc = calculate_val_test_acc(m->x_test,m->Y_test);
+  printf("\033[96mTest Accuracy : \033[0m%f\n",acc);
 }
 
 
@@ -282,8 +282,8 @@ void __load_model__(char * filename){
   Computation_Graph * temp = m->graph->next_layer;
 
   for(int i=0;i<m->number_of_layers-1 && temp!=NULL;i++){
-    weights[i].matrix = (double*)calloc(temp->DENSE->weights->shape[0]*temp->DENSE->weights->shape[1],sizeof(double));
-    biases[i].matrix = (double*)calloc(temp->DENSE->bias->shape[0]*temp->DENSE->bias->shape[1],sizeof(double));
+    weights[i].matrix = (float*)calloc(temp->DENSE->weights->shape[0]*temp->DENSE->weights->shape[1],sizeof(float));
+    biases[i].matrix = (float*)calloc(temp->DENSE->bias->shape[0]*temp->DENSE->bias->shape[1],sizeof(float));
     temp = temp->next_layer;
   }
   temp = m->graph->next_layer;
@@ -296,7 +296,7 @@ void __load_model__(char * filename){
   for(int i=0;i<m->number_of_layers-1;i++){
     if(temp==NULL) printf("null\n");
     for(int j=0;j<temp->DENSE->weights->shape[0]*temp->DENSE->weights->shape[1];j++){
-      fscanf(fp,"%lf ",&weights[i].matrix[j]);
+      fscanf(fp,"%f ",&weights[i].matrix[j]);
     }
     weights[i].shape[0] = temp->DENSE->weights->shape[0];
     weights[i].shape[1] = temp->DENSE->weights->shape[1];
@@ -305,7 +305,7 @@ void __load_model__(char * filename){
   temp = m->graph->next_layer;
   for(int i=0;i<m->number_of_layers-1;i++){
     for(int j=0;j<temp->DENSE->bias->shape[0]*temp->DENSE->bias->shape[1];j++){
-      fscanf(fp,"%lf ",&biases[i].matrix[j]);
+      fscanf(fp,"%f ",&biases[i].matrix[j]);
     }
     biases[i].shape[0] = temp->DENSE->bias->shape[0];
     biases[i].shape[1] = temp->DENSE->bias->shape[1];
@@ -322,10 +322,10 @@ void __load_model__(char * filename){
     temp->DENSE->bias = NULL;
 
     temp->DENSE->weights = (dARRAY*)malloc(sizeof(dARRAY));
-    temp->DENSE->weights->matrix = (double*)calloc(weights[index].shape[0]*weights[index].shape[1],sizeof(double));
+    temp->DENSE->weights->matrix = (float*)calloc(weights[index].shape[0]*weights[index].shape[1],sizeof(float));
 
     temp->DENSE->bias = (dARRAY*)malloc(sizeof(dARRAY));
-    temp->DENSE->bias->matrix = (double*)calloc(biases[index].shape[0]*biases[index].shape[1],sizeof(double));
+    temp->DENSE->bias->matrix = (float*)calloc(biases[index].shape[0]*biases[index].shape[1],sizeof(float));
     
     temp->DENSE->weights->matrix = weights[index].matrix;
 
@@ -361,13 +361,13 @@ void __save_model__(char * filename){
   Computation_Graph * temp = m->graph->next_layer;
   for(int i=0;i<m->number_of_layers-1;i++){
     for(int j=0;j<temp->DENSE->weights->shape[0]*temp->DENSE->weights->shape[1];j++)
-      fprintf(fp,"%lf ",temp->DENSE->weights->matrix[j]);
+      fprintf(fp,"%f ",temp->DENSE->weights->matrix[j]);
     temp = temp->next_layer;
   }
   temp = m->graph->next_layer;
   for(int i=0;i<m->number_of_layers-1;i++){
     for(int j=0;j<temp->DENSE->bias->shape[0]*temp->DENSE->bias->shape[1];j++)
-      fprintf(fp,"%lf ",temp->DENSE->bias->matrix[j]);
+      fprintf(fp,"%f ",temp->DENSE->bias->matrix[j]);
     temp = temp->next_layer;
   }
   fclose(fp);
@@ -382,9 +382,9 @@ dARRAY * load_x_train(int * dims){
     exit(EXIT_FAILURE);
   }
   dARRAY * x_train = (dARRAY*)malloc(sizeof(dARRAY));
-  x_train->matrix = (double*)calloc(dims[0]*dims[1],sizeof(double));
+  x_train->matrix = (float*)calloc(dims[0]*dims[1],sizeof(float));
   for(int j=0;j<dims[0]*dims[1];j++){
-    fscanf(fp,"%lf ",&x_train->matrix[j]);
+    fscanf(fp,"%f ",&x_train->matrix[j]);
   }
   x_train->shape[0] = dims[1];
   x_train->shape[1] = dims[0];
@@ -404,9 +404,9 @@ dARRAY * load_y_train(int * dims){
     exit(EXIT_FAILURE);
   }
   dARRAY * Y_train = (dARRAY*)malloc(sizeof(dARRAY));
-  Y_train->matrix = (double*)calloc(dims[0]*dims[1],sizeof(double));
+  Y_train->matrix = (float*)calloc(dims[0]*dims[1],sizeof(float));
   for(int j=0;j<dims[0]*dims[1];j++){
-    fscanf(fp,"%lf ",&Y_train->matrix[j]);
+    fscanf(fp,"%f ",&Y_train->matrix[j]);
   }
   Y_train->shape[0] = dims[1];
   Y_train->shape[1] = dims[0];
@@ -426,9 +426,9 @@ dARRAY * load_x_cv(int * dims){
     exit(EXIT_FAILURE);
   }
   dARRAY * x_cv = (dARRAY*)malloc(sizeof(dARRAY));
-  x_cv->matrix = (double*)calloc(dims[0]*dims[1],sizeof(double));
+  x_cv->matrix = (float*)calloc(dims[0]*dims[1],sizeof(float));
   for(int j=0;j<dims[0]*dims[1];j++){
-    fscanf(fp,"%lf ",&x_cv->matrix[j]);
+    fscanf(fp,"%f ",&x_cv->matrix[j]);
   }
   x_cv->shape[0] = dims[1];
   x_cv->shape[1] = dims[0];
@@ -448,9 +448,9 @@ dARRAY * load_y_cv(int * dims){
     exit(EXIT_FAILURE);
   }
   dARRAY * Y_cv = (dARRAY*)malloc(sizeof(dARRAY));
-  Y_cv->matrix = (double*)calloc(dims[0]*dims[1],sizeof(double));
+  Y_cv->matrix = (float*)calloc(dims[0]*dims[1],sizeof(float));
   for(int j=0;j<dims[0]*dims[1];j++){
-    fscanf(fp,"%lf ",&Y_cv->matrix[j]);
+    fscanf(fp,"%f ",&Y_cv->matrix[j]);
   }
   Y_cv->shape[0] = dims[1];
   Y_cv->shape[1] = dims[0];
@@ -470,9 +470,9 @@ dARRAY * load_x_test(int * dims){
     exit(EXIT_FAILURE);
   }
   dARRAY * x_test_temp = (dARRAY*)malloc(sizeof(dARRAY));
-  x_test_temp->matrix = (double*)calloc(dims[0]*dims[1],sizeof(double));
+  x_test_temp->matrix = (float*)calloc(dims[0]*dims[1],sizeof(float));
   for(int j=0;j<dims[0]*dims[1];j++){
-    fscanf(fp,"%lf ",&x_test_temp->matrix[j]);
+    fscanf(fp,"%f ",&x_test_temp->matrix[j]);
   }
   x_test_temp->shape[0] = dims[1];
   x_test_temp->shape[1] = dims[0];
@@ -491,9 +491,9 @@ dARRAY * load_y_test(int * dims){
     exit(EXIT_FAILURE);
   }
   dARRAY * Y_test = (dARRAY*)malloc(sizeof(dARRAY));
-  Y_test->matrix = (double*)calloc(dims[0]*dims[1],sizeof(double));
+  Y_test->matrix = (float*)calloc(dims[0]*dims[1],sizeof(float));
   for(int j=0;j<dims[0]*dims[1];j++){
-    fscanf(fp,"%lf ",&Y_test->matrix[j]);
+    fscanf(fp,"%f ",&Y_test->matrix[j]);
   }
   Y_test->shape[0] = dims[1];
   Y_test->shape[1] = dims[0];
@@ -513,9 +513,9 @@ dARRAY * load_test_image(char * filename){
     exit(EXIT_FAILURE);
   }
   dARRAY * image = (dARRAY*)malloc(sizeof(dARRAY));
-  image->matrix = (double*)calloc(12288*1,sizeof(double));
+  image->matrix = (float*)calloc(12288*1,sizeof(float));
   for(int j=0;j<12288;j++){
-    fscanf(fp,"%lf ",&image->matrix[j]);
+    fscanf(fp,"%f ",&image->matrix[j]);
   }
   image->shape[0] = 12288;
   image->shape[1] = 1;

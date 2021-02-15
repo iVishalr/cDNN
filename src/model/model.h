@@ -10,17 +10,17 @@ typedef struct model_args{
   dARRAY * Y_cv;
   dARRAY * x_test;
   dARRAY * Y_test;
-  double learning_rate;
+  float learning_rate;
   int mini_batch_size;
   int num_iter;
   char * optimizer;
   char * loss;
   char * regularization;
-  double lambda;
+  float lambda;
   int print_cost;
-  double beta;
-  double beta1;
-  double beta2;
+  float beta;
+  float beta1;
+  float beta2;
   int checkpoint_every;
 }Model_args;
 
@@ -48,8 +48,8 @@ extern "C"{
   void __summary__();
   void __predict__();
   void __test__();
-  double calculate_accuracy(dARRAY * predicted, dARRAY * gnd_truth);
-  double calculate_test_val_acc(dARRAY * input_features,dARRAY * gnd_truth);
+  float calculate_accuracy(dARRAY * predicted, dARRAY * gnd_truth);
+  float calculate_test_val_acc(dARRAY * input_features,dARRAY * gnd_truth);
   dARRAY * relu_val(dARRAY * linear_matrix);
   dARRAY * sigmoid_val(dARRAY * linear_matrix);
   dARRAY * tanh_val(dARRAY * linear_matrix);
@@ -70,7 +70,7 @@ typedef struct model{
   Computation_Graph * current_layer;
   int number_of_layers;
 
-  double learning_rate;
+  float learning_rate;
   int mini_batch_size;
   dARRAY * x_train;
   dARRAY * Y_train;
@@ -85,28 +85,28 @@ typedef struct model{
   int num_iter;
   char * optimizer;
   char * regularization;
-  double lambda;
+  float lambda;
   char * loss;
-  double beta;
-  double beta1;
-  double beta2;
+  float beta;
+  float beta1;
+  float beta2;
   int time_step;
   dARRAY * m_t_dW[1024];
   dARRAY * v_t_dW[1024];
   dARRAY * m_t_db[1024];
   dARRAY * v_t_db[1024];
-  double epsilon;
+  float epsilon;
   dARRAY * cache_dW[1024];
   dARRAY * cache_db[1024];
 
   int input_size;
   int output_size;
   long int total_parameters;
-  double train_cost;
-  double iter_cost;
-  double train_accuracy;
-  double test_accuracy;
-  double cross_val_accuracy;
+  float train_cost;
+  float iter_cost;
+  float train_accuracy;
+  float test_accuracy;
+  float cross_val_accuracy;
   int predicting;
   int ckpt_every;
 
