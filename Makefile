@@ -1,20 +1,30 @@
+#-----------------------
+#Compiler Configurations
+#-----------------------
 CC=gcc-10
 CCL=clang 
-ATTR= -funroll-loops -O3 -fopenmp -Ofast -ffp-contract=fast -I /opt/OpenBLAS/include/ -L/opt/OpenBLAS/lib -lopenblas
+ATTR= -funroll-loops -O3 -fopenmp -Ofast -ffp-contract=fast
 CFLAGS=-c -Wall -Wrestrict
+
+#-----------
+#Directories
+#-----------
 BUILD=build
 SRC=src
+
+#----------------
+#Code Directories
+#----------------
 UTILS=utils
 TEST=test
 ACTIVATIONS=activations
-RELU=relu
-SIGMOID=sigmoid
-TANH=tanh
 LAYERS=layers
 LOSS=loss_functions
 OPTIMIZERS=optimizers
 MODEL=model
 PLOT=plot
+
+#Default target to compile the whole project
 all: 
 	@if ! test -d $(BUILD); \
 		then echo "\033[93msetting up build directory...\033[0m"; mkdir -p build;\
@@ -22,12 +32,14 @@ all:
 	@if ! test -d bin; \
 		then echo "\033[93msetting up bin directory...\033[0m"; mkdir -p bin; \
   	fi;
-	@$(MAKE) env start
-# $(BUILD)/test_utils.o	
-env:
-	export OPENBLAS_NUM_THREADS=4
+	@$(MAKE) project
 
-start:  $(BUILD)/utils.o $(BUILD)/relu.o $(BUILD)/sigmoid.o $(BUILD)/tanh.o \
+.PHONY: targets
+targets:
+	@echo "Available targets in the Makefile";
+	@$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$'
+
+project:  $(BUILD)/utils.o $(BUILD)/relu.o $(BUILD)/sigmoid.o $(BUILD)/tanh.o \
 $(BUILD)/neural_net.o $(BUILD)/Dense.o $(BUILD)/Input.o $(BUILD)/cross_entropy_loss.o \
 $(BUILD)/gradient_descent.o $(BUILD)/adam.o $(BUILD)/adagrad.o $(BUILD)/rmsprop.o \
 $(BUILD)/model.o \
@@ -37,7 +49,6 @@ $(BUILD)/plot.o $(BUILD)/test_network.o
 	$(BUILD)/gradient_descent.o $(BUILD)/adam.o $(BUILD)/adagrad.o $(BUILD)/rmsprop.o \
 	$(BUILD)/model.o $(BUILD)/plot.o $(BUILD)/test_network.o
 	@echo "\033[92mBuild Successful\033[0m"
-	@echo "\033[92mCompiled Test\033[0m"
 $(BUILD)/utils.o: $(SRC)/$(UTILS)/utils.c
 	$(CC) $(CFLAGS) $(ATTR) -o $@ $<
 $(BUILD)/relu.o: $(SRC)/$(ACTIVATIONS)/relu.c
@@ -68,8 +79,11 @@ $(BUILD)/plot.o: $(SRC)/$(PLOT)/plot.c
 	$(CC) $(CFLAGS) $(ATTR) -o $@ $<
 $(BUILD)/test_network.o: $(SRC)/$(TEST)/test_network.c
 	$(CC) $(CFLAGS) $(ATTR) -o $@ $<
+
+%:
+	@echo "\033[96mPlease enter a valid target\033[0m";
+	@$(MAKE) targets
+
 clean:
 	@rm -rf $(BUILD) a.out a.exe
 	@echo "\033[92mDone\033[0m"
-
-# -Xpreprocessor -fopenmp -I/usr/local/include -L/usr/local/lib
