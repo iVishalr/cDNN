@@ -1,7 +1,7 @@
 #ifndef ACTIVATIONS_H
 #define ACTIVATIONS_H
 
-#include "../utils.h"
+#include "../utils/utils.h"
 
 typedef struct{
   dARRAY * input;

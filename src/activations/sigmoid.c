@@ -1,5 +1,5 @@
-#include "../activations.h"
-#include "../../../model/model.h"
+#include "./activations.h"
+#include "../model/model.h"
 
 extern __Model__ * m;
 
@@ -17,13 +17,6 @@ dARRAY * forward_pass_sigmoid(){
 }
 
 dARRAY * backward_pass_sigmoid(){
-  // printf("Current layer's (sigmoid) activation : \n");
-  // for(int i=0;i<m->current_layer->DENSE->A->shape[0];i++){
-  //   for(int j=0;j<m->current_layer->DENSE->A->shape[1];j++){
-  //     printf("%lf ",m->current_layer->DENSE->A->matrix[i*m->current_layer->DENSE->A->shape[1]+j]);
-  //   }
-  //   printf("\n");
-  // }
   dARRAY * sigmoid_outb = NULL;
   dARRAY * temp = NULL;
   dARRAY * one = NULL;

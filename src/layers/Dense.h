@@ -2,7 +2,7 @@
 #define DENSE_LAYER_H_
 
 #include "../utils/utils.h"
-#include "../utils/Activations/activations.h"
+#include "../activations/activations.h"
 
 typedef struct dense_arg{
   int layer_size;

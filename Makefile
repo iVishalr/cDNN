@@ -1,13 +1,12 @@
 CC=gcc-10
 CCL=clang 
 ATTR= -funroll-loops -O3 -fopenmp -Ofast -ffp-contract=fast -I /opt/OpenBLAS/include/ -L/opt/OpenBLAS/lib -lopenblas
-# ATTR= -Xpreprocessor -fopenmp -I/usr/local/include -L/usr/local/lib -framework Accelerate
 CFLAGS=-c -Wall -Wrestrict
 BUILD=build
 SRC=src
 UTILS=utils
 TEST=test
-ACTIVATIONS=Activations
+ACTIVATIONS=activations
 RELU=relu
 SIGMOID=sigmoid
 TANH=tanh
@@ -41,11 +40,11 @@ $(BUILD)/plot.o $(BUILD)/test_network.o
 	@echo "\033[92mCompiled Test\033[0m"
 $(BUILD)/utils.o: $(SRC)/$(UTILS)/utils.c
 	$(CC) $(CFLAGS) $(ATTR) -o $@ $<
-$(BUILD)/relu.o: $(SRC)/$(UTILS)/$(ACTIVATIONS)/$(RELU)/relu.c
+$(BUILD)/relu.o: $(SRC)/$(ACTIVATIONS)/relu.c
 	$(CC) $(CFLAGS) $(ATTR) -o $@ $<
-$(BUILD)/sigmoid.o: $(SRC)/$(UTILS)/$(ACTIVATIONS)/$(SIGMOID)/sigmoid.c
+$(BUILD)/sigmoid.o: $(SRC)/$(ACTIVATIONS)/sigmoid.c
 	$(CC) $(CFLAGS) $(ATTR) -o $@ $<
-$(BUILD)/tanh.o: $(SRC)/$(UTILS)/$(ACTIVATIONS)/$(TANH)/tanh.c
+$(BUILD)/tanh.o: $(SRC)/$(ACTIVATIONS)/tanh.c
 	$(CC) $(CFLAGS) $(ATTR) -o $@ $<
 $(BUILD)/Dense.o: $(SRC)/$(LAYERS)/Dense.c
 	$(CC) $(CFLAGS) $(ATTR) -o $@ $<

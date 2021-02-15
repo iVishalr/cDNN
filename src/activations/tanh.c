@@ -1,5 +1,5 @@
-#include "../activations.h"
-#include "../../../model/model.h"
+#include "./activations.h"
+#include "../model/model.h"
 
 extern __Model__ * m;
 

@@ -1,5 +1,5 @@
-#include "../activations.h"
-#include "../../../model/model.h"
+#include "./activations.h"
+#include "../model/model.h"
 
 extern __Model__ * m;
 
@@ -17,13 +17,6 @@ dARRAY * forward_pass_relu(){
 }
 
 dARRAY * backward_pass_relu(){
-  // printf("Current layer's (relu) activation : \n");
-  // for(int i=0;i<m->current_layer->DENSE->A->shape[0];i++){
-  //   for(int j=0;j<m->current_layer->DENSE->A->shape[1];j++){
-  //     printf("%lf ",m->current_layer->DENSE->A->matrix[i*m->current_layer->DENSE->A->shape[1]+j]);
-  //   }
-  //   printf("\n");
-  // }
   dARRAY * relu_outb = NULL;
   relu_outb = (dARRAY*)malloc(sizeof(dARRAY));
   relu_outb->matrix = (double*)calloc(m->current_layer->DENSE->A->shape[0]*m->current_layer->DENSE->A->shape[1],sizeof(double));
@@ -54,4 +47,3 @@ dARRAY * (relu)(ReLu_args args){
   free(r);
   r = NULL;
 }
-

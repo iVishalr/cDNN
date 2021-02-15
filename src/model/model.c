@@ -374,7 +374,7 @@ void __save_model__(char * filename){
   fp = NULL;
 }
 
-void load_x_train(int * dims){
+dARRAY * load_x_train(int * dims){
   FILE * fp = NULL;
   fp = fopen("./data/X_train.data","rb");
   if(fp==NULL){
@@ -389,13 +389,14 @@ void load_x_train(int * dims){
   x_train->shape[0] = dims[1];
   x_train->shape[1] = dims[0];
 
-  m->x_train = transpose(x_train);
+  dARRAY * X_train = transpose(x_train);
   free2d(x_train);
   x_train = NULL;
   fclose(fp);
+  return X_train;
 }
 
-void load_y_train(int * dims){
+dARRAY * load_y_train(int * dims){
   FILE * fp = NULL;
   fp = fopen("./data/y_train.data","rb");
   if(fp==NULL){
@@ -410,13 +411,14 @@ void load_y_train(int * dims){
   Y_train->shape[0] = dims[1];
   Y_train->shape[1] = dims[0];
 
-  m->Y_train = transpose(Y_train);
+  dARRAY * y_train = transpose(Y_train);
   free2d(Y_train);
   Y_train = NULL;
   fclose(fp);
+  return y_train;
 }
 
-void load_x_cv(int * dims){
+dARRAY * load_x_cv(int * dims){
   FILE * fp = NULL;
   fp = fopen("./data/X_cv.data","rb");
   if(fp==NULL){
@@ -431,13 +433,14 @@ void load_x_cv(int * dims){
   x_cv->shape[0] = dims[1];
   x_cv->shape[1] = dims[0];
 
-  m->x_cv = transpose(x_cv);
+  dARRAY * X_CV = transpose(x_cv);
   free2d(x_cv);
   x_cv = NULL;
   fclose(fp);
+  return X_CV;
 }
 
-void load_y_cv(int * dims){
+dARRAY * load_y_cv(int * dims){
   FILE * fp = NULL;
   fp = fopen("./data/y_cv.data","rb");
   if(fp==NULL){
@@ -452,13 +455,14 @@ void load_y_cv(int * dims){
   Y_cv->shape[0] = dims[1];
   Y_cv->shape[1] = dims[0];
 
-  m->Y_cv = transpose(Y_cv);
+  dARRAY * y_cv = transpose(Y_cv);
   free2d(Y_cv);
   Y_cv = NULL;
   fclose(fp);
+  return y_cv;
 }
 
-void load_x_test(int * dims){
+dARRAY * load_x_test(int * dims){
   FILE * fp = NULL;
   fp = fopen("./data/X_test.data","rb");
   if(fp==NULL){
@@ -472,13 +476,14 @@ void load_x_test(int * dims){
   }
   x_test_temp->shape[0] = dims[1];
   x_test_temp->shape[1] = dims[0];
-  m->x_test = transpose(x_test_temp);
+  dARRAY * x_test = transpose(x_test_temp);
   free2d(x_test_temp);
   x_test_temp = NULL;
   fclose(fp);
+  return x_test;
 }
 
-void load_y_test(int * dims){
+dARRAY * load_y_test(int * dims){
   FILE * fp = NULL;
   fp = fopen("./data/y_test.data","rb");
   if(fp==NULL){
@@ -493,10 +498,11 @@ void load_y_test(int * dims){
   Y_test->shape[0] = dims[1];
   Y_test->shape[1] = dims[0];
 
-  m->Y_test = transpose(Y_test);
+  dARRAY * y_test = transpose(Y_test);
   free2d(Y_test);
   Y_test = NULL;
   fclose(fp);
+  return y_test;
 }
 
 dARRAY * load_test_image(char * filename){

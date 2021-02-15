@@ -1,6 +1,8 @@
 {
   "C_Cpp.default.intelliSenseMode": "gcc-x64",
   "files.associations": {
-    "random": "c"
+    "random": "c",
+    "activations.h": "c",
+    "model.h": "c"
   }
 }

@@ -80,7 +80,7 @@ plt.xticks(ticks=ticks,fontsize=7)
 plt.yticks(fontsize=7)
 plt.legend()
 plt.title("Model Metrics over "+sys.argv[1]+" iterations",pad=30,fontsize=15)
-plt.savefig('acc.png', bbox_inches='tight')
+plt.savefig('Model_Metrics.png', bbox_inches='tight')
 
 
 os.remove(COST_PATH)

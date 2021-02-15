@@ -53,12 +53,12 @@ extern "C"{
   dARRAY * relu_val(dARRAY * linear_matrix);
   dARRAY * sigmoid_val(dARRAY * linear_matrix);
   dARRAY * tanh_val(dARRAY * linear_matrix);
-  void load_x_train(int * dims);
-  void load_y_train(int * dims);
-  void load_x_cv(int * dims);
-  void load_y_cv(int * dims);
-  void load_x_test(int * dims);
-  void load_y_test(int * dims);
+  dARRAY * load_x_train(int * dims);
+  dARRAY * load_y_train(int * dims);
+  dARRAY * load_x_cv(int * dims);
+  dARRAY * load_y_cv(int * dims);
+  dARRAY * load_x_test(int * dims);
+  dARRAY * load_y_test(int * dims);
   dARRAY * load_test_image(char * filename);
   void (destroy_model)();
 #ifdef __cplusplus
