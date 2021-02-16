@@ -445,6 +445,23 @@ dARRAY * power(dARRAY * matrix, int power){
   return result;
 }
 
+dARRAY * exponentional(dARRAY * matrix){
+  if(matrix==NULL){
+    printf("\033[1;31mError:\033[93m Matrix is empty. Call power() only after intializing dARRAY object.\033[0m\n");
+    return NULL;
+  }
+  dARRAY * result = (dARRAY*)malloc(sizeof(dARRAY));
+  result->matrix = (float*)calloc(matrix->shape[0]*matrix->shape[1],sizeof(float));
+  omp_set_num_threads(8);
+  #pragma omp parallel for num_threads(8) shared(matrix,result) schedule(static)
+  for(int i=0; i<matrix->shape[0]*matrix->shape[1]; i++){
+    result->matrix[i] = exp(matrix->matrix[i]);
+  }
+  result->shape[0] = matrix->shape[0];
+  result->shape[1] = matrix->shape[1];
+  return result;
+}
+
 /**!
  * Function performs broadcasting of matrices 
  * Refer to www.numpy.org for detailed explanation of broadcasting. 

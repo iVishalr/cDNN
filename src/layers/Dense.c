@@ -122,6 +122,8 @@ void forward_pass_DENSE(){
     // printf("done with dropout\n");
     // free2d(dropout_mask_temp);
     dropout_mask_temp = NULL;
+    free2d(m->current_layer->DENSE->cache);
+    m->current_layer->DENSE->cache = Z_drop_out;
   }
   //Compute the activation of this layer depending on the choice of activation selected.
   if(!strcasecmp(m->current_layer->DENSE->activation,"relu")){
@@ -155,6 +157,19 @@ void forward_pass_DENSE(){
       Z_drop_out = NULL;
     }
   }
+  else if(!strcasecmp(m->current_layer->DENSE->activation,"softmax")){
+    // printf("calculating softmax act\n");
+    if(m->current_layer->DENSE->dropout==1.0) {
+      m->current_layer->DENSE->A = softmax(.input=Z); 
+    }
+    else{
+      // printf("dropout enabled!\n");
+      m->current_layer->DENSE->A = softmax(.input=Z_drop_out);
+      free2d(Z_drop_out);
+      Z_drop_out = NULL;
+    }
+    // printf("done softmax act\n");
+  }
   else{
     //if user didn't want to use any activation, pass Z itself as the output
     if(m->current_layer->DENSE->dropout==1.0) {
@@ -176,6 +191,7 @@ void forward_pass_DENSE(){
 
 void backward_pass_DENSE(){
   //Store the number of training examples in a variable
+  // printf("in BF\n");
   float num_examples = m->num_of_training_examples;
   //Assign pointers to the respective layers
   Dense_layer * layer = m->current_layer->DENSE; 
@@ -187,7 +203,6 @@ void backward_pass_DENSE(){
   }
   else 
     prev_layer = m->current_layer->prev_layer->DENSE;
-
   //Compute g'(z)
   //where g is the activation function used for the layer
   //g' is the differentiation of the activation function
@@ -205,14 +220,29 @@ void backward_pass_DENSE(){
     //local grad of tanh gate
     local_act_grad = TanH(.input=layer->cache,.status=1);
   }
+  else if(!strcasecmp(layer->activation,"softmax")){
+    //local grad of tanh gate
+    local_act_grad = softmax(.input=layer->cache,.status=1);
+  }
+  else{
+    local_act_grad = layer->cache;
+  }
   if(m->current_layer->next_layer->type==LOSS){
     //If we are on the last layer, then the gradient flowing
     //into the Z computation block will be by chain rule
     // dZ = local_act_grad * global_grad (loss_layer->grad_out)
-    layer->dZ = multiply(local_act_grad,m->current_layer->next_layer->LOSS->grad_out);
-    free2d(local_act_grad);
-    free2d(m->current_layer->next_layer->LOSS->grad_out);
-    local_act_grad = m->current_layer->next_layer->LOSS->grad_out = NULL;
+    if(!strcasecmp(m->current_layer->DENSE->activation,"softmax")){
+      layer->dZ = subtract(m->output,m->current_layer->next_layer->LOSS->gnd_truth);
+      free2d(local_act_grad);
+      free2d(m->current_layer->next_layer->LOSS->grad_out);
+      local_act_grad = m->current_layer->next_layer->LOSS->grad_out = NULL;
+    }
+    else{
+      layer->dZ = multiply(local_act_grad,m->current_layer->next_layer->LOSS->grad_out);
+      free2d(local_act_grad);
+      free2d(m->current_layer->next_layer->LOSS->grad_out);
+      local_act_grad = m->current_layer->next_layer->LOSS->grad_out = NULL;
+    }
   }
   else{
     //If we are not on the last layer then, we need to calculate dZ differently

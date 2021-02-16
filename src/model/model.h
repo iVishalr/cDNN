@@ -53,6 +53,7 @@ extern "C"{
   dARRAY * relu_val(dARRAY * linear_matrix);
   dARRAY * sigmoid_val(dARRAY * linear_matrix);
   dARRAY * tanh_val(dARRAY * linear_matrix);
+  dARRAY * softmax_val(dARRAY * linear_matrix);
   dARRAY * load_x_train(int * dims);
   dARRAY * load_y_train(int * dims);
   dARRAY * load_x_cv(int * dims);

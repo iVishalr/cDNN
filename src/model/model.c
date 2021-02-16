@@ -82,6 +82,7 @@ float calculate_accuracy(dARRAY * predicted, dARRAY * gnd_truth){
   for(int i = 0;i<predicted->shape[0]*predicted->shape[1];i++){
     if(temp->matrix[i]==gnd_truth->matrix[i]) success++;
   }
+  if(predicted->shape[0]!=1) success = success/predicted->shape[0];
   free2d(temp);
   temp = NULL;
   return success/(float)predicted->shape[1];
@@ -125,7 +126,35 @@ dARRAY * tanh_val(dARRAY * linear_matrix){
   return tanh_out;
 }
 
-float calculate_val_test_acc(dARRAY * input_features,dARRAY * gnd_truth){
+dARRAY * softmax_val(dARRAY * linear_matrix){
+  dARRAY * softmax_outf = NULL;
+  dARRAY * exp_sub_max = exponentional(linear_matrix);
+
+  dARRAY * div_factor = (dARRAY*)malloc(sizeof(dARRAY));
+  div_factor->matrix = (float*)calloc(exp_sub_max->shape[1],sizeof(float));
+  
+  dARRAY * temp = transpose(exp_sub_max);
+  for(int i=0;i<temp->shape[0];i++){
+    float sum_of_exps=0.0;
+    for(int j=0;j<temp->shape[1];j++){
+      sum_of_exps+= temp->matrix[i*temp->shape[1]+j];
+    }
+    div_factor->matrix[i] = sum_of_exps;
+  }
+  div_factor->shape[0] = 1;
+  div_factor->shape[1] = exp_sub_max->shape[1];
+
+  softmax_outf = divison(exp_sub_max,div_factor);
+
+  free2d(exp_sub_max);
+  free2d(div_factor);
+  free2d(temp);
+  temp = exp_sub_max = div_factor = NULL; 
+
+  return softmax_outf;
+}
+
+dARRAY * calculate_val_test_acc(dARRAY * input_features,dARRAY * gnd_truth){
   dARRAY * weight_input_res = NULL;
   dARRAY * output = NULL;
   dARRAY * activation_temp = NULL;
@@ -158,6 +187,10 @@ float calculate_val_test_acc(dARRAY * input_features,dARRAY * gnd_truth){
       activation_temp = tanh_val(Z);
       free2d(Z);
     }
+    else if(!strcasecmp(temp->DENSE->activation,"softmax")){
+      activation_temp = softmax_val(Z);
+      free2d(Z);
+    }
     else{
       activation_temp = Z;
     }
@@ -170,12 +203,16 @@ float calculate_val_test_acc(dARRAY * input_features,dARRAY * gnd_truth){
     temp = temp->next_layer;
     Z = NULL;
   }
-  if(m->predicting) return output->matrix[0];
+  if(m->predicting) return output;
   else{
     float acc = calculate_accuracy(output,gnd_truth);
     free2d(output);
     output = NULL;
-    return acc;
+
+    dARRAY * return_val = (dARRAY*)malloc(sizeof(dARRAY));
+    return_val->matrix = &acc;
+
+    return return_val;
   }
 }
 
@@ -208,7 +245,8 @@ void __fit__(){
     __forward__();
     sum_cost += m->iter_cost;
     sum_train_acc += calculate_accuracy(m->output,m->Y_train);
-    sum_train_val_acc += calculate_val_test_acc(m->x_cv,m->Y_cv);
+    // dARRAY * temp = calculate_val_test_acc(m->x_cv,m->Y_cv);
+    // sum_train_val_acc += *temp->matrix;
     if(m->print_cost){
       m->train_cost = sum_cost/(float)i;
       m->train_accuracy = sum_train_acc/(float)i;
@@ -247,6 +285,8 @@ void __fit__(){
     }
     i++;
     if(m->num_iter==-1) iterations = i;
+    // free(temp);
+    // temp = NULL;
   }
   append_to_file(train_cost_arr,"./bin/cost.data","ab+");
   append_to_file(train_acc_arr,"./bin/train_acc.data","ab+");
@@ -256,16 +296,16 @@ void __fit__(){
 void __predict__(dARRAY * input_feature){
   m->graph->INPUT->A = input_feature;
   m->predicting = 1;
-  float prediction = calculate_val_test_acc(input_feature,NULL);
-  printf("Score : %f\n",prediction);
-  if(prediction<0.5) printf("CAT\n");
+  dARRAY * prediction = calculate_val_test_acc(input_feature,NULL);
+  printf("Score : [%f,%f]\n",prediction->matrix[0],prediction->matrix[1]);
+  if(prediction->matrix[0]>=0.5 && prediction->matrix[1]<0.5) printf("CAT\n");
   else printf("DOG\n");
   m->predicting=0;
 }
 
 void __test__(){
-  float acc = calculate_val_test_acc(m->x_test,m->Y_test);
-  printf("\033[96mTest Accuracy : \033[0m%f\n",acc);
+  dARRAY * acc = calculate_val_test_acc(m->x_test,m->Y_test);
+  printf("\033[96mTest Accuracy : \033[0m%f\n",acc->matrix[0]);
 }
 
 

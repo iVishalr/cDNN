@@ -39,12 +39,12 @@ targets:
 	@echo "Available targets in the Makefile";
 	@$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$'
 
-project:  $(BUILD)/utils.o $(BUILD)/relu.o $(BUILD)/sigmoid.o $(BUILD)/tanh.o \
+project:  $(BUILD)/utils.o $(BUILD)/relu.o $(BUILD)/sigmoid.o $(BUILD)/tanh.o $(BUILD)/softmax.o \
 $(BUILD)/neural_net.o $(BUILD)/Dense.o $(BUILD)/Input.o $(BUILD)/cross_entropy_loss.o \
 $(BUILD)/gradient_descent.o $(BUILD)/adam.o $(BUILD)/adagrad.o $(BUILD)/rmsprop.o \
 $(BUILD)/model.o \
 $(BUILD)/plot.o $(BUILD)/test_network.o 
-	$(CC) $(ATTR) $(BUILD)/utils.o $(BUILD)/relu.o $(BUILD)/sigmoid.o $(BUILD)/tanh.o \
+	$(CC) $(ATTR) $(BUILD)/utils.o $(BUILD)/relu.o $(BUILD)/sigmoid.o $(BUILD)/tanh.o $(BUILD)/softmax.o \
 	$(BUILD)/neural_net.o $(BUILD)/Dense.o $(BUILD)/Input.o $(BUILD)/cross_entropy_loss.o \
 	$(BUILD)/gradient_descent.o $(BUILD)/adam.o $(BUILD)/adagrad.o $(BUILD)/rmsprop.o \
 	$(BUILD)/model.o $(BUILD)/plot.o $(BUILD)/test_network.o
@@ -56,6 +56,8 @@ $(BUILD)/relu.o: $(SRC)/$(ACTIVATIONS)/relu.c
 $(BUILD)/sigmoid.o: $(SRC)/$(ACTIVATIONS)/sigmoid.c
 	$(CC) $(CFLAGS) $(ATTR) -o $@ $<
 $(BUILD)/tanh.o: $(SRC)/$(ACTIVATIONS)/tanh.c
+	$(CC) $(CFLAGS) $(ATTR) -o $@ $<
+$(BUILD)/softmax.o: $(SRC)/$(ACTIVATIONS)/softmax.c
 	$(CC) $(CFLAGS) $(ATTR) -o $@ $<
 $(BUILD)/Dense.o: $(SRC)/$(LAYERS)/Dense.c
 	$(CC) $(CFLAGS) $(ATTR) -o $@ $<
