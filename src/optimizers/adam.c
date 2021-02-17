@@ -79,7 +79,6 @@ void adam(){
 
     float first_momentum_scaling_factor = 1-pow(m->beta1,m->time_step);
     float second_momentum_scaling_factor = 1-pow(m->beta2,m->time_step);
-    
     dARRAY * m_t_dW_corrected = divScalar(m->m_t_dW[layer],first_momentum_scaling_factor);
     dARRAY * m_t_db_corrected = divScalar(m->m_t_db[layer],first_momentum_scaling_factor);
 
@@ -132,8 +131,9 @@ void adam(){
     free2d(update_term2_b);
     layer_weights = layer_biases = update_term2_w = update_term2_b = NULL;
 
-    if(temp->DENSE->dropout_mask!=NULL)
+    if(temp->DENSE->dropout_mask!=NULL){
       free2d(temp->DENSE->dropout_mask);
+    }
     if(temp->DENSE->A!=NULL)
       free2d(temp->DENSE->A);
     if(temp->DENSE->cache!=NULL)

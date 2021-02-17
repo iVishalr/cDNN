@@ -109,6 +109,7 @@ typedef struct model{
   float test_accuracy;
   float cross_val_accuracy;
   int predicting;
+  int testing;
   int ckpt_every;
 
   __model_init__ init;

@@ -6,16 +6,16 @@ int main(){
   
   create_model();
   
-  int x_train_dims[] = {12288,100};
+  int x_train_dims[] = {12288,4000};
   dARRAY * x_train = load_x_train(x_train_dims);
 
-  int x_cv_dims[] = {12288,100};
+  int x_cv_dims[] = {12288,1000};
   dARRAY * x_cv = load_x_cv(x_cv_dims);
   
-  int y_train_dims[] = {2,100};
+  int y_train_dims[] = {2,4000};
   dARRAY * y_train = load_y_train(y_train_dims);
   
-  int y_cv_dims[] = {2,100};
+  int y_cv_dims[] = {2,1000};
   dARRAY * y_cv = load_y_cv(y_cv_dims);
   
   int x_test_dims[] = {12288,1000};
@@ -25,11 +25,11 @@ int main(){
   dARRAY * y_test = load_y_test(y_test_dims);
 
   Input(.layer_size=12288);
-  Dense(.layer_size=64,.activation="relu",.initializer="he",.layer_type="hidden");
-  Dense(.layer_size=32,.activation="relu",.initializer="he",.layer_type="hidden");
+  Dense(.layer_size=64,.activation="relu",.initializer="he",.layer_type="hidden",.dropout=0.5);
+  Dense(.layer_size=16,.activation="relu",.initializer="he",.layer_type="hidden",.dropout=0.5);
   Dense(.layer_size=2,.activation="softmax",.initializer="random",.layer_type="output");
   Model(.x_train=x_train,.Y_train=y_train,.x_cv=x_cv,.Y_cv=y_cv,.x_test=x_test,.Y_test=y_test,\
-        .num_iter=3000,.learning_rate=0.007,.optimizer="sgd",.checkpoint_every=-1
+        .num_iter=4000,.learning_rate=0.0007,.optimizer="sgd",.checkpoint_every=-1
        );
 
   m->fit();

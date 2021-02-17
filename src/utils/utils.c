@@ -528,17 +528,20 @@ dARRAY * sum(dARRAY * matrix, int axis){
   new->matrix = NULL;
   if(axis==0){
     new->matrix = (float*)calloc(matrix->shape[1],sizeof(float));
+    dARRAY * temp = transpose(matrix);
     omp_set_num_threads(8);
     #pragma omp parallel for num_threads(8) collapse(1) shared(matrix,new) schedule(static)
-    for(int i = 0; i<matrix->shape[0];i++){
-      float temp = 0.0;
-      for(int j=0;j<matrix->shape[1];j++){
-        temp += matrix->matrix[j*matrix->shape[1]+i];
+    for(int i=0;i<temp->shape[0];i++){
+      float sum_=0.0;
+      for(int j=0;j<temp->shape[1];j++){
+        sum_+= temp->matrix[i*temp->shape[1]+j];
       }
-      new->matrix[i] = temp;
+      new->matrix[i] = sum_;
     }
     new->shape[0] = 1;
     new->shape[1] = matrix->shape[1];
+    free2d(temp);
+    temp=NULL;
   }
   else if(axis==1){
     new->matrix = (float*)calloc(matrix->shape[0],sizeof(float));

@@ -4,6 +4,7 @@ __Model__ * m;
 
 void __init__(){
   m->predicting = 0;
+  m->testing=0;
   m->test_accuracy = 0.0;
   m->train_accuracy = 0.0;
   m->train_cost = 0.0;
@@ -70,6 +71,23 @@ void __backward__(){
 }
 
 float calculate_accuracy(dARRAY * predicted, dARRAY * gnd_truth){
+  if(m->testing){
+    printf("Ground Truth\n");
+    for(int  i=0;i<gnd_truth->shape[0];i++){
+      for(int j=0;j<gnd_truth->shape[1];j++){
+        printf("%d ",(int)gnd_truth->matrix[i*gnd_truth->shape[1]+j]);
+      }
+      printf("\n");
+    }
+    // printf("Predicted array : \n");
+    // if(predicted==NULL) printf("predicted was null for some reason\n");
+    // for(int  i=0;i<predicted->shape[0];i++){
+    //   for(int j=0;j<predicted->shape[1];j++){
+    //     printf("%f ",predicted->matrix[i*predicted->shape[1]+j]);
+    //   }
+    //   printf("\n");
+    // }
+  }
   int success = 0;
   dARRAY * temp = (dARRAY*)malloc(sizeof(dARRAY));
   temp->matrix = (float*)calloc(predicted->shape[0]*predicted->shape[1],sizeof(float));
@@ -79,12 +97,33 @@ float calculate_accuracy(dARRAY * predicted, dARRAY * gnd_truth){
   temp->shape[0] = predicted->shape[0];
   temp->shape[1] = predicted->shape[1];
 
+  if(m->testing){
+    printf("Predicted array : \n");
+    if(temp==NULL) printf("predicted was null for some reason\n");
+    for(int  i=0;i<temp->shape[0];i++){
+      for(int j=0;j<temp->shape[1];j++){
+        if((int)temp->matrix[i*temp->shape[1]+j]==(int)gnd_truth->matrix[i*gnd_truth->shape[1]+j])
+          printf("\033[92m%d\033[0m ",(int)temp->matrix[i*temp->shape[1]+j]);
+        else{
+          printf("\033[1;31m%d\033[0m ",(int)temp->matrix[i*temp->shape[1]+j]);
+        }
+      }
+      printf("\n");
+    }
+  }  
+
   for(int i = 0;i<predicted->shape[0]*predicted->shape[1];i++){
     if(temp->matrix[i]==gnd_truth->matrix[i]) success++;
   }
+  if(m->testing)
+    printf("number of success : %d\n",success);
   if(predicted->shape[0]!=1) success = success/predicted->shape[0];
+  if(m->testing)
+    printf("number of success/2 : %d\n",success);
   free2d(temp);
   temp = NULL;
+  if(m->testing)
+    printf("Avg accuracy : %f\n",success/(float)predicted->shape[1]);
   return success/(float)predicted->shape[1];
 }
 
@@ -130,26 +169,29 @@ dARRAY * softmax_val(dARRAY * linear_matrix){
   dARRAY * softmax_outf = NULL;
   dARRAY * exp_sub_max = exponentional(linear_matrix);
 
-  dARRAY * div_factor = (dARRAY*)malloc(sizeof(dARRAY));
-  div_factor->matrix = (float*)calloc(exp_sub_max->shape[1],sizeof(float));
+  // dARRAY * div_factor = (dARRAY*)malloc(sizeof(dARRAY));
+  // div_factor->matrix = (float*)calloc(exp_sub_max->shape[1],sizeof(float));
   
-  dARRAY * temp = transpose(exp_sub_max);
-  for(int i=0;i<temp->shape[0];i++){
-    float sum_of_exps=0.0;
-    for(int j=0;j<temp->shape[1];j++){
-      sum_of_exps+= temp->matrix[i*temp->shape[1]+j];
-    }
-    div_factor->matrix[i] = sum_of_exps;
-  }
-  div_factor->shape[0] = 1;
-  div_factor->shape[1] = exp_sub_max->shape[1];
+  // dARRAY * temp = transpose(exp_sub_max);
+  // for(int i=0;i<temp->shape[0];i++){
+  //   float sum_of_exps=0.0;
+  //   for(int j=0;j<temp->shape[1];j++){
+  //     sum_of_exps+= temp->matrix[i*temp->shape[1]+j];
+  //   }
+  //   div_factor->matrix[i] = sum_of_exps;
+  // }
+  // div_factor->shape[0] = 1;
+  // div_factor->shape[1] = exp_sub_max->shape[1];
+
+  dARRAY * div_factor = sum(exp_sub_max,0);
 
   softmax_outf = divison(exp_sub_max,div_factor);
 
   free2d(exp_sub_max);
   free2d(div_factor);
-  free2d(temp);
-  temp = exp_sub_max = div_factor = NULL; 
+  // free2d(temp);
+  // temp = exp_sub_max = div_factor = NULL; 
+  exp_sub_max = div_factor = NULL; 
 
   return softmax_outf;
 }
@@ -161,7 +203,7 @@ dARRAY * calculate_val_test_acc(dARRAY * input_features,dARRAY * gnd_truth){
 
   Computation_Graph * temp = m->graph->next_layer;
   int layer=0;
-  while(temp!=NULL){
+  while(temp->type!=LOSS){
     if(temp->prev_layer->type==INPUT){ 
     weight_input_res = dot(temp->DENSE->weights, input_features); 
     }
@@ -197,7 +239,6 @@ dARRAY * calculate_val_test_acc(dARRAY * input_features,dARRAY * gnd_truth){
     if(temp->next_layer->type==LOSS){
       output = activation_temp;
       Z = NULL;
-      break;
     }
     layer++;
     temp = temp->next_layer;
@@ -206,12 +247,18 @@ dARRAY * calculate_val_test_acc(dARRAY * input_features,dARRAY * gnd_truth){
   if(m->predicting) return output;
   else{
     float acc = calculate_accuracy(output,gnd_truth);
+    if(m->testing)
+      printf("Accuracy : %f\n",acc);
     free2d(output);
     output = NULL;
 
     dARRAY * return_val = (dARRAY*)malloc(sizeof(dARRAY));
-    return_val->matrix = &acc;
-
+    return_val->matrix = (float*)calloc(1,sizeof(float));
+    return_val->matrix[0] = acc;
+    return_val->shape[0] = 1;
+    return_val->shape[1] = 1;
+    if(m->testing)
+      printf("Accuracy : %f\n",return_val->matrix[0]);
     return return_val;
   }
 }
@@ -245,8 +292,8 @@ void __fit__(){
     __forward__();
     sum_cost += m->iter_cost;
     sum_train_acc += calculate_accuracy(m->output,m->Y_train);
-    // dARRAY * temp = calculate_val_test_acc(m->x_cv,m->Y_cv);
-    // sum_train_val_acc += *temp->matrix;
+    dARRAY * temp = calculate_val_test_acc(m->x_cv,m->Y_cv);
+    sum_train_val_acc += temp->matrix[0];
     if(m->print_cost){
       m->train_cost = sum_cost/(float)i;
       m->train_accuracy = sum_train_acc/(float)i;
@@ -285,8 +332,8 @@ void __fit__(){
     }
     i++;
     if(m->num_iter==-1) iterations = i;
-    // free(temp);
-    // temp = NULL;
+    free(temp);
+    temp = NULL;
   }
   append_to_file(train_cost_arr,"./bin/cost.data","ab+");
   append_to_file(train_acc_arr,"./bin/train_acc.data","ab+");
@@ -304,8 +351,11 @@ void __predict__(dARRAY * input_feature){
 }
 
 void __test__(){
+  // m->testing=1;
   dARRAY * acc = calculate_val_test_acc(m->x_test,m->Y_test);
   printf("\033[96mTest Accuracy : \033[0m%f\n",acc->matrix[0]);
+  free2d(acc);
+  acc = NULL;
 }
 
 

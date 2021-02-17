@@ -105,24 +105,34 @@ void forward_pass_DENSE(){
   dARRAY * Z_drop_out = NULL;
   if(m->current_layer->DENSE->dropout<(float)1.0){
     //If dropout has been applied to the layer we need to create a dropout mask
-    // printf("creating fropout msak\n");
     int dropout_mask_dims[] = {Z->shape[0],Z->shape[1]};
+    
     dARRAY * dropout_mask_temp = NULL;
     dropout_mask_temp = randn(dropout_mask_dims);
     
-    // #pragma omp parallel for num_threads(8) shared(dropout_mask_temp)
+    m->current_layer->DENSE->dropout_mask = (dARRAY*)malloc(sizeof(dARRAY));
+    m->current_layer->DENSE->dropout_mask->matrix = (float*)calloc(dropout_mask_dims[0]*dropout_mask_dims[1],sizeof(float));
+
+    #pragma omp parallel for num_threads(8) shared(dropout_mask_temp)
     for(int i=0;i<dropout_mask_dims[0]*dropout_mask_dims[1];i++){
-      // printf("iteration %d\n",i);
-      dropout_mask_temp->matrix[i] = dropout_mask_temp->matrix[i]<m->current_layer->DENSE->dropout ? (float)1.0 : (float)0.0;
+      m->current_layer->DENSE->dropout_mask->matrix[i] = dropout_mask_temp->matrix[i]<m->current_layer->DENSE->dropout ? (float)1.0 : (float)0.0;
     }
-    m->current_layer->DENSE->dropout_mask = dropout_mask_temp;
+
+    m->current_layer->DENSE->dropout_mask->shape[0] = dropout_mask_dims[0];
+    m->current_layer->DENSE->dropout_mask->shape[1] = dropout_mask_dims[1];
+
+    free2d(dropout_mask_temp);
+    dropout_mask_temp = NULL;
     //we need to scale our activations so that loss doesnt change in the end as we will be forward propagating through
     //less neurons. This will change loss if activations are not scaled.
-    Z_drop_out = divScalar(m->current_layer->DENSE->dropout_mask,m->current_layer->DENSE->dropout);
-    // printf("done with dropout\n");
-    // free2d(dropout_mask_temp);
-    dropout_mask_temp = NULL;
+    dARRAY * Z_drop_out_temp = multiply(Z,m->current_layer->DENSE->dropout_mask);
+
+    Z_drop_out = divScalar(Z_drop_out_temp,m->current_layer->DENSE->dropout);
+    
+    free2d(Z_drop_out_temp);
     free2d(m->current_layer->DENSE->cache);
+    m->current_layer->DENSE->cache = Z_drop_out_temp = Z = NULL;
+
     m->current_layer->DENSE->cache = Z_drop_out;
   }
   //Compute the activation of this layer depending on the choice of activation selected.
@@ -132,7 +142,7 @@ void forward_pass_DENSE(){
     }
     else{
       m->current_layer->DENSE->A = relu(.input=Z_drop_out);
-      free2d(Z_drop_out);
+      // free2d(Z_drop_out);
       Z_drop_out = NULL;
     }
   }
@@ -142,7 +152,7 @@ void forward_pass_DENSE(){
     }
     else{
       m->current_layer->DENSE->A = sigmoid(.input=Z_drop_out);
-      free2d(Z_drop_out);
+      // free2d(Z_drop_out);
       Z_drop_out = NULL;
     }
   }
@@ -153,22 +163,19 @@ void forward_pass_DENSE(){
     else{
       // printf("dropout enabled!\n");
       m->current_layer->DENSE->A = TanH(.input=Z_drop_out);
-      free2d(Z_drop_out);
+      // free2d(Z_drop_out);
       Z_drop_out = NULL;
     }
   }
   else if(!strcasecmp(m->current_layer->DENSE->activation,"softmax")){
-    // printf("calculating softmax act\n");
     if(m->current_layer->DENSE->dropout==1.0) {
       m->current_layer->DENSE->A = softmax(.input=Z); 
     }
     else{
-      // printf("dropout enabled!\n");
       m->current_layer->DENSE->A = softmax(.input=Z_drop_out);
-      free2d(Z_drop_out);
+      // free2d(Z_drop_out);
       Z_drop_out = NULL;
     }
-    // printf("done softmax act\n");
   }
   else{
     //if user didn't want to use any activation, pass Z itself as the output
@@ -191,7 +198,6 @@ void forward_pass_DENSE(){
 
 void backward_pass_DENSE(){
   //Store the number of training examples in a variable
-  // printf("in BF\n");
   float num_examples = m->num_of_training_examples;
   //Assign pointers to the respective layers
   Dense_layer * layer = m->current_layer->DENSE; 
@@ -273,6 +279,7 @@ void backward_pass_DENSE(){
   if(m->current_layer->prev_layer->type==INPUT) 
     prev_A_transpose = transpose(prev_layer_in_features->A);
   else prev_A_transpose = transpose(prev_layer->A);
+  
   dARRAY * temp1_dW = NULL;
   temp1_dW = dot(layer->dZ,prev_A_transpose);
 
@@ -281,6 +288,7 @@ void backward_pass_DENSE(){
 
   if(m->lambda>(float)0.0){
     float mul_factor = m->lambda/(float)num_examples;
+    
     dARRAY * regularization_grad = mulScalar(temp1_dW,mul_factor);
     dARRAY * dW_temp = divScalar(temp1_dW,(float)num_examples);
     
@@ -316,9 +324,11 @@ void backward_pass_DENSE(){
     //local gradient would be just the current layer weights
     dARRAY * weight_transpose = NULL;
     weight_transpose = transpose(layer->weights);
+    
     //chaining with the global or incomming gradient
     dARRAY * prev_layer_A_temp = NULL;
     prev_layer_A_temp = dot(weight_transpose,layer->dZ);
+    
     if(layer->dropout==(float)1.0){
       prev_layer->dA = prev_layer_A_temp;
       prev_layer_A_temp = NULL;

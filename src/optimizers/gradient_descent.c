@@ -67,14 +67,14 @@ void SGD(){
 
       temp->DENSE->bias = NULL;
       temp->DENSE->bias = subtract(layer_biases,mul_lr_b);
-
       free2d(layer_biases);
       free2d(mul_lr_b);
       free2d(grad_b);
-
-      if(temp->DENSE->dropout<1.0){
+      
+      if(temp->DENSE->dropout_mask!=NULL && temp->DENSE->dropout<(float)1.0){
         free2d(temp->DENSE->dropout_mask);
       }
+      
       if(temp->DENSE->A!=NULL){
         free2d(temp->DENSE->A);
       }
