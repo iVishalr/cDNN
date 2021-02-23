@@ -10,6 +10,7 @@ void __init__(){
   m->train_cost = 0.0;
   m->cross_val_accuracy = 0.0;
   m->iter_cost = 0.0;
+  m->current_iter = 1;
   m->output = NULL;
   __initialize_params__();
 }
@@ -79,14 +80,6 @@ float calculate_accuracy(dARRAY * predicted, dARRAY * gnd_truth){
       }
       printf("\n");
     }
-    // printf("Predicted array : \n");
-    // if(predicted==NULL) printf("predicted was null for some reason\n");
-    // for(int  i=0;i<predicted->shape[0];i++){
-    //   for(int j=0;j<predicted->shape[1];j++){
-    //     printf("%f ",predicted->matrix[i*predicted->shape[1]+j]);
-    //   }
-    //   printf("\n");
-    // }
   }
   int success = 0;
   dARRAY * temp = (dARRAY*)malloc(sizeof(dARRAY));
@@ -169,28 +162,12 @@ dARRAY * softmax_val(dARRAY * linear_matrix){
   dARRAY * softmax_outf = NULL;
   dARRAY * exp_sub_max = exponentional(linear_matrix);
 
-  // dARRAY * div_factor = (dARRAY*)malloc(sizeof(dARRAY));
-  // div_factor->matrix = (float*)calloc(exp_sub_max->shape[1],sizeof(float));
-  
-  // dARRAY * temp = transpose(exp_sub_max);
-  // for(int i=0;i<temp->shape[0];i++){
-  //   float sum_of_exps=0.0;
-  //   for(int j=0;j<temp->shape[1];j++){
-  //     sum_of_exps+= temp->matrix[i*temp->shape[1]+j];
-  //   }
-  //   div_factor->matrix[i] = sum_of_exps;
-  // }
-  // div_factor->shape[0] = 1;
-  // div_factor->shape[1] = exp_sub_max->shape[1];
-
   dARRAY * div_factor = sum(exp_sub_max,0);
 
   softmax_outf = divison(exp_sub_max,div_factor);
 
   free2d(exp_sub_max);
   free2d(div_factor);
-  // free2d(temp);
-  // temp = exp_sub_max = div_factor = NULL; 
   exp_sub_max = div_factor = NULL; 
 
   return softmax_outf;
@@ -278,9 +255,9 @@ void append_to_file(float * arr ,char * filename,char * mode){
 void __fit__(){
   int i = 1;
   int iterations=0;
-  float sum_cost = 0.0;
-  float sum_train_acc = 0.0;
-  float sum_train_val_acc = 0.0;
+  float sum_cost = m->train_cost*m->current_iter;
+  float sum_train_acc = m->train_accuracy*m->current_iter;
+  float sum_train_val_acc = m->cross_val_accuracy*m->current_iter;
   float * train_cost_arr = (float*)calloc(m->num_iter==-1?1000000:m->num_iter,sizeof(float));
   float * train_acc_arr = (float*)calloc(m->num_iter==-1?1000000:m->num_iter,sizeof(float));
   float * val_acc_arr = (float*)calloc(m->num_iter==-1?1000000:m->num_iter,sizeof(float));
@@ -295,9 +272,9 @@ void __fit__(){
     dARRAY * temp = calculate_val_test_acc(m->x_cv,m->Y_cv);
     sum_train_val_acc += temp->matrix[0];
     if(m->print_cost){
-      m->train_cost = sum_cost/(float)i;
-      m->train_accuracy = sum_train_acc/(float)i;
-      m->cross_val_accuracy = sum_train_val_acc/(float)i;
+      m->train_cost = i==m->current_iter ? sum_cost/(float)i : sum_cost/(float)m->current_iter;
+      m->train_accuracy = i==m->current_iter ? sum_train_acc/(float)i : sum_train_acc/(float)m->current_iter;
+      m->cross_val_accuracy = i==m->current_iter ? sum_train_val_acc/(float)i : sum_train_val_acc/(float)m->current_iter;
       train_cost_arr[i-1] = m->train_cost;
       train_acc_arr[i-1] = m->train_accuracy;
       val_acc_arr[i-1] = m->cross_val_accuracy;
@@ -319,6 +296,10 @@ void __fit__(){
     else if(!strcasecmp(m->optimizer,"sgd")){
       SGD();
     }
+    else{
+      printf("Optimizer selected is not available\n");
+      exit(EXIT_FAILURE);
+    }
     if(m->ckpt_every!=-1 && (i%m->ckpt_every==0 || (i==m->num_iter && m->num_iter!=-1))){
       time_t rawtime;
       struct tm * timeinfo;
@@ -329,7 +310,12 @@ void __fit__(){
       char buffer[1024];
       snprintf(buffer,sizeof(buffer),"model_%d_%s.t7",i,asctime (timeinfo));
       __save_model__(buffer);
+
+      // append_to_file(train_cost_arr,"./bin/cost.data","ab+");
+      // append_to_file(train_acc_arr,"./bin/train_acc.data","ab+");
+      // append_to_file(val_acc_arr,"./bin/val_acc.data","ab+");
     }
+    m->current_iter += 1;
     i++;
     if(m->num_iter==-1) iterations = i;
     free(temp);
@@ -344,9 +330,17 @@ void __predict__(dARRAY * input_feature){
   m->graph->INPUT->A = input_feature;
   m->predicting = 1;
   dARRAY * prediction = calculate_val_test_acc(input_feature,NULL);
-  printf("Score : [%f,%f]\n",prediction->matrix[0],prediction->matrix[1]);
-  if(prediction->matrix[0]>=0.5 && prediction->matrix[1]<0.5) printf("CAT\n");
-  else printf("DOG\n");
+  
+  if(prediction->shape[0]!=1){
+    printf("Score : [%f,%f]\n",prediction->matrix[0],prediction->matrix[1]);
+    if(prediction->matrix[0]>=0.5 && prediction->matrix[1]<0.5) printf("CAT\n");
+    else printf("DOG\n");
+  }
+  else{
+    printf("Score : %f\n",prediction->matrix[0]);
+    if(prediction->matrix[0]>=0.5) printf("DOG\n");
+    else printf("CAT\n");
+  }
   m->predicting=0;
 }
 
@@ -401,11 +395,17 @@ void __load_model__(char * filename){
     biases[i].shape[1] = temp->DENSE->bias->shape[1];
     temp = temp->next_layer;
   }
+  fscanf(fp,"%f ",&m->train_cost);
+  fscanf(fp,"%f ",&m->train_accuracy);
+  fscanf(fp,"%f ",&m->cross_val_accuracy);
+  fscanf(fp,"%d ",&m->current_iter);
   fclose(fp);
   temp = m->graph->next_layer;
   int index = 0;
   while(temp!=NULL){
-    free2d(temp->DENSE->weights);
+    if(temp->DENSE->weights!=NULL)
+      free2d(temp->DENSE->weights);
+    if(temp->DENSE->bias!=NULL)
     free2d(temp->DENSE->bias);
     
     temp->DENSE->weights = NULL;
@@ -460,6 +460,10 @@ void __save_model__(char * filename){
       fprintf(fp,"%f ",temp->DENSE->bias->matrix[j]);
     temp = temp->next_layer;
   }
+  fprintf(fp,"%f ",m->train_cost);
+  fprintf(fp,"%f ",m->train_accuracy);
+  fprintf(fp,"%f ",m->cross_val_accuracy);
+  fprintf(fp,"%d ",m->current_iter-1);
   fclose(fp);
   fp = NULL;
 }

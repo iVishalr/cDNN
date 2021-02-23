@@ -3,7 +3,7 @@
 #-----------------------
 CC=gcc-10
 CCL=clang 
-ATTR= -funroll-loops -O3 -fopenmp -Ofast -ffp-contract=fast
+ATTR= -funroll-loops -O3 -fopenmp -Ofast -ffp-contract=fast --fast-math
 CFLAGS=-c -Wall -Wrestrict
 
 #-----------

@@ -5,33 +5,15 @@ extern __Model__ * m;
 
 dARRAY * forward_pass_softmax(){
   dARRAY * softmax_outf = NULL;
-  // printf("exping\n");
   dARRAY * exp_sub_max = exponentional(m->current_layer->DENSE->cache);
 
-  dARRAY * div_factor = (dARRAY*)malloc(sizeof(dARRAY));
-  div_factor->matrix = (float*)calloc(exp_sub_max->shape[1],sizeof(float));
-  
-  dARRAY * temp = transpose(exp_sub_max);
-  // printf("calculating div factor\n");
-  omp_set_num_threads(8);
-  #pragma omp parallel for num_threads(8) collapse(1) shared(temp,div_factor) schedule(static)
-  for(int i=0;i<temp->shape[0];i++){
-    float sum_of_exps=0.0;
-    for(int j=0;j<temp->shape[1];j++){
-      sum_of_exps+= temp->matrix[i*temp->shape[1]+j];
-    }
-    div_factor->matrix[i] = sum_of_exps;
-  }
-  div_factor->shape[0] = 1;
-  div_factor->shape[1] = exp_sub_max->shape[1];
-  // printf("calculated div factor\n");
+  dARRAY * div_factor = sum(exp_sub_max,0);
   softmax_outf = divison(exp_sub_max,div_factor);
-  // printf("calculated sfmax output\n");
-  
-  free2d(temp);
+
   free2d(exp_sub_max);
   free2d(div_factor);
-  temp = exp_sub_max = div_factor = NULL; 
+  exp_sub_max = div_factor = NULL; 
+  
   return softmax_outf;
 }
 

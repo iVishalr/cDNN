@@ -142,7 +142,6 @@ void forward_pass_DENSE(){
     }
     else{
       m->current_layer->DENSE->A = relu(.input=Z_drop_out);
-      // free2d(Z_drop_out);
       Z_drop_out = NULL;
     }
   }
@@ -152,7 +151,6 @@ void forward_pass_DENSE(){
     }
     else{
       m->current_layer->DENSE->A = sigmoid(.input=Z_drop_out);
-      // free2d(Z_drop_out);
       Z_drop_out = NULL;
     }
   }
@@ -161,9 +159,7 @@ void forward_pass_DENSE(){
       m->current_layer->DENSE->A = TanH(.input=Z); 
     }
     else{
-      // printf("dropout enabled!\n");
       m->current_layer->DENSE->A = TanH(.input=Z_drop_out);
-      // free2d(Z_drop_out);
       Z_drop_out = NULL;
     }
   }
@@ -173,7 +169,6 @@ void forward_pass_DENSE(){
     }
     else{
       m->current_layer->DENSE->A = softmax(.input=Z_drop_out);
-      // free2d(Z_drop_out);
       Z_drop_out = NULL;
     }
   }

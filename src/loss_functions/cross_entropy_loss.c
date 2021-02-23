@@ -29,26 +29,7 @@ void forward_pass_L2_LOSS(){
     free2d(log_y_hat);
     log_y_hat = NULL;
 
-    loss = (dARRAY*)malloc(sizeof(dARRAY));
-    loss->matrix = (float*)calloc(loss_term_temp->shape[1],sizeof(float));
-    
-    dARRAY * temp = transpose(loss_term_temp);
-    omp_set_num_threads(8);
-    #pragma omp parallel for num_threads(8) collapse(1) shared(temp,loss) schedule(static)
-    for(int i=0;i<temp->shape[0];i++){
-      float sum_of_exps=0.0;
-      for(int j=0;j<temp->shape[1];j++){
-        sum_of_exps+= temp->matrix[i*temp->shape[1]+j];
-      }
-      loss->matrix[i] = sum_of_exps;
-    }
-    loss->shape[0] = 1;
-    loss->shape[1] = loss_term_temp->shape[1];
-    
-    // printf("calculated loss due to softmax\n");
-    
-    free2d(temp);
-    temp = NULL;
+    loss = sum(loss_term_temp,0);
 
     free2d(loss_term_temp);
     loss_term_temp = NULL;

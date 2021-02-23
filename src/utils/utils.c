@@ -26,7 +26,7 @@ dARRAY * zeros(int * dims){
 dARRAY * ones(int * dims){
   dARRAY * matrix = (dARRAY*)malloc(sizeof(dARRAY));
   matrix->matrix = (float*)malloc(sizeof(float)*(dims[0]*dims[1]));
-  omp_set_num_threads(4);
+  omp_set_num_threads(8);
   #pragma omp parallel for 
   for(int i=0;i<dims[0]*dims[1];i++){
      matrix->matrix[i]=1;
@@ -45,7 +45,7 @@ dARRAY * ones(int * dims){
 dARRAY * eye(int * dims){
   dARRAY * matrix = (dARRAY*)malloc(sizeof(dARRAY));
   matrix->matrix = (float*)calloc((dims[0]*dims[1]),sizeof(float));
-  omp_set_num_threads(4);
+  omp_set_num_threads(8);
   #pragma omp parallel for collapse(1)
   for(int i=0;i<dims[0]; i++){
     for(int j=0;j<dims[1];j++)
@@ -530,7 +530,7 @@ dARRAY * sum(dARRAY * matrix, int axis){
     new->matrix = (float*)calloc(matrix->shape[1],sizeof(float));
     dARRAY * temp = transpose(matrix);
     omp_set_num_threads(8);
-    #pragma omp parallel for num_threads(8) collapse(1) shared(matrix,new) schedule(static)
+    #pragma omp parallel for num_threads(8) collapse(1)
     for(int i=0;i<temp->shape[0];i++){
       float sum_=0.0;
       for(int j=0;j<temp->shape[1];j++){
@@ -546,7 +546,7 @@ dARRAY * sum(dARRAY * matrix, int axis){
   else if(axis==1){
     new->matrix = (float*)calloc(matrix->shape[0],sizeof(float));
     omp_set_num_threads(8);
-    #pragma omp parallel for num_threads(8) collapse(1) shared(matrix,new) schedule(static)
+    #pragma omp parallel for num_threads(8) collapse(1)
     for(int i=0;i<matrix->shape[0];i++){
       float temp = 0.0;
       for(int j=0;j<matrix->shape[1];j++){

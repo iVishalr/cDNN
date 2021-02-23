@@ -111,6 +111,7 @@ typedef struct model{
   int predicting;
   int testing;
   int ckpt_every;
+  int current_iter;
 
   __model_init__ init;
   __model_fit__ fit;
