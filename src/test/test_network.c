@@ -34,18 +34,18 @@ int main(){
        );
 
   // m->load_model("test_patch2.t7");
-  m->fit();
+  // m->fit();
   // m->save_model("test_patch3.t7");
-  m->test();
+  // m->test();
 
-  dARRAY * test_img1 = load_test_image("test_img1.data");
-  dARRAY * test_img2 = load_test_image("test_img2.data");
+  // dARRAY * test_img1 = load_test_image("test_img1.data");
+  // dARRAY * test_img2 = load_test_image("test_img2.data");
 
-  m->predict(test_img1);
-  m->predict(test_img2);
+  // m->predict(test_img1);
+  // m->predict(test_img2);
   
-  free2d(test_img1);
-  free2d(test_img2);
-  plot_train_scores();
+  // free2d(test_img1);
+  // free2d(test_img2);
+  // plot_train_scores();
   destroy_model();
 }

@@ -646,11 +646,35 @@ void (create_model)(){
 
 void (destroy_model)(){
   destroy_Graph(m->graph);
-  free2d(m->x_train);
-  free2d(m->Y_train);
+  if(m->x_train!=NULL)
+    free2d(m->x_train);
+  m->Y_train = NULL;
+  if(m->x_cv!=NULL)
   free2d(m->x_cv);
+  if(m->Y_cv!=NULL)
   free2d(m->Y_cv);
+  if(m->output!=NULL)
   free2d(m->output);
+  if(m->x_test!=NULL)
+  free2d(m->x_test);
+  if(m->Y_test!=NULL)
+  free2d(m->Y_test);
+  for(int i=0;i<m->number_of_layers;i++){
+    if(m->m_t_dW[i] != NULL) free2d(m->m_t_dW[i]);
+    if(m->m_t_db[i] != NULL) free2d(m->m_t_db[i]);
+    if(m->v_t_dW[i] != NULL) free2d(m->v_t_dW[i]);
+    if(m->v_t_db[i] != NULL) free2d(m->v_t_db[i]);
+    if(m->cache_dW[i] != NULL) free2d(m->cache_dW[i]);
+    if(m->cache_db[i] != NULL) free2d(m->cache_db[i]);
+    m->m_t_dW[i] = NULL;
+    m->v_t_dW[i] = NULL;
+    m->m_t_db[i] = NULL;
+    m->v_t_db[i] = NULL;
+    m->cache_dW[i] = NULL;
+    m->cache_db[i] = NULL;
+  }
+  m->x_train = m->Y_train = m->x_cv = m->x_test = m->Y_test = m->Y_cv = m->output = NULL;
+  free(m);
   m = NULL;
 }
 

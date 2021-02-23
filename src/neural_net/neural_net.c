@@ -91,7 +91,6 @@ Computation_Graph * destroy_Graph(Computation_Graph * G){
       layer->dropout_mask = NULL;
       layer->db = NULL;
       layer->dZ = NULL;
-
       free(prev->DENSE);
       prev->DENSE = NULL;
       prev->prev_layer = NULL;
@@ -99,23 +98,20 @@ Computation_Graph * destroy_Graph(Computation_Graph * G){
     }
     else if(prev->type==INPUT){
       Input_layer * layer = prev->INPUT;
-      if(layer->A!=NULL)
-        free2d(layer->A);
       layer->A = NULL;
       prev->prev_layer = NULL;
-      free(prev->INPUT);
+      free(layer);
       layer=NULL;
     }
     else if(prev->type==LOSS){
       cross_entropy_loss_layer * layer = prev->LOSS;
-      if(layer->grad_out) free2d(layer->grad_out);
-      if(layer->gnd_truth) free2d(layer->gnd_truth);
+      if(layer->grad_out!=NULL) free2d(layer->grad_out);
+      if(layer->gnd_truth!=NULL) free2d(layer->gnd_truth);
       prev->prev_layer = NULL;
-      free(prev->LOSS);
+      free(layer);
       layer = NULL;
     }
     prev = NULL;
-    // free(prev);
   }
   prev = NULL;
   temp = NULL;
