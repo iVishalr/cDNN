@@ -22,7 +22,7 @@ void forward_pass_MSE_LOSS(){
   loss = NULL;
 
   dARRAY * cost = NULL;
-  dARRAY * cross_entropy_cost = divScalar(sum_of_losses,(float)(number_of_examples));
+  dARRAY * mse_cost = divScalar(sum_of_losses,(float)(number_of_examples));
   
   free2d(sum_of_losses);
   sum_of_losses = NULL;
@@ -50,11 +50,11 @@ void forward_pass_MSE_LOSS(){
     }
   }
   if(m->regularization!=NULL){
-    cost = addScalar(cross_entropy_cost,reg_cost);
+    cost = addScalar(mse_cost,reg_cost);
     temp = NULL;
 
-    free2d(cross_entropy_cost);
-    cross_entropy_cost = NULL;
+    free2d(mse_cost);
+    mse_cost = NULL;
 
     float total_cost = cost->matrix[0];
     free2d(cost);
@@ -63,7 +63,7 @@ void forward_pass_MSE_LOSS(){
     m->iter_cost = total_cost;
   }
   else{
-    cost = cross_entropy_cost;
+    cost = mse_cost;
     float total_cost = cost->matrix[0];
     free2d(cost);
     cost = NULL;

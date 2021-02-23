@@ -26,6 +26,7 @@ void adam(){
     term1 = term2 = NULL;
 
     //m_db
+    mul_factor = 1-m->beta1;
     term1 = mulScalar(temp->DENSE->db,mul_factor);
     mul_factor = m->beta1;
     term2 = mulScalar(m->m_t_db[layer],mul_factor);

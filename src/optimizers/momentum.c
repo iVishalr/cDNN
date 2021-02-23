@@ -13,12 +13,16 @@ void Momentum(){
     }
     //calculate first momentum
     //m_dW
-    float mul_factor = 1-m->beta1;
+    float mul_factor = 1-m->beta;
     dARRAY * term1 = mulScalar(temp->DENSE->dW,mul_factor);
     mul_factor = m->beta;
-    dARRAY * term2 = mulScalar(m->m_t_dW[layer],mul_factor);
-    free2d(m->m_t_dW[layer]);
-    m->m_t_dW[layer] = NULL;
+    dARRAY * ptr_dW = m->m_t_dW[layer];
+    dARRAY * term2 = mulScalar(ptr_dW,mul_factor);
+    
+    free2d(ptr_dW);
+    free2d(temp->DENSE->dW);
+    temp->DENSE->dW = ptr_dW = NULL;
+
     m->m_t_dW[layer] = add(term1,term2);
 
     free2d(term1);
@@ -26,11 +30,18 @@ void Momentum(){
     term1 = term2 = NULL;
 
     //m_db
+    mul_factor = 1-m->beta;
     term1 = mulScalar(temp->DENSE->db,mul_factor);
+    
     mul_factor = m->beta;
-    term2 = mulScalar(m->m_t_db[layer],mul_factor);
-    free2d(m->m_t_db[layer]);
-    m->m_t_db[layer] = NULL;
+    dARRAY * ptr_db = m->m_t_db[layer];
+    
+    term2 = mulScalar(ptr_db,mul_factor);
+
+    free2d(ptr_db);
+    free2d(temp->DENSE->db);
+    temp->DENSE->db = ptr_db = NULL;
+
     m->m_t_db[layer] = add(term1,term2);
 
     free2d(term1);
@@ -56,9 +67,8 @@ void Momentum(){
     free2d(mul_lr_b);
     layer_weights = layer_biases = mul_lr_w = mul_lr_b = NULL;
 
-    if(temp->DENSE->dropout_mask!=NULL){
+    if(temp->DENSE->dropout_mask!=NULL)
       free2d(temp->DENSE->dropout_mask);
-    }
     if(temp->DENSE->A!=NULL)
       free2d(temp->DENSE->A);
     if(temp->DENSE->cache!=NULL)
@@ -67,7 +77,8 @@ void Momentum(){
       free2d(temp->DENSE->dA);
     if(temp->DENSE->dZ!=NULL)
       free2d(temp->DENSE->dZ);
-    temp->DENSE->dA=temp->DENSE->cache = temp->DENSE->A = temp->DENSE->dropout_mask = temp->DENSE->dZ = NULL;
+    temp->DENSE->dA=temp->DENSE->cache = temp->DENSE->A = temp->DENSE->dropout_mask = temp->DENSE->dZ = m->output = NULL;
+
     layer++;
     temp = temp->next_layer;
   }

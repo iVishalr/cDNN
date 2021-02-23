@@ -25,12 +25,12 @@ int main(){
   dARRAY * y_test = load_y_test(y_test_dims);
 
   Input(.layer_size=12288);
-  // Dense(.layer_size=10,.activation="relu",.initializer="he",.layer_type="hidden");
-  // Dense(.layer_size=32,.activation="relu",.initializer="he",.layer_type="hidden");
+  Dense(.layer_size=10,.activation="relu",.initializer="he",.layer_type="hidden");
+  Dense(.layer_size=32,.activation="relu",.initializer="he",.layer_type="hidden");
   Dense(.layer_size=16,.activation="relu",.layer_type="hidden");
   Dense(.layer_size=1,.activation="sigmoid",.initializer="random",.layer_type="output");
   Model(.x_train=x_train,.Y_train=y_train,.x_cv=x_cv,.Y_cv=y_cv,.x_test=x_test,.Y_test=y_test,\
-        .num_iter=1000,.learning_rate=4e-3,.optimizer="momentum",.checkpoint_every=-1,.loss="MSELoss"
+        .num_iter=3000,.learning_rate=4e-3,.optimizer="momentum",.checkpoint_every=-1,
        );
 
   // m->load_model("test_patch2.t7");
