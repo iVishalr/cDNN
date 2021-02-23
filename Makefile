@@ -40,13 +40,13 @@ targets:
 	@$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$'
 
 project:  $(BUILD)/utils.o $(BUILD)/relu.o $(BUILD)/sigmoid.o $(BUILD)/tanh.o $(BUILD)/softmax.o \
-$(BUILD)/neural_net.o $(BUILD)/Dense.o $(BUILD)/Input.o $(BUILD)/cross_entropy_loss.o \
-$(BUILD)/gradient_descent.o $(BUILD)/adam.o $(BUILD)/adagrad.o $(BUILD)/rmsprop.o \
+$(BUILD)/neural_net.o $(BUILD)/Dense.o $(BUILD)/Input.o $(BUILD)/cross_entropy_loss.o $(BUILD)/MSELoss.o\
+$(BUILD)/gradient_descent.o $(BUILD)/momentum.o $(BUILD)/adam.o $(BUILD)/adagrad.o $(BUILD)/rmsprop.o \
 $(BUILD)/model.o \
 $(BUILD)/plot.o $(BUILD)/test_network.o 
 	$(CC) $(ATTR) $(BUILD)/utils.o $(BUILD)/relu.o $(BUILD)/sigmoid.o $(BUILD)/tanh.o $(BUILD)/softmax.o \
-	$(BUILD)/neural_net.o $(BUILD)/Dense.o $(BUILD)/Input.o $(BUILD)/cross_entropy_loss.o \
-	$(BUILD)/gradient_descent.o $(BUILD)/adam.o $(BUILD)/adagrad.o $(BUILD)/rmsprop.o \
+	$(BUILD)/neural_net.o $(BUILD)/Dense.o $(BUILD)/Input.o $(BUILD)/cross_entropy_loss.o $(BUILD)/MSELoss.o \
+	$(BUILD)/gradient_descent.o $(BUILD)/momentum.o $(BUILD)/adam.o $(BUILD)/adagrad.o $(BUILD)/rmsprop.o \
 	$(BUILD)/model.o $(BUILD)/plot.o $(BUILD)/test_network.o
 	@echo "\033[92mBuild Successful\033[0m"
 $(BUILD)/utils.o: $(SRC)/$(UTILS)/utils.c
@@ -67,7 +67,11 @@ $(BUILD)/neural_net.o: $(SRC)/neural_net/neural_net.c
 	$(CC) $(CFLAGS) $(ATTR) -o $@ $<
 $(BUILD)/cross_entropy_loss.o: $(SRC)/$(LOSS)/cross_entropy_loss.c
 	$(CC) $(CFLAGS) $(ATTR) -o $@ $<
+$(BUILD)/MSELoss.o: $(SRC)/$(LOSS)/MSELoss.c
+	$(CC) $(CFLAGS) $(ATTR) -o $@ $<
 $(BUILD)/gradient_descent.o: $(SRC)/$(OPTIMIZERS)/gradient_descent.c
+	$(CC) $(CFLAGS) $(ATTR) -o $@ $<
+$(BUILD)/momentum.o: $(SRC)/$(OPTIMIZERS)/momentum.c
 	$(CC) $(CFLAGS) $(ATTR) -o $@ $<
 $(BUILD)/adam.o: $(SRC)/$(OPTIMIZERS)/adam.c
 	$(CC) $(CFLAGS) $(ATTR) -o $@ $<

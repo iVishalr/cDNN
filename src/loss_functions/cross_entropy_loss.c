@@ -154,31 +154,10 @@ void backward_pass_L2_LOSS(){
   int act_dims[] = {m->output->shape[0],m->output->shape[1]};
   if(!strcasecmp(m->current_layer->prev_layer->DENSE->activation,"softmax")){
     dARRAY * temp = divison(loss_layer->gnd_truth,m->output);
-    dARRAY * temp2 = transpose(temp);
-    
-    dARRAY * class_sum = (dARRAY*)malloc(sizeof(dARRAY));
-    class_sum->matrix = (float*)calloc(temp->shape[1],sizeof(float));
-    
-    omp_set_num_threads(8);
-    #pragma omp parallel for num_threads(8) collapse(1) shared(temp,class_sum) schedule(static)
-    for(int i=0;i<temp2->shape[0];i++){
-      float sum_of_exps=0.0;
-      for(int j=0;j<temp2->shape[1];j++){
-        sum_of_exps+= temp2->matrix[i*temp2->shape[1]+j];
-      }
-      class_sum->matrix[i] = sum_of_exps;
-    }
-    class_sum->shape[0] = 1;
-    class_sum->shape[1] = temp->shape[1];
-    
+    dARRAY * class_sum = sum(temp,0);
     free2d(temp);
     temp = NULL;
-
-    free2d(temp2);
-    temp2 = NULL;
-    
     loss_layer->grad_out = mulScalar(class_sum,-1.0);
-    
     free2d(class_sum);
     class_sum = NULL;
   }

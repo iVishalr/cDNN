@@ -23,6 +23,7 @@ void __initialize_params__(){
   if(!strcasecmp(m->optimizer,"adam")) flag = 1;
   if(!strcasecmp(m->optimizer,"adagrad")) flag = 2;
   if(!strcasecmp(m->optimizer,"rmsprop")) flag = 2;
+  if(!strcasecmp(m->optimizer,"momentum")) flag = 3;
   while(temp!=NULL){
     m->current_layer = temp;
     if(temp->type==DENSE){
@@ -42,6 +43,13 @@ void __initialize_params__(){
       int dims_db[] = {temp->DENSE->bias->shape[0],temp->DENSE->bias->shape[1]};
       m->cache_dW[index] = zeros(dims_dW);
       m->cache_db[index] = zeros(dims_db);
+      index++; 
+    }
+    else if(flag==3 && temp->type!=LOSS){
+      int dims_dW[] = {temp->DENSE->weights->shape[0],temp->DENSE->weights->shape[1]};
+      int dims_db[] = {temp->DENSE->bias->shape[0],temp->DENSE->bias->shape[1]};
+      m->m_t_dW[index] = zeros(dims_dW);
+      m->m_t_db[index] = zeros(dims_db);
       index++; 
     }
     temp = temp->next_layer;
@@ -295,6 +303,9 @@ void __fit__(){
     }
     else if(!strcasecmp(m->optimizer,"sgd")){
       SGD();
+    }
+    else if(!strcasecmp(m->optimizer,"momentum")){
+      Momentum();
     }
     else{
       printf("Optimizer selected is not available\n");
@@ -654,7 +665,7 @@ void (destroy_model)(){
   if(m->Y_cv!=NULL)
   free2d(m->Y_cv);
   if(m->output!=NULL)
-  free2d(m->output);
+  // free2d(m->output);
   if(m->x_test!=NULL)
   free2d(m->x_test);
   if(m->Y_test!=NULL)
@@ -695,6 +706,7 @@ void (Model)(Model_args model_args){
   m->regularization = model_args.regularization;
 
   if(!strcasecmp(m->loss,"cross_entropy_loss")) cross_entropy_loss();
+  if(!strcasecmp(m->loss,"MSELoss")) MSELoss();
 
   //initialize hyperparameters for various optimizers
   m->optimizer = model_args.optimizer; // Optimizer choice
