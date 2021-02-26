@@ -9,6 +9,8 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
+#include <cblas.h>
+#include <sys/time.h>
 
 #ifdef __cplusplus
 extern "C"{

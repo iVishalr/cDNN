@@ -70,11 +70,41 @@ dARRAY * transpose(dARRAY * restrict Matrix){
   if(Matrix->shape[0]==1 && Matrix->shape[1]==1) return Matrix;
   dARRAY * matrix = (dARRAY*)malloc(sizeof(dARRAY));
   matrix->matrix = (float*)calloc(Matrix->shape[0]*Matrix->shape[1],sizeof(float));
-  omp_set_num_threads(8);
+  // openblas_set_num_threads(2);
+  // struct timeval start_gflops,finish_gflops;
+  // double start = omp_get_wtime();
+  // gettimeofday(&start_gflops, NULL);
+  #pragma omp task
+  cblas_somatcopy(CblasRowMajor,CblasTrans,Matrix->shape[0],Matrix->shape[1],1,Matrix->matrix,Matrix->shape[1],matrix->matrix,Matrix->shape[0]);
+  // gettimeofday(&finish_gflops, NULL);
+  // double end = omp_get_wtime();
+  // double duration = ((double)(finish_gflops.tv_sec-start_gflops.tv_sec)*1000000 + (double)(finish_gflops.tv_usec-start_gflops.tv_usec)) / 1000000;
+  // double gflops = 2.0 * Matrix->shape[0]*Matrix->shape[1];
+  // gflops = gflops/duration*1.0e-6;
+  // printf("Transpose took %lf seconds, %lf MFLOPS\n",(end-start),gflops);
+  matrix->shape[0] = Matrix->shape[1];
+  matrix->shape[1] = Matrix->shape[0];
+  return matrix;
+}
+
+
+
+dARRAY * transposem(dARRAY * restrict Matrix){
+  if(Matrix==NULL){
+    printf("\033[1;31mError:\033[93m Matrix is empty. Call transpose() only after intializing dARRAY object.\033[0m\n");
+    return NULL;
+  }
+  if(Matrix->shape[0]==1 && Matrix->shape[1]==1) return Matrix;
+  dARRAY * matrix = (dARRAY*)malloc(sizeof(dARRAY));
+  matrix->matrix = (float*)calloc(Matrix->shape[0]*Matrix->shape[1],sizeof(float));
+  omp_set_num_threads(2);
+  double start = omp_get_wtime();
   #pragma omp parallel for num_threads(8) shared(Matrix,matrix) schedule(static)
   for(int i=0;i<Matrix->shape[0];i++)
     for(int j=0;j<Matrix->shape[1];j++)
       matrix->matrix[j*Matrix->shape[0]+i] = Matrix->matrix[i*Matrix->shape[1]+j];
+  double end = omp_get_wtime();
+  printf("Transpose took %lf seconds\n",(end-start));
   matrix->shape[0] = Matrix->shape[1];
   matrix->shape[1] = Matrix->shape[0];
   return matrix;
@@ -88,6 +118,38 @@ dARRAY * transpose(dARRAY * restrict Matrix){
  * @return A pointer to the result of dot(MatrixA,MatrixB) 
 */
 dARRAY * dot(dARRAY * MatrixA, dARRAY * MatrixB){
+  if(MatrixA->shape[1]!=MatrixB->shape[0]){
+    printf("\033[1;31mError:\033[93m Shape error while performing dot(). Matrix dimensions do not align. %d(dim1) != %d(dim0)\033[0m\n",MatrixA->shape[1],MatrixB->shape[0]);
+    return NULL;
+  }
+  if(MatrixB == NULL || MatrixA == NULL){
+    printf("\033[1;31mError:\033[93m One of the input matrices is empty. Call dot() only after initializing dARRAY object\033[0m\n");
+    return NULL;
+  }
+  long long int m,n,k;
+  m = MatrixA->shape[0];
+  n = MatrixB->shape[1];
+  k = MatrixB->shape[0];
+  dARRAY * result = (dARRAY*)malloc(sizeof(dARRAY));
+  result->matrix = (float*)calloc(m*n,sizeof(float));
+  // openblas_set_num_threads(2);
+  // struct timeval start_gflops,finish_gflops;
+  // double start = omp_get_wtime();
+  // gettimeofday(&start_gflops, NULL);
+  #pragma omp task
+  cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans,m,n,k,1,MatrixA->matrix, k,MatrixB->matrix, n,0,result->matrix,n);
+  // gettimeofday(&finish_gflops, NULL);
+  // double end = omp_get_wtime();
+  // double duration = ((double)(finish_gflops.tv_sec-start_gflops.tv_sec)*1000000 + (double)(finish_gflops.tv_usec-start_gflops.tv_usec)) / 1000000;
+  // double gflops = 2.0 * m*n*k;
+  // gflops = gflops/duration*1.0e-6;
+  // printf("Dot Product took %lf seconds, %lf MFLOPS\n",(end-start),gflops);
+  result->shape[0] = MatrixA->shape[0];
+  result->shape[1] = MatrixB->shape[1];
+  return result;
+}
+
+dARRAY * dotm(dARRAY * MatrixA, dARRAY * MatrixB){
   if(MatrixA->shape[1]!=MatrixB->shape[0]){
     printf("\033[1;31mError:\033[93m Shape error while performing dot(). Matrix dimensions do not align. %d(dim1) != %d(dim0)\033[0m\n",MatrixA->shape[1],MatrixB->shape[0]);
     return NULL;
@@ -254,17 +316,33 @@ dARRAY * add(dARRAY * MatrixA, dARRAY * MatrixB){
   dARRAY * result = (dARRAY*)malloc(sizeof(dARRAY));
   result->matrix = (float*)calloc(MatrixA->shape[0]*MatrixA->shape[1],sizeof(float));
   if(x==y){
-    omp_set_num_threads(8);
-    #pragma omp parallel for num_threads(8) shared(MatrixA,MatrixB,result) schedule(static)
-    for(int i=0;i<MatrixA->shape[0]*MatrixA->shape[1];i++){
-      result->matrix[i] = MatrixA->matrix[i] + MatrixB->matrix[i];
-    }
+    // omp_set_num_threads(8);
+    // #pragma omp parallel for num_threads(8) shared(MatrixA,MatrixB,result) schedule(static)
+    // for(int i=0;i<MatrixA->shape[0]*MatrixA->shape[1];i++){
+    //   result->matrix[i] = MatrixA->matrix[i] + MatrixB->matrix[i];
+    // }
+    #pragma omp task
+    cblas_scopy(MatrixB->shape[0]*MatrixB->shape[1],MatrixB->matrix,1,result->matrix,1);
+    #pragma omp task
+    cblas_saxpy(MatrixA->shape[0]*MatrixA->shape[1],1,MatrixA->matrix,1,result->matrix,1);
   }
   else{
-    omp_set_num_threads(8);
-    #pragma omp parallel for num_threads(8) shared(MatrixA,MatrixB,bcast_arr,result) schedule(static)
-    for(int i=0;i<MatrixA->shape[0]*MatrixA->shape[1];i++)
-        result->matrix[i] = x>y ? MatrixA->matrix[i] + bcast_arr->matrix[i] : bcast_arr->matrix[i] + MatrixB->matrix[i];
+    // omp_set_num_threads(8);
+    // #pragma omp parallel for num_threads(8) shared(MatrixA,MatrixB,bcast_arr,result) schedule(static)
+    // for(int i=0;i<MatrixA->shape[0]*MatrixA->shape[1];i++)
+    //     result->matrix[i] = x>y ? MatrixA->matrix[i] + bcast_arr->matrix[i] : bcast_arr->matrix[i] + MatrixB->matrix[i];
+    if(x>y){
+      #pragma omp task
+      cblas_scopy(MatrixA->shape[0]*MatrixA->shape[1],bcast_arr->matrix,1,result->matrix,1);
+      #pragma omp task
+      cblas_saxpy(MatrixA->shape[0]*MatrixA->shape[1],1,MatrixA->matrix,1,result->matrix,1);
+    }
+    else{
+      #pragma omp task
+      cblas_scopy(MatrixB->shape[0]*MatrixB->shape[1],MatrixB->matrix,1,result->matrix,1);
+      #pragma omp task
+      cblas_saxpy(MatrixA->shape[0]*MatrixA->shape[1],1,bcast_arr->matrix,1,result->matrix,1);
+    }
   }
   if(bcast_arr!=NULL)
   free2d(bcast_arr);
@@ -305,17 +383,34 @@ dARRAY * subtract(dARRAY * MatrixA, dARRAY * MatrixB){
   dARRAY * result = (dARRAY*)malloc(sizeof(dARRAY));
   result->matrix = (float*)calloc(MatrixA->shape[0]*MatrixA->shape[1],sizeof(float));
   if(x==y){
-    omp_set_num_threads(8);
-    #pragma omp parallel for num_threads(8) shared(MatrixA,MatrixB,result) schedule(static)
-    for(int i=0;i<MatrixA->shape[0]*MatrixA->shape[1];i++){
-      result->matrix[i] = MatrixA->matrix[i] - MatrixB->matrix[i];
-    }
+    // omp_set_num_threads(8);
+    // #pragma omp parallel for num_threads(8) shared(MatrixA,MatrixB,result) schedule(static)
+    // for(int i=0;i<MatrixA->shape[0]*MatrixA->shape[1];i++){
+    //   result->matrix[i] = MatrixA->matrix[i] + MatrixB->matrix[i];
+    // }
+    #pragma omp task
+    cblas_scopy(MatrixA->shape[0]*MatrixA->shape[1],MatrixA->matrix,1,result->matrix,1);
+    #pragma omp task
+    cblas_saxpy(MatrixB->shape[0]*MatrixB->shape[1],-1,MatrixB->matrix,1,result->matrix,1);
   }
   else{
-    omp_set_num_threads(8);
-    #pragma omp parallel for num_threads(8) shared(MatrixA,MatrixB,bcast_arr,result) schedule(static)
-    for(int i=0;i<MatrixA->shape[0]*MatrixA->shape[1];i++)
-        result->matrix[i] = x>y ? MatrixA->matrix[i] - bcast_arr->matrix[i] : bcast_arr->matrix[i] - MatrixB->matrix[i];
+    // omp_set_num_threads(8);
+    // #pragma omp parallel for num_threads(8) shared(MatrixA,MatrixB,bcast_arr,result) schedule(static)
+    // for(int i=0;i<MatrixA->shape[0]*MatrixA->shape[1];i++)
+    //     result->matrix[i] = x>y ? MatrixA->matrix[i] + bcast_arr->matrix[i] : bcast_arr->matrix[i] + MatrixB->matrix[i];
+    if(x>y){
+      // openblas_set_num_threads(8);
+      #pragma omp task
+      cblas_scopy(MatrixA->shape[0]*MatrixA->shape[1],MatrixA->matrix,1,result->matrix,1);
+      #pragma omp task
+      cblas_saxpy(MatrixA->shape[0]*MatrixA->shape[1],-1,bcast_arr->matrix,1,result->matrix,1);
+    }
+    else{
+      #pragma omp task
+      cblas_scopy(bcast_arr->shape[0]*bcast_arr->shape[1],bcast_arr->matrix,1,result->matrix,1);
+      #pragma omp task
+      cblas_saxpy(MatrixA->shape[0]*MatrixA->shape[1],-1,MatrixB->matrix,1,result->matrix,1);
+    }
   }
   if(bcast_arr!=NULL)
     free2d(bcast_arr);
@@ -337,6 +432,8 @@ dARRAY * addScalar(dARRAY * matrix, float scalar){
     printf("\033[1;31mError:\033[93m Matrix is empty. Call addScalar() only after intializing dARRAY object.\033[0m\n");
     return NULL;
   }
+  // float * mul_matrix = (float*)calloc(matrix->shape[0]*matrix->shape[1],sizeof(float));
+
   dARRAY * result = (dARRAY*)malloc(sizeof(dARRAY));
   result->matrix = (float*)calloc(matrix->shape[0]*matrix->shape[1],sizeof(float));
   omp_set_num_threads(8);
@@ -396,6 +493,20 @@ dARRAY * mulScalar(dARRAY * matrix, float scalar){
   result->shape[1] = matrix->shape[1];
   return result;
 }
+dARRAY * mulScalarm(dARRAY * matrix, float scalar){
+  if(matrix==NULL){
+    printf("\033[1;31mError:\033[93m Matrix is empty. Call divScalar() only after intializing dARRAY object.\033[0m\n");
+    return NULL;
+  }
+  float * div_mat = (float*)calloc(matrix->shape[0]*matrix->shape[1],sizeof(float));
+  cblas_sscal(matrix->shape[0]*matrix->shape[1],scalar,matrix->matrix,1);
+  cblas_scopy(matrix->shape[0]*matrix->shape[1],matrix->matrix,1,div_mat,1);
+  dARRAY * result = (dARRAY*)malloc(sizeof(dARRAY));
+  result->matrix = div_mat;
+  result->shape[0] = matrix->shape[0];
+  result->shape[1] = matrix->shape[1];
+  return result;
+}
 
 /**!
  * Function divides a scalar value with each element of a matrix. 
@@ -420,6 +531,22 @@ dARRAY * divScalar(dARRAY * matrix, float scalar){
   result->shape[1] = matrix->shape[1];
   return result;
 }
+dARRAY * divScalarm(dARRAY * matrix, float scalar){
+  if(matrix==NULL){
+    printf("\033[1;31mError:\033[93m Matrix is empty. Call divScalar() only after intializing dARRAY object.\033[0m\n");
+    return NULL;
+  }
+  float * div_mat = (float*)calloc(matrix->shape[0]*matrix->shape[1],sizeof(float));
+  cblas_sscal(matrix->shape[0]*matrix->shape[1],(1/scalar),matrix->matrix,1);
+  cblas_scopy(matrix->shape[0]*matrix->shape[1],matrix->matrix,1,div_mat,1);
+  dARRAY * result = (dARRAY*)malloc(sizeof(dARRAY));
+  result->matrix = div_mat;
+  result->shape[0] = matrix->shape[0];
+  result->shape[1] = matrix->shape[1];
+  return result;
+}
+
+
 
 /**!
  * Function raises the elements of a matrix to the specified power. 
@@ -544,15 +671,21 @@ dARRAY * sum(dARRAY * matrix, int axis){
     temp=NULL;
   }
   else if(axis==1){
-    new->matrix = (float*)calloc(matrix->shape[0],sizeof(float));
-    omp_set_num_threads(8);
-    #pragma omp parallel for num_threads(8) collapse(1)
-    for(int i=0;i<matrix->shape[0];i++){
-      float temp = 0.0;
-      for(int j=0;j<matrix->shape[1];j++){
-        temp += matrix->matrix[i*matrix->shape[1]+j];
-      }
-      new->matrix[i] = temp;
+    // if(matrix->shape[0]==1){
+    //   new->matrix = (float*)calloc(matrix->shape[0],sizeof(float));
+    //   new->matrix[0] = cblas_dasum(matrix->shape[0]*matrix->shape[1],matrix->matrix,1.0);
+    // }
+    // else{
+      new->matrix = (float*)calloc(matrix->shape[0],sizeof(float));
+      omp_set_num_threads(8);
+      #pragma omp parallel for num_threads(8) collapse(1)
+      for(int i=0;i<matrix->shape[0];i++){
+        float temp = 0.0;
+        for(int j=0;j<matrix->shape[1];j++){
+          temp += matrix->matrix[i*matrix->shape[1]+j];
+        }
+        new->matrix[i] = temp;
+      // }
     }
     new->shape[0] = matrix->shape[0];
     new->shape[1] = 1;

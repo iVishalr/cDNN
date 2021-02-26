@@ -3,12 +3,13 @@
         {
             "name": "Mac",
             "includePath": [
-                "${workspaceFolder}/**"
+                "${workspaceFolder}/**",
+                "/Library/Developer/CommandLineTools/SDKs/MacOSX11.1.sdk/System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/Headers"
             ],
             "defines": [],
             "macFrameworkPath": [],
             "compilerPath": "/usr/bin/gcc",
-            "intelliSenseMode": "gcc-x64",
+            "intelliSenseMode": "macos-gcc-x86",
             "cStandard": "c99",
             "cppStandard": "c++98"
         }

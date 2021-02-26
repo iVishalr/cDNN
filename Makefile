@@ -3,7 +3,7 @@
 #-----------------------
 CC=gcc-10
 CCL=clang 
-ATTR= -funroll-loops -O3 -fopenmp -Ofast -ffp-contract=fast --fast-math
+ATTR= -funroll-loops -O3 -fopenmp -Ofast -ffp-contract=fast --fast-math -I /opt/OpenBLAS/include/ -L/opt/OpenBLAS/lib -lopenblas
 CFLAGS=-c -Wall -Wrestrict
 
 #-----------
@@ -38,7 +38,6 @@ all:
 targets:
 	@echo "Available targets in the Makefile";
 	@$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$'
-
 project:  $(BUILD)/utils.o $(BUILD)/relu.o $(BUILD)/sigmoid.o $(BUILD)/tanh.o $(BUILD)/softmax.o \
 $(BUILD)/neural_net.o $(BUILD)/Dense.o $(BUILD)/Input.o $(BUILD)/cross_entropy_loss.o $(BUILD)/MSELoss.o\
 $(BUILD)/gradient_descent.o $(BUILD)/momentum.o $(BUILD)/adam.o $(BUILD)/adagrad.o $(BUILD)/rmsprop.o \

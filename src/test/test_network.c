@@ -25,7 +25,7 @@ int main(){
   dARRAY * y_test = load_y_test(y_test_dims);
 
   Input(.layer_size=12288);
-  Dense(.layer_size=10,.activation="relu",.initializer="he",.layer_type="hidden");
+  Dense(.layer_size=64,.activation="relu",.initializer="he",.layer_type="hidden");
   Dense(.layer_size=32,.activation="relu",.initializer="he",.layer_type="hidden");
   Dense(.layer_size=16,.activation="relu",.layer_type="hidden");
   Dense(.layer_size=1,.activation="sigmoid",.initializer="random",.layer_type="output");
