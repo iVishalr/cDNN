@@ -30,7 +30,7 @@ int main(){
   Dense(.layer_size=16,.activation="relu",.layer_type="hidden");
   Dense(.layer_size=1,.activation="sigmoid",.initializer="random",.layer_type="output");
   Model(.x_train=x_train,.Y_train=y_train,.x_cv=x_cv,.Y_cv=y_cv,.x_test=x_test,.Y_test=y_test,\
-        .num_iter=3000,.learning_rate=4e-3,.optimizer="momentum",.checkpoint_every=-1,
+        .num_iter=500,.learning_rate=4e-3,.optimizer="momentum",.checkpoint_every=-1,
        );
 
   // m->load_model("test_patch2.t7");

@@ -36,7 +36,7 @@ extern "C"{
   dARRAY * mulScalar(dARRAY * matrix, float scalar);
   dARRAY * divison(dARRAY * MatrixA, dARRAY * MatrixB);
   dARRAY * divScalar(dARRAY * matrix, float scalar);
-  dARRAY * power(dARRAY * matrix, int power);
+  dARRAY * power(dARRAY * matrix, float power);
   dARRAY * exponentional(dARRAY * matrix);
   dARRAY * b_cast(dARRAY * MatrixA, dARRAY * MatrixB);
   dARRAY * reshape(dARRAY * matrix, int * dims);
