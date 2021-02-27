@@ -6,13 +6,13 @@ int main(){
   
   create_model();
   
-  int x_train_dims[] = {12288,10};
+  int x_train_dims[] = {12288,500};
   dARRAY * x_train = load_x_train(x_train_dims);
 
   int x_cv_dims[] = {12288,10};
   dARRAY * x_cv = load_x_cv(x_cv_dims);
   
-  int y_train_dims[] = {1,10};
+  int y_train_dims[] = {1,500};
   dARRAY * y_train = load_y_train(y_train_dims);
   
   int y_cv_dims[] = {1,10};
@@ -34,9 +34,9 @@ int main(){
        );
 
   // m->load_model("test_patch2.t7");
-  m->fit();
+  // m->fit();
   // m->save_model("test_patch3.t7");
-  m->test();
+  // m->test();
 
   dARRAY * test_img1 = load_test_image("test_img1.data");
   dARRAY * test_img2 = load_test_image("test_img2.data");

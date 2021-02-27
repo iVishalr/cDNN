@@ -629,6 +629,123 @@ dARRAY * load_test_image(char * filename){
   return image;
 }
 
+void create_mini_batches(){
+  if(m->x_train->shape[1]!=m->Y_train->shape[1]){
+    printf("\033[1;31mShape Error : \033[93mNumber of examples in X_train[%d,\033[1;31m%d\033[93m] != Y_train[%d,\033[1;31m%d\033[93m]!\033[0m\n",m->x_train->shape[0],m->x_train->shape[1],m->Y_train->shape[0],m->Y_train->shape[1]);
+    exit(EXIT_FAILURE);
+  }
+  int num_mini_batches = (m->x_train->shape[1]%m->mini_batch_size==0)?\
+                          m->x_train->shape[1]/m->mini_batch_size :\
+                          floor(m->x_train->shape[1]/m->mini_batch_size) + 1;
+  printf("Mini-Batch-Size : %d, Number of Batches to Create : %d\n",m->mini_batch_size,num_mini_batches);
+  int remaining_mem_block = (m->x_train->shape[1]-((num_mini_batches-1)*m->mini_batch_size));
+  printf("Remaining block size: %d\n",remaining_mem_block);
+  for(int i=0;i<num_mini_batches;i++){
+    if(i<num_mini_batches-1){
+      m->x_train_mini_batch[i] = (dARRAY*)malloc(sizeof(dARRAY));
+      m->x_train_mini_batch[i]->matrix = (float*)calloc(m->x_train->shape[0]*m->mini_batch_size,sizeof(float));
+      m->y_train_mini_batch[i] = (dARRAY*)malloc(sizeof(dARRAY));
+      m->y_train_mini_batch[i]->matrix = (float*)calloc(m->Y_train->shape[0]*m->mini_batch_size,sizeof(float));
+      m->x_train_mini_batch[i]->shape[0] = m->x_train->shape[0];
+      m->x_train_mini_batch[i]->shape[1] = m->mini_batch_size;
+      m->y_train_mini_batch[i]->shape[0] = m->Y_train->shape[0];
+      m->y_train_mini_batch[i]->shape[1] = m->mini_batch_size;
+    }
+    else{
+      printf("Not enough examples to create a full minibatch\n");
+      m->x_train_mini_batch[i] = (dARRAY*)malloc(sizeof(dARRAY));
+      m->x_train_mini_batch[i]->matrix = (float*)calloc(m->x_train->shape[0]*remaining_mem_block,sizeof(float));
+      m->y_train_mini_batch[i] = (dARRAY*)malloc(sizeof(dARRAY));
+      m->y_train_mini_batch[i]->matrix = (float*)calloc(m->Y_train->shape[0]*remaining_mem_block,sizeof(float));
+      m->x_train_mini_batch[i]->shape[0] = m->x_train->shape[0];
+      m->x_train_mini_batch[i]->shape[1] = remaining_mem_block;
+      m->y_train_mini_batch[i]->shape[0] = m->Y_train->shape[0];
+      m->y_train_mini_batch[i]->shape[1] = remaining_mem_block;
+      printf("i = %d\n",i);
+      shape(m->x_train_mini_batch[i]);
+      shape(m->y_train_mini_batch[i]);
+    }
+  }
+  dARRAY * X_train = transpose(m->x_train);
+  dARRAY * Y_train = transpose(m->Y_train);
+
+  free2d(m->x_train);
+  free2d(m->Y_train);
+  m->x_train = m->Y_train = NULL;
+
+  dARRAY * temp = NULL;
+  for(int i=0;i<num_mini_batches;i++){
+    int row = 0;
+    temp = (dARRAY*)malloc(sizeof(dARRAY));
+    temp->matrix = (float*)calloc(m->mini_batch_size*X_train->shape[1],sizeof(float));
+    if(i<num_mini_batches-1){
+      temp->shape[0] = m->mini_batch_size;
+      temp->shape[1] = X_train->shape[1];
+      for(int j=i*m->mini_batch_size;j<(i+1)*m->mini_batch_size && j<X_train->shape[0];j++){
+        for(int k = 0;k<X_train->shape[1];k++){
+          temp->matrix[row*X_train->shape[1]+k] = X_train->matrix[j*X_train->shape[1]+k];
+        }
+        row++;
+      }
+      m->x_train_mini_batch[i] = transpose(temp);
+      free2d(temp);
+      temp = NULL;
+    }
+    else{
+      temp->shape[0] = remaining_mem_block;
+      temp->shape[1] = X_train->shape[1];
+      for(int j=i*m->mini_batch_size;j<X_train->shape[0]-remaining_mem_block && j<X_train->shape[0];j++){
+        for(int k = 0;k<X_train->shape[1];k++){
+          temp->matrix[row*X_train->shape[1]+k] = X_train->matrix[j*X_train->shape[1]+k];
+        }
+        row++;
+      }
+      m->x_train_mini_batch[i] = transpose(temp);
+      free2d(temp);
+      temp = NULL;
+    }
+  }
+  for(int i=0;i<num_mini_batches;i++){
+    int row = 0;
+    temp = (dARRAY*)malloc(sizeof(dARRAY));
+    temp->matrix = (float*)calloc(m->mini_batch_size*Y_train->shape[1],sizeof(float));
+    if(i<num_mini_batches-1){
+      temp->shape[0] = m->mini_batch_size;
+      temp->shape[1] = Y_train->shape[1];
+      for(int j=i*m->mini_batch_size;j<(i+1)*m->mini_batch_size && j<Y_train->shape[0];j++){
+        for(int k = 0;k<Y_train->shape[1];k++){
+          temp->matrix[row*Y_train->shape[1]+k] = Y_train->matrix[j*Y_train->shape[1]+k];
+        }
+        row++;
+      }
+      m->y_train_mini_batch[i] = transpose(temp);
+      free2d(temp);
+      temp = NULL;
+    }
+    else{
+      temp->shape[0] = remaining_mem_block;
+      temp->shape[1] = Y_train->shape[1];
+      for(int j=i*m->mini_batch_size;j<Y_train->shape[0]-remaining_mem_block && j<Y_train->shape[0];j++){
+        for(int k = 0;k<X_train->shape[1];k++){
+          temp->matrix[row*Y_train->shape[1]+k] = Y_train->matrix[j*Y_train->shape[1]+k];
+        }
+        row++;
+      }
+      m->y_train_mini_batch[i] = transpose(temp);
+      free2d(temp);
+      temp = NULL;
+    }
+  }
+  for(int i=0;i<num_mini_batches;i++){
+    printf("Shape(X_mini[%d]) : ",i);
+    shape(m->x_train_mini_batch[i]);
+    printf("Shape(Y_mini[%d]) : ",i);
+    shape(m->y_train_mini_batch[i]);
+    printf("\n");
+  }
+  printf("Created Mini Batches!\n");
+}
+
 void __summary__(){}
 
 long int get_total_params(){
@@ -726,6 +843,8 @@ void (Model)(Model_args model_args){
   }
   m->mini_batch_size = model_args.mini_batch_size;
   m->num_iter = model_args.num_iter;
+
+  create_mini_batches();
 
   m->input_size = model_args.x_train->shape[0];
   m->output_size = model_args.Y_train->shape[0];
