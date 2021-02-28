@@ -6,7 +6,7 @@ mse_loss_layer * loss_layer_mse = NULL;
 
 void forward_pass_MSE_LOSS(){
   //Store the number of training examples in a variable
-  int number_of_examples = m->Y_train->shape[1];
+  int number_of_examples = m->y_train_mini_batch[m->current_mini_batch]->shape[1];
   dARRAY * Y = loss_layer_mse->gnd_truth;
   dARRAY * loss = NULL;
 
@@ -85,6 +85,6 @@ void (MSELoss)(mse_loss_args args){
   loss_layer_mse->grad_out = NULL;
   loss_layer_mse->forward = forward_pass_MSE_LOSS;
   loss_layer_mse->backward = backward_pass_MSE_LOSS;
-  loss_layer_mse->gnd_truth = m->Y_train;
+  loss_layer_mse->gnd_truth = m->y_train_mini_batch[m->current_mini_batch];
   append_graph(loss_layer_mse,"loss");
 }

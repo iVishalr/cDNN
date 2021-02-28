@@ -14,6 +14,7 @@ void Momentum(){
     //calculate first momentum
     //m_dW
     float mul_factor = 1-m->beta;
+    // if(temp->DENSE->dW==NULL) printf("dW was null\n");
     dARRAY * term1 = mulScalar(temp->DENSE->dW,mul_factor);
     mul_factor = m->beta;
     dARRAY * ptr_dW = m->m_t_dW[layer];

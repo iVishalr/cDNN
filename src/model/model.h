@@ -61,6 +61,7 @@ extern "C"{
   dARRAY * load_x_test(int * dims);
   dARRAY * load_y_test(int * dims);
   void create_mini_batches();
+  void dump_image(dARRAY * images);
   dARRAY * load_test_image(char * filename);
   void (destroy_model)();
 #ifdef __cplusplus
@@ -74,14 +75,16 @@ typedef struct model{
 
   float learning_rate;
   int mini_batch_size;
+  int num_mini_batches;
+  int current_mini_batch;
   dARRAY * x_train;
   dARRAY * Y_train;
   dARRAY * x_test;
   dARRAY * Y_test;
   dARRAY * x_cv;
   dARRAY * Y_cv;
-  dARRAY * x_train_mini_batch[1024];
-  dARRAY * y_train_mini_batch[1024];
+  dARRAY ** x_train_mini_batch;
+  dARRAY ** y_train_mini_batch;
   dARRAY * output;
 
   int num_of_training_examples;

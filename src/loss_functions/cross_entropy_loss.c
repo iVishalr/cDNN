@@ -6,8 +6,8 @@ cross_entropy_loss_layer * loss_layer = NULL;
 
 void forward_pass_L2_LOSS(){
   //Store the number of training examples in a variable
-  int number_of_examples = m->Y_train->shape[1];
-  dARRAY * Y = loss_layer->gnd_truth;
+  int number_of_examples = m->y_train_mini_batch[m->current_mini_batch]->shape[1];
+  dARRAY * Y = m->y_train_mini_batch[m->current_mini_batch];
   int act_dims[] = {m->output->shape[0],m->output->shape[1]};
   dARRAY * loss = NULL;
 
@@ -39,7 +39,7 @@ void forward_pass_L2_LOSS(){
     log_y_hat = (dARRAY *)malloc(sizeof(dARRAY));
     log_y_hat->matrix = (float*)calloc(act_dims[0]*act_dims[1],sizeof(float));
     //calculate log(y_pred)
-    #pragma omp parallel for num_threads(8)
+    // #pragma omp parallel for num_threads(8)
     for(int i=0;i<act_dims[0]*act_dims[1];i++){
       log_y_hat->matrix[i] = log(m->output->matrix[i]);
     }
@@ -54,7 +54,7 @@ void forward_pass_L2_LOSS(){
     log_one_y_hat = (dARRAY *)malloc(sizeof(dARRAY));
     log_one_y_hat->matrix = (float*)calloc(act_dims[0]*act_dims[1],sizeof(float));
     //calculate log(1-y_pred)
-    #pragma omp parallel for num_threads(8)
+    // #pragma omp parallel for num_threads(8)
     for(int i=0;i<act_dims[0]*act_dims[1];i++){
       log_one_y_hat->matrix[i] = log(temp_sub->matrix[i]);
     }
@@ -153,7 +153,7 @@ void forward_pass_L2_LOSS(){
 void backward_pass_L2_LOSS(){
   int act_dims[] = {m->output->shape[0],m->output->shape[1]};
   if(!strcasecmp(m->current_layer->prev_layer->DENSE->activation,"softmax")){
-    dARRAY * temp = divison(loss_layer->gnd_truth,m->output);
+    dARRAY * temp = divison(m->y_train_mini_batch[m->current_mini_batch],m->output);
     dARRAY * class_sum = sum(temp,0);
     free2d(temp);
     temp = NULL;
@@ -163,7 +163,7 @@ void backward_pass_L2_LOSS(){
   }
   else{
     dARRAY * one = ones(act_dims);
-    dARRAY * temp1 = subtract(m->Y_train,m->output);
+    dARRAY * temp1 = subtract(m->y_train_mini_batch[m->current_mini_batch],m->output);
     dARRAY * temp2 = subtract(one,m->output);
     dARRAY * temp3 = multiply(m->output,temp2);
     free2d(one);
@@ -188,6 +188,6 @@ void (cross_entropy_loss)(cross_entropy_loss_args args){
   loss_layer->grad_out = NULL;
   loss_layer->forward = forward_pass_L2_LOSS;
   loss_layer->backward = backward_pass_L2_LOSS;
-  loss_layer->gnd_truth = m->Y_train;
+  loss_layer->gnd_truth = m->y_train_mini_batch[m->current_mini_batch];
   append_graph(loss_layer,"loss");
 }

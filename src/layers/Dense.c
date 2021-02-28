@@ -193,7 +193,7 @@ void forward_pass_DENSE(){
 
 void backward_pass_DENSE(){
   //Store the number of training examples in a variable
-  float num_examples = m->num_of_training_examples;
+  float num_examples = m->y_train_mini_batch[m->current_mini_batch]->shape[1];
   //Assign pointers to the respective layers
   Dense_layer * layer = m->current_layer->DENSE; 
   Input_layer * prev_layer_in_features = NULL;
@@ -233,7 +233,7 @@ void backward_pass_DENSE(){
     //into the Z computation block will be by chain rule
     // dZ = local_act_grad * global_grad (loss_layer->grad_out)
     if(!strcasecmp(m->current_layer->DENSE->activation,"softmax")){
-      layer->dZ = subtract(m->output,m->current_layer->next_layer->LOSS->gnd_truth);
+      layer->dZ = subtract(m->output,m->y_train_mini_batch[m->current_mini_batch]);
       free2d(local_act_grad);
       free2d(m->current_layer->next_layer->LOSS->grad_out);
       local_act_grad = m->current_layer->next_layer->LOSS->grad_out = NULL;
@@ -346,7 +346,6 @@ void backward_pass_DENSE(){
 }
 
 void (Dense)(dense_args dense_layer_args){
-  
   Dense_layer * layer = (Dense_layer*)malloc(sizeof(Dense_layer));
   layer->activation = dense_layer_args.activation;
   layer->num_of_computation_nodes = dense_layer_args.layer_size;
@@ -358,7 +357,10 @@ void (Dense)(dense_args dense_layer_args){
   layer->dropout_mask = NULL;
   layer->dropout = dense_layer_args.dropout;
   layer->lambda = dense_layer_args.lambda;
-  layer->dA = layer->db = layer->dW = layer->dZ = NULL;
+  layer->dA = NULL;
+  layer->db = NULL;
+  layer->dW = NULL;
+  layer->dZ = NULL;
   layer->isTraining = 1;
   layer->layer_type = dense_layer_args.layer_type;
   //finally we need to append to computation graph
