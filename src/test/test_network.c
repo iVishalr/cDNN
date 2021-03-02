@@ -32,7 +32,7 @@ int main(){
   Dense(.layer_size=1,.activation="sigmoid",.initializer="random",.layer_type="output");
   Model(.x_train=x_train,.Y_train=y_train,.x_cv=x_cv,.Y_cv=y_cv,.x_test=x_test,.Y_test=y_test,\
         .num_iter=1000,.learning_rate=4e-3,.optimizer="sgd",.checkpoint_every=-1,.mini_batch_size=64,.regularization="L2",.lambda=5e-4,\
-        .loss="MSELoss"
+        
        );
 
   // m->load_model("test_patch2.t7");
