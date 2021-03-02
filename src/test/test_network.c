@@ -6,20 +6,20 @@ int main(){
   
   create_model();
   
-  int x_train_dims[] = {12288,20000};
+  int x_train_dims[] = {12288,100};
   dARRAY * x_train = load_x_train(x_train_dims);
 
-  int x_cv_dims[] = {12288,2000};
+  int x_cv_dims[] = {12288,20};
   dARRAY * x_cv = load_x_cv(x_cv_dims);
   
-  int y_train_dims[] = {1,20000};
+  int y_train_dims[] = {1,100};
   dARRAY * y_train = load_y_train(y_train_dims);
   
-  int y_cv_dims[] = {1,2000};
+  int y_cv_dims[] = {1,20};
   dARRAY * y_cv = load_y_cv(y_cv_dims);
   
-  int x_test_dims[] = {12288,2000};
-  int y_test_dims[] = {1,2000};
+  int x_test_dims[] = {12288,20};
+  int y_test_dims[] = {1,20};
 
   dARRAY * x_test = load_x_test(x_test_dims);
   dARRAY * y_test = load_y_test(y_test_dims);
@@ -27,10 +27,12 @@ int main(){
   Input(.layer_size=12288);
   Dense(.layer_size=64,.activation="relu",.initializer="he",.layer_type="hidden");
   Dense(.layer_size=32,.activation="relu",.initializer="he",.layer_type="hidden");
+  Dense(.layer_size=32,.activation="relu",.layer_type="hidden");
   Dense(.layer_size=16,.activation="relu",.layer_type="hidden");
   Dense(.layer_size=1,.activation="sigmoid",.initializer="random",.layer_type="output");
   Model(.x_train=x_train,.Y_train=y_train,.x_cv=x_cv,.Y_cv=y_cv,.x_test=x_test,.Y_test=y_test,\
-        .num_iter=100,.learning_rate=4e-3,.optimizer="momentum",.checkpoint_every=-1,.mini_batch_size=64
+        .num_iter=1000,.learning_rate=4e-3,.optimizer="sgd",.checkpoint_every=-1,.mini_batch_size=64,.regularization="L2",.lambda=5e-4,\
+        .loss="MSELoss"
        );
 
   // m->load_model("test_patch2.t7");
