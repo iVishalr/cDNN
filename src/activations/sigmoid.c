@@ -8,9 +8,21 @@ dARRAY * forward_pass_sigmoid(){
   sigmoid_outf = (dARRAY*)malloc(sizeof(dARRAY));
   sigmoid_outf->matrix = (float*)calloc(m->current_layer->DENSE->cache->shape[0]*m->current_layer->DENSE->cache->shape[1],sizeof(float));
   omp_set_num_threads(8);
-  #pragma omp parallel for num_threads(8) shared(m,sigmoid_outf) schedule(static)
-  for(int i=0;i<m->current_layer->DENSE->cache->shape[0]*m->current_layer->DENSE->cache->shape[1];i++)
-    sigmoid_outf->matrix[i] = (float)(1.0/(float)(1+exp((float)(-1.0*m->current_layer->DENSE->cache->matrix[i]))));
+  #pragma omp parallel for num_threads(8) shared(sigmoid_outf) schedule(static)
+  for(int i=0;i<m->current_layer->DENSE->cache->shape[0]*m->current_layer->DENSE->cache->shape[1];i++){
+    float exp_res = 0.0f;
+    //For numerical stability
+    if(m->current_layer->DENSE->cache->matrix[i]>0.0f){
+      exp_res = (float)exp(-1 * m->current_layer->DENSE->cache->matrix[i]);
+      sigmoid_outf->matrix[i] = 1.0f/(1.0f + exp_res);
+    }
+    else if(m->current_layer->DENSE->cache->matrix[i]<0.0f){
+      exp_res = (float)exp(m->current_layer->DENSE->cache->matrix[i]);
+      sigmoid_outf->matrix[i] = exp_res/(1.0f + exp_res);
+    }
+    if(sigmoid_outf->matrix[i]==1.0f) sigmoid_outf->matrix[i] = 0.99997;
+    else if(sigmoid_outf->matrix[i]==0.0f) sigmoid_outf->matrix[i] = 0.00015;
+  }
   sigmoid_outf->shape[0] = m->current_layer->DENSE->cache->shape[0];
   sigmoid_outf->shape[1] = m->current_layer->DENSE->cache->shape[1];
   return sigmoid_outf;

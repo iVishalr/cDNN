@@ -37,6 +37,7 @@ extern "C"{
   dARRAY * divison(dARRAY * MatrixA, dARRAY * MatrixB);
   dARRAY * divScalar(dARRAY * matrix, float scalar);
   dARRAY * power(dARRAY * matrix, float power);
+  dARRAY * squareroot(dARRAY * matrix);
   dARRAY * exponentional(dARRAY * matrix);
   dARRAY * b_cast(dARRAY * MatrixA, dARRAY * MatrixB);
   dARRAY * reshape(dARRAY * matrix, int * dims);

@@ -10,7 +10,7 @@ dARRAY * forward_pass_relu(){
   omp_set_num_threads(8);
   #pragma omp parallel for num_threads(8) shared(m,relu_outf) schedule(static)
   for(int i=0;i<m->current_layer->DENSE->cache->shape[0]*m->current_layer->DENSE->cache->shape[1];i++)
-    relu_outf->matrix[i] = m->current_layer->DENSE->cache->matrix[i]>(float)0.0 ?(float)m->current_layer->DENSE->cache->matrix[i] : (float)0.0;
+    relu_outf->matrix[i] = m->current_layer->DENSE->cache->matrix[i]>0.0f?(float)m->current_layer->DENSE->cache->matrix[i] : 0.0f;
   relu_outf->shape[0] = m->current_layer->DENSE->cache->shape[0];
   relu_outf->shape[1] = m->current_layer->DENSE->cache->shape[1];
   return relu_outf;
@@ -23,7 +23,7 @@ dARRAY * backward_pass_relu(){
   omp_set_num_threads(8);
   #pragma omp parallel for num_threads(8) shared(m,relu_outb) schedule(static)
   for(int i=0;i<m->current_layer->DENSE->A->shape[0]*m->current_layer->DENSE->A->shape[1];i++)
-    relu_outb->matrix[i] = m->current_layer->DENSE->A->matrix[i]>(float)0.0 ? (float)1.0 : (float)0.0;
+    relu_outb->matrix[i] = m->current_layer->DENSE->A->matrix[i]>0.0f ? 1.0f : 0.0f;
   relu_outb->shape[0] = m->current_layer->DENSE->A->shape[0];
   relu_outb->shape[1] = m->current_layer->DENSE->A->shape[1];
   return relu_outb;

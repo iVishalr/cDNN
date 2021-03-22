@@ -6,8 +6,10 @@ mse_loss_layer * loss_layer_mse = NULL;
 
 void forward_pass_MSE_LOSS(){
   //Store the number of training examples in a variable
-  int number_of_examples = m->y_train_mini_batch[m->current_mini_batch]->shape[1];
-  dARRAY * Y = m->y_train_mini_batch[m->current_mini_batch];
+  // int number_of_examples = m->y_train_mini_batch[m->current_mini_batch]->shape[1];
+  int number_of_examples = m->Y_train->shape[1];
+  // dARRAY * Y = m->y_train_mini_batch[m->current_mini_batch];
+  dARRAY * Y = m->Y_train;
   dARRAY * loss = NULL;
 
   dARRAY * temp_sub = subtract(m->output,Y);
@@ -72,7 +74,8 @@ void forward_pass_MSE_LOSS(){
 }
 
 void backward_pass_MSE_LOSS(){
-  dARRAY * Y = m->y_train_mini_batch[m->current_mini_batch];
+  // dARRAY * Y = m->y_train_mini_batch[m->current_mini_batch];
+  dARRAY * Y = m->Y_train;
   dARRAY * temp = subtract(m->output,Y);
   loss_layer_mse->grad_out = mulScalar(temp,2.0);
   free2d(temp);

@@ -27,7 +27,7 @@ dARRAY * ones(int * dims){
   dARRAY * matrix = (dARRAY*)malloc(sizeof(dARRAY));
   matrix->matrix = (float*)malloc(sizeof(float)*(dims[0]*dims[1]));
   omp_set_num_threads(8);
-  #pragma omp parallel for 
+  #pragma omp parallel for num_threads(8)
   for(int i=0;i<dims[0]*dims[1];i++){
      matrix->matrix[i]=1;
   }
@@ -46,7 +46,7 @@ dARRAY * eye(int * dims){
   dARRAY * matrix = (dARRAY*)malloc(sizeof(dARRAY));
   matrix->matrix = (float*)calloc((dims[0]*dims[1]),sizeof(float));
   omp_set_num_threads(8);
-  #pragma omp parallel for collapse(1)
+  #pragma omp parallel for num_threads(8) collapse(1)
   for(int i=0;i<dims[0]; i++){
     for(int j=0;j<dims[1];j++)
       matrix->matrix[i*dims[1]+j] = i==j ? 1: 0;
@@ -474,7 +474,7 @@ dARRAY * subScalar(dARRAY * matrix, float scalar){
   result->matrix = (float*)calloc(matrix->shape[0]*matrix->shape[1],sizeof(float));
   omp_set_num_threads(8);
   #pragma omp parallel for num_threads(8) shared(matrix,result,scalar) schedule(static)
-  for(int i=0; i<matrix->shape[0]*matrix->shape[1];  i++){
+  for(int i=0; i<matrix->shape[0]*matrix->shape[1]; i++){
     result->matrix[i] = matrix->matrix[i] - scalar;
   }
   result->shape[0] = matrix->shape[0];
@@ -498,7 +498,7 @@ dARRAY * mulScalar(dARRAY * matrix, float scalar){
   result->matrix = (float*)calloc(matrix->shape[0]*matrix->shape[1],sizeof(float));
   omp_set_num_threads(8);
   #pragma omp parallel for num_threads(8) shared(matrix,result,scalar) schedule(static)
-  for(int i=0; i<matrix->shape[0]*matrix->shape[1];  i++){
+  for(int i=0; i<matrix->shape[0]*matrix->shape[1]; i++){
     result->matrix[i] = matrix->matrix[i] * scalar;
   }
   result->shape[0] = matrix->shape[0];
@@ -581,7 +581,24 @@ dARRAY * power(dARRAY * matrix, float power){
   omp_set_num_threads(8);
   #pragma omp parallel for num_threads(8) shared(matrix,result,power) schedule(static)
   for(int i=0; i<matrix->shape[0]*matrix->shape[1];  i++){
-    result->matrix[i] = pow(matrix->matrix[i],power);
+    result->matrix[i] = (float)pow(matrix->matrix[i],power);
+  }
+  result->shape[0] = matrix->shape[0];
+  result->shape[1] = matrix->shape[1];
+  return result;
+}
+
+dARRAY * squareroot(dARRAY * matrix){
+  if(matrix==NULL){
+    printf("\033[1;31mError:\033[93m Matrix is empty. Call squareroot() only after intializing dARRAY object.\033[0m\n");
+    return NULL;
+  }
+  dARRAY * result = (dARRAY*)malloc(sizeof(dARRAY));
+  result->matrix = (float*)calloc(matrix->shape[0]*matrix->shape[1],sizeof(float));
+  omp_set_num_threads(8);
+  #pragma omp parallel for num_threads(8) shared(matrix,result) schedule(static)
+  for(int i=0; i<matrix->shape[0]*matrix->shape[1];  i++){
+    result->matrix[i] = (float)sqrt(matrix->matrix[i]);
   }
   result->shape[0] = matrix->shape[0];
   result->shape[1] = matrix->shape[1];
@@ -724,7 +741,7 @@ dARRAY * sum(dARRAY * matrix, int axis){
 float frobenius_norm(dARRAY * matrix){
   float frobenius_norm = 0.0;
   omp_set_num_threads(8);
-  #pragma omp parallel for num_threads(8) shared(matrix) schedule(static)
+  #pragma omp parallel for num_threads(8) shared(matrix) reduction(+:frobenius_norm) schedule(static)
   for(int i=0;i<matrix->shape[0]*matrix->shape[1];i++){
     frobenius_norm += pow(matrix->matrix[i],2);
   }
@@ -734,7 +751,7 @@ float frobenius_norm(dARRAY * matrix){
 float Manhattan_distance(dARRAY * matrix){
   float dist = 0.0;
   omp_set_num_threads(8);
-  #pragma omp parallel for num_threads(8) shared(matrix) schedule(static)
+  #pragma omp parallel for num_threads(8) shared(matrix) reduction(+:dist) schedule(static)
   for(int i=0;i<matrix->shape[0]*matrix->shape[1];i++){
     dist += abs(matrix->matrix[i]);
   }

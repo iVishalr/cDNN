@@ -57,7 +57,8 @@ dARRAY * init_weights(int * weights_dims,const char * init_type){
   //Optional feature.
   //Don't use it
   //It is only to see what happens if your intialize all your weights to zeros
-  //Fails to break symmetry and thus network wont train no matter what you do.
+  //Fails to break symmetry and thus network won't train no matter what you do.
+  //Can replace all your layers with a single linear classifier
   else if(!strcmp(init_type,"zeros")){
     weights = zeros(weights_dims);
   }
@@ -81,7 +82,7 @@ dARRAY * init_bias(int * bias_dims){
 }
 
 void forward_pass_DENSE(){
-  // printf("dense forward\n");
+  // printf("forward DENSE\n");
   //Compute Z = W.A + b
   //Z is the linear output of the gate
   //W is the weights of the current layer
@@ -90,14 +91,15 @@ void forward_pass_DENSE(){
   dARRAY * Wx = NULL;
   //if the pevious layer is an input layer, we want to dot product the weights with the input
   //features and not the activations
-  if(m->current_layer->prev_layer->type==INPUT) 
-    Wx = \
-    dot(m->current_layer->DENSE->weights, m->current_layer->prev_layer->INPUT->A);
+  if(m->current_layer->prev_layer->type==INPUT)
+    Wx = dot(m->current_layer->DENSE->weights, m->current_layer->prev_layer->INPUT->A);
   else 
-    Wx = \
-    dot(m->current_layer->DENSE->weights, m->current_layer->prev_layer->DENSE->A);
+    Wx = dot(m->current_layer->DENSE->weights, m->current_layer->prev_layer->DENSE->A);
+  
   //Store Z in cache as we will require it in backward pass
-  dARRAY * Z = m->current_layer->DENSE->cache = add(Wx,m->current_layer->DENSE->bias);//Z
+  m->current_layer->DENSE->cache = add(Wx,m->current_layer->DENSE->bias);
+  dARRAY * Z = m->current_layer->DENSE->cache;
+  
   //Done with Wx, free it.
   free2d(Wx);
   Wx = NULL;
@@ -174,8 +176,7 @@ void forward_pass_DENSE(){
   }
   else{
     //if user didn't want to use any activation, pass Z itself as the output
-    if(m->current_layer->DENSE->dropout==1.0) {
-      
+    if(m->current_layer->DENSE->dropout==1.0){
       m->current_layer->DENSE->A = Z; 
     }
     else{
@@ -183,17 +184,17 @@ void forward_pass_DENSE(){
       Z_drop_out = NULL;
     }
   }
-
   Z=NULL;
-
-  //set output of model to be activation of the last layer
-  if(m->current_layer->next_layer->type==LOSS)
+  if(m->current_layer->next_layer->type==LOSS){
     m->output = m->current_layer->DENSE->A;
+  }
 }
 
 void backward_pass_DENSE(){
+  // printf("BACKWARD DENSE\n");
   //Store the number of training examples in a variable
-  float num_examples = m->y_train_mini_batch[m->current_mini_batch]->shape[1];
+  // float num_examples = m->y_train_mini_batch[m->current_mini_batch]->shape[1];
+  float num_examples = m->Y_train->shape[1];
   //Assign pointers to the respective layers
   Dense_layer * layer = m->current_layer->DENSE; 
   Input_layer * prev_layer_in_features = NULL;
@@ -233,16 +234,19 @@ void backward_pass_DENSE(){
     //into the Z computation block will be by chain rule
     // dZ = local_act_grad * global_grad (loss_layer->grad_out)
     if(!strcasecmp(m->current_layer->DENSE->activation,"softmax")){
-      layer->dZ = subtract(m->output,m->y_train_mini_batch[m->current_mini_batch]);
+      // layer->dZ = subtract(m->output,m->y_train_mini_batch[m->current_mini_batch]);
+      layer->dZ = subtract(m->output,m->Y_train);
       free2d(local_act_grad);
       free2d(m->current_layer->next_layer->LOSS->grad_out);
-      local_act_grad = m->current_layer->next_layer->LOSS->grad_out = NULL;
+      local_act_grad = NULL;
+      m->current_layer->next_layer->LOSS->grad_out = NULL;
     }
     else{
       layer->dZ = multiply(local_act_grad,m->current_layer->next_layer->LOSS->grad_out);
       free2d(local_act_grad);
       free2d(m->current_layer->next_layer->LOSS->grad_out);
-      local_act_grad = m->current_layer->next_layer->LOSS->grad_out = NULL;
+      local_act_grad = NULL;
+      m->current_layer->next_layer->LOSS->grad_out = NULL;
     }
   }
   else{

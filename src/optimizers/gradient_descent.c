@@ -72,6 +72,7 @@ void SGD(){
     temp->DENSE->A = NULL;
     m->output = NULL;
     temp->DENSE->dZ = NULL;
+    
     temp = temp->next_layer;
   }
 }

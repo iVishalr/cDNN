@@ -22,8 +22,8 @@ void __initialize_params__(){
   int flag = 0;
   if(!strcasecmp(m->optimizer,"adam")) flag = 1;
   if(!strcasecmp(m->optimizer,"adagrad")) flag = 2;
-  if(!strcasecmp(m->optimizer,"rmsprop")) flag = 2;
-  if(!strcasecmp(m->optimizer,"momentum")) flag = 3;
+  if(!strcasecmp(m->optimizer,"rmsprop")) flag = 3;
+  if(!strcasecmp(m->optimizer,"momentum")) flag = 4;
   while(temp!=NULL){
     m->current_layer = temp;
     if(temp->type==DENSE){
@@ -46,6 +46,13 @@ void __initialize_params__(){
       index++; 
     }
     else if(flag==3 && temp->type!=LOSS){
+      int dims_dW[] = {temp->DENSE->weights->shape[0],temp->DENSE->weights->shape[1]};
+      int dims_db[] = {temp->DENSE->bias->shape[0],temp->DENSE->bias->shape[1]};
+      m->v_t_dW[index] = zeros(dims_dW);
+      m->v_t_db[index] = zeros(dims_db);
+      index++;
+    }
+    else if(flag==4 && temp->type!=LOSS){
       int dims_dW[] = {temp->DENSE->weights->shape[0],temp->DENSE->weights->shape[1]};
       int dims_db[] = {temp->DENSE->bias->shape[0],temp->DENSE->bias->shape[1]};
       m->m_t_dW[index] = zeros(dims_dW);
@@ -261,28 +268,27 @@ void append_to_file(float * arr ,char * filename,char * mode){
 }
 
 void __fit__(){
-  printf("Starting to Train\n");
   int i = 1;
   int index = 0;
   int iterations=0;
   float sum_cost = m->train_cost*m->current_iter;
   float sum_train_acc = m->train_accuracy*m->current_iter;
   float sum_train_val_acc = m->cross_val_accuracy*m->current_iter;
-  float * train_cost_arr = (float*)calloc(m->num_iter==-1?1000000:m->num_iter*m->num_mini_batches,sizeof(float));
-  float * train_acc_arr = (float*)calloc(m->num_iter==-1?1000000:m->num_iter*m->num_mini_batches,sizeof(float));
-  float * val_acc_arr = (float*)calloc(m->num_iter==-1?1000000:m->num_iter*m->num_mini_batches,sizeof(float));
+  float * train_cost_arr = (float*)calloc(m->num_iter==-1?1000000:m->num_iter,sizeof(float));
+  float * train_acc_arr = (float*)calloc(m->num_iter==-1?1000000:m->num_iter,sizeof(float));
+  float * val_acc_arr = (float*)calloc(m->num_iter==-1?1000000:m->num_iter,sizeof(float));
   if(m->num_iter==-1){
     iterations = i;
   }
   else iterations = m->num_iter;
   while(i<=iterations){
-    // printf("Epoch %d\n",i);
-    for(int mini_batch=0;mini_batch<m->num_mini_batches;mini_batch++){
-      // printf("Mini batch : %d\n",mini_batch);
-      m->current_mini_batch = mini_batch;
+    // m->current_mini_batch = 0;
+    // m->current_mini_batch = 0;
+    // for(int mini_batch=0;mini_batch<m->num_mini_batches;mini_batch++){
       __forward__();
       sum_cost += m->iter_cost;
-      sum_train_acc += calculate_accuracy(m->output,m->y_train_mini_batch[mini_batch]);
+      // sum_train_acc += calculate_accuracy(m->output,m->y_train_mini_batch[m->current_mini_batch]);
+      sum_train_acc += calculate_accuracy(m->output,m->Y_train);
       dARRAY * temp = calculate_val_test_acc(m->x_cv,m->Y_cv);
       sum_train_val_acc += temp->matrix[0];
       if(m->print_cost){
@@ -292,10 +298,11 @@ void __fit__(){
         train_cost_arr[index] = m->train_cost;
         train_acc_arr[index] = m->train_accuracy;
         val_acc_arr[index] = m->cross_val_accuracy;
-        printf("\033[96m%d. %d. Cost : \033[0m%f ",i,mini_batch,m->train_cost);
+        // printf("\033[96m%d. %d. Cost : \033[0m%f ",i,mini_batch,m->train_cost);
+        printf("\033[96m%d. Cost : \033[0m%f ",i,m->train_cost);
         printf("\033[96m train_acc : \033[0m%f ",m->train_accuracy);
         printf("\033[96m val_acc : \033[0m%f\n",m->cross_val_accuracy);
-        if(train_cost_arr[index]>=2*train_cost_arr[0]){
+        if(train_cost_arr[index]>=2.5*train_cost_arr[0]){
           printf("Cost is exploding hence exiting\n");
           exit(EXIT_FAILURE);
         }
@@ -340,8 +347,8 @@ void __fit__(){
       m->current_iter += 1;
       free(temp);
       temp = NULL;
-    }
-    
+      // m->current_mini_batch+=1;
+    // }
     i++;
     if(m->num_iter==-1) iterations = i;
   }
@@ -647,6 +654,10 @@ void create_mini_batches(){
     printf("\033[1;31mShape Error : \033[93mNumber of examples in X_train[%d,\033[1;31m%d\033[93m] != Y_train[%d,\033[1;31m%d\033[93m]!\033[0m\n",m->x_train->shape[0],m->x_train->shape[1],m->Y_train->shape[0],m->Y_train->shape[1]);
     exit(EXIT_FAILURE);
   }
+  if(m->mini_batch_size>m->Y_train->shape[1]){
+    printf("\033[1;31mMini Batch Error : \033[93mNumber of examples in train_set is less than the mini_batch_size specified!\033[1;31m [examples:%d < mini_batch_size: %d]\033[93m\nPlease make sure that the mini batch size is less than or equal to the number of examples in train_set.\033[0m\n",m->x_train->shape[1],m->mini_batch_size);
+    exit(EXIT_FAILURE);
+  }
   int num_mini_batches = (m->x_train->shape[1]%m->mini_batch_size==0)?\
                           m->x_train->shape[1]/m->mini_batch_size :\
                           floor(m->x_train->shape[1]/m->mini_batch_size) + 1;
@@ -680,17 +691,21 @@ void create_mini_batches(){
   }
   dARRAY * X_train = transpose(m->x_train);
   dARRAY * Y_train = transpose(m->Y_train);
-
+  printf("Shape(X_train) : ");
+  shape(X_train);
+  printf("Shape(Y_train) : ");
+  shape(Y_train);
   free2d(m->x_train);
   free2d(m->Y_train);
-  m->x_train = m->Y_train = NULL;
+  m->x_train = NULL;
+  m->Y_train = NULL;
 
   dARRAY * temp = NULL;
   for(int i=0;i<num_mini_batches;i++){
     int row = 0;
     temp = (dARRAY*)malloc(sizeof(dARRAY));
     temp->matrix = (float*)calloc(m->mini_batch_size*X_train->shape[1],sizeof(float));
-    if(i<num_mini_batches-1){
+    if(i<num_mini_batches-1 || num_mini_batches==1){
       temp->shape[0] = m->mini_batch_size;
       temp->shape[1] = X_train->shape[1];
       for(int j=i*m->mini_batch_size;j<(i+1)*m->mini_batch_size && j<X_train->shape[0];j++){
@@ -707,6 +722,7 @@ void create_mini_batches(){
       temp->shape[0] = remaining_mem_block;
       temp->shape[1] = X_train->shape[1];
       for(int j=i*m->mini_batch_size;j<X_train->shape[0]-remaining_mem_block && j<X_train->shape[0];j++){
+        printf("Entering loop!\n");
         for(int k = 0;k<X_train->shape[1];k++){
           temp->matrix[row*X_train->shape[1]+k] = X_train->matrix[j*X_train->shape[1]+k];
         }
@@ -879,13 +895,15 @@ void (Model)(Model_args model_args){
   m->mini_batch_size = model_args.mini_batch_size;
   m->num_iter = model_args.num_iter;
 
-  create_mini_batches();
+  // create_mini_batches();
   printf("Adding loss functions\n");
   if(!strcasecmp(m->loss,"cross_entropy_loss")) cross_entropy_loss();
   if(!strcasecmp(m->loss,"MSELoss")) MSELoss();
   printf("Added loss fun\n");
 
-  m->input_size = m->x_train_mini_batch[0]->shape[0];
+  // m->input_size = m->x_train_mini_batch[0]->shape[0];
+  printf("Setting up input size\n");
+  m->input_size = m->x_train->shape[0];
   // m->output_size = model_args.Y_train->shape[0];
 
   // if(m->input_size!=m->graph->INPUT->input_features_size){
@@ -893,8 +911,9 @@ void (Model)(Model_args model_args){
   //   printf("\033[96mHint : \033[93mCheck if layer_size of input layer == x_train->shape[0]\033[0m\n");
   //   exit(EXIT_FAILURE);
   // }
-
-  m->num_of_training_examples = m->x_train_mini_batch[0]->shape[1];
+  printf("Setting up num of examples\n");
+  // m->num_of_training_examples = m->x_train_mini_batch[0]->shape[1];
+  m->num_of_training_examples = m->x_train->shape[1];
   m->print_cost = model_args.print_cost;
   m->init = __init__;
   m->forward = __forward__;

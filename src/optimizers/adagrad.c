@@ -23,7 +23,10 @@ void adagrad(){
     free2d(scaled_grads_db);
     free2d(ptr_cache_dW);
     free2d(ptr_cache_db);
-    scaled_grads_dW = scaled_grads_db = ptr_cache_dW = ptr_cache_db = NULL;
+    scaled_grads_dW = NULL;
+    scaled_grads_db = NULL;
+    ptr_cache_dW = NULL;
+    ptr_cache_db = NULL;
 
     dARRAY * div_factor_temp_dW = power(m->cache_dW[layer],0.5);
     dARRAY * div_factor_temp_db = power(m->cache_db[layer],0.5);
@@ -33,14 +36,16 @@ void adagrad(){
 
     free2d(div_factor_temp_dW);
     free2d(div_factor_temp_db);
-    div_factor_temp_dW = div_factor_temp_db = NULL;
+    div_factor_temp_dW = NULL;
+    div_factor_temp_db = NULL;
 
     dARRAY * mul_lr_w = mulScalar(temp->DENSE->dW,m->learning_rate);
     dARRAY * mul_lr_b = mulScalar(temp->DENSE->db,m->learning_rate);
 
     free2d(temp->DENSE->dW);
     free2d(temp->DENSE->db);
-    temp->DENSE->dW = temp->DENSE->db = NULL;
+    temp->DENSE->dW = NULL;
+    temp->DENSE->db = NULL;
 
     dARRAY * update_term_w = divison(mul_lr_w,div_factor_dW);
     dARRAY * update_term_b = divison(mul_lr_b,div_factor_db);
@@ -49,7 +54,31 @@ void adagrad(){
     free2d(mul_lr_b);
     free2d(div_factor_dW);
     free2d(div_factor_db);
-    mul_lr_w = mul_lr_b = div_factor_dW = div_factor_db = NULL;
+    mul_lr_w = NULL;
+    mul_lr_b = NULL;
+    div_factor_dW = NULL;
+    div_factor_db = NULL;
+
+    if(m->regularization!=NULL){
+      float mul_grad = m->lambda * m->learning_rate/(float)m->y_train_mini_batch[m->current_mini_batch]->shape[1];
+      dARRAY * update_term2_dW = mulScalar(temp->DENSE->weights,mul_grad);
+      dARRAY * update_term2_db = mulScalar(temp->DENSE->bias,mul_grad);
+
+      dARRAY * ptr_update_term1_dW = update_term_w;
+      dARRAY * ptr_update_term1_db = update_term_b;
+
+      update_term_w = add(ptr_update_term1_dW,update_term2_dW);
+      update_term_b = add(ptr_update_term1_db,update_term2_db);
+
+      free2d(update_term2_dW);
+      free2d(update_term2_db);
+      free2d(ptr_update_term1_dW);
+      free2d(ptr_update_term1_db);
+      update_term2_dW = NULL;
+      update_term2_db = NULL;
+      ptr_update_term1_dW = NULL;
+      ptr_update_term1_db = NULL;
+    }
 
     dARRAY * grad_W = temp->DENSE->weights;
     dARRAY * grad_b = temp->DENSE->bias;
@@ -61,7 +90,10 @@ void adagrad(){
     free2d(grad_b);
     free2d(update_term_w);
     free2d(update_term_b);
-    grad_W = grad_b = update_term_w = update_term_b = NULL;
+    grad_W = NULL;
+    grad_b = NULL;
+    update_term_w = NULL;
+    update_term_b = NULL;
 
     if(temp->DENSE->dropout_mask!=NULL)
       free2d(temp->DENSE->dropout_mask);
@@ -73,7 +105,13 @@ void adagrad(){
       free2d(temp->DENSE->dA);
     if(temp->DENSE->dZ!=NULL)
       free2d(temp->DENSE->dZ);
-    temp->DENSE->dA = temp->DENSE->cache = temp->DENSE->A = temp->DENSE->dropout_mask = temp->DENSE->dZ = m->output = NULL;
+    temp->DENSE->dA = NULL;
+    temp->DENSE->cache = NULL;
+    temp->DENSE->A = NULL;
+    temp->DENSE->dropout_mask = NULL;
+    temp->DENSE->dZ = NULL;
+    m->output = NULL;
+    
     layer++;
     temp = temp->next_layer;
   }
