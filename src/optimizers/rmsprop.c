@@ -11,8 +11,8 @@ void RMSProp(){
       temp = temp->next_layer;
       continue;
     }
-    dARRAY * scaled_dW = power(temp->DENSE->dW,2);
-    dARRAY * scaled_db = power(temp->DENSE->db,2);
+    dARRAY * scaled_dW = power(temp->DENSE->dW,2.0f);
+    dARRAY * scaled_db = power(temp->DENSE->db,2.0f);
 
     float mul_factor = 1-m->beta;
     dARRAY * wavg_term2_dW = mulScalar(scaled_dW,mul_factor);
@@ -34,8 +34,6 @@ void RMSProp(){
     free2d(ptr_vt_db);
     ptr_vt_dW = NULL;
     ptr_vt_db = NULL;
-    m->v_t_dW[layer] = NULL;
-    m->v_t_dW[layer] = NULL;
 
     m->v_t_dW[layer] = add(wavg_term1_dW,wavg_term2_dW);
     m->v_t_db[layer] = add(wavg_term1_db,wavg_term2_db);
@@ -106,18 +104,18 @@ void RMSProp(){
       ptr_update_term_db = NULL;
     }
 
-    dARRAY * grad_W = temp->DENSE->weights;
-    dARRAY * grad_b = temp->DENSE->bias;
+    dARRAY * layer_weights = temp->DENSE->weights;
+    dARRAY * layer_biases = temp->DENSE->bias;
 
-    temp->DENSE->weights = subtract(grad_W,update_term_dW);
-    temp->DENSE->bias = subtract(grad_b,update_term_db);
+    temp->DENSE->weights = subtract(layer_weights,update_term_dW);
+    temp->DENSE->bias = subtract(layer_biases,update_term_db);
 
-    free2d(grad_W);
-    free2d(grad_b);
+    free2d(layer_weights);
+    free2d(layer_biases);
     free2d(update_term_dW);
     free2d(update_term_db);
-    grad_W = NULL;
-    grad_b = NULL;
+    layer_weights = NULL;
+    layer_biases = NULL;
     update_term_dW = NULL;
     update_term_db = NULL;
 

@@ -28,11 +28,9 @@ int main(){
   Dense(.layer_size=64,.activation="relu",.initializer="he",.layer_type="hidden");
   Dense(.layer_size=32,.activation="relu",.initializer="he",.layer_type="hidden");
   Dense(.layer_size=32,.activation="relu",.layer_type="hidden");
-  Dense(.layer_size=16,.activation="relu",.layer_type="hidden");
   Dense(.layer_size=1,.activation="sigmoid",.initializer="random",.layer_type="output");
   Model(.x_train=x_train,.Y_train=y_train,.x_cv=x_cv,.Y_cv=y_cv,\
-        .num_iter=1000,.learning_rate=4.67e-3,.optimizer="momentum",.checkpoint_every=-1,.mini_batch_size=500,\
-        .loss="MSELoss"
+        .num_iter=1000,.learning_rate=4.67e-3,.optimizer="sgd",.checkpoint_every=-1,.mini_batch_size=500,\
        );
       //  .loss="MSELoss"
       // .regularization="L2",.lambda=5e-4,

@@ -4,103 +4,95 @@
 extern __Model__ * m;
 
 void adam(){
-  Computation_Graph * temp = m->graph;
   int layer = 0;
+  Computation_Graph * temp = m->graph;
+  
   while(temp!=NULL){
     if(temp->type==LOSS || temp->type==INPUT){
       temp = temp->next_layer;
       continue;
     }
     //calculate first momentum
-    //m_dW
-    float mul_factor = 1-m->beta1;
-    dARRAY * term1 = mulScalar(temp->DENSE->dW,mul_factor);
+    float mul_factor = 1.0f-m->beta1;
+    dARRAY * term1_W = mulScalar(temp->DENSE->dW,mul_factor);
+    dARRAY * term1_b = mulScalar(temp->DENSE->db,mul_factor);
+
     mul_factor = m->beta1;
     dARRAY * ptr_m_t_dW = m->m_t_dW[layer];
-    dARRAY * term2 = mulScalar(ptr_m_t_dW,mul_factor);
+    dARRAY * ptr_m_t_db = m->m_t_db[layer];
+
+    dARRAY * term2_W = mulScalar(ptr_m_t_dW,mul_factor);
+    dARRAY * term2_b = mulScalar(ptr_m_t_db,mul_factor);
     
     free2d(ptr_m_t_dW);
-    ptr_m_t_dW = NULL;
-    
-    m->m_t_dW[layer] = add(term1,term2);
-
-    free2d(term1);
-    free2d(term2);
-    term1 = NULL;
-    term2 = NULL;
-
-    //m_db
-    mul_factor = 1-m->beta1;
-    term1 = mulScalar(temp->DENSE->db,mul_factor);
-    mul_factor = m->beta1;
-    dARRAY * ptr_m_t_db = m->m_t_db[layer];
-    term2 = mulScalar(ptr_m_t_db,mul_factor);
-    
     free2d(ptr_m_t_db);
+    ptr_m_t_dW = NULL;
     ptr_m_t_db = NULL;
     
-    m->m_t_db[layer] = add(term1,term2);
+    m->m_t_dW[layer] = add(term1_W,term2_W);
+    m->m_t_db[layer] = add(term1_b,term2_b);
 
-    free2d(term1);
-    free2d(term2);
-    term1 = NULL;
-    term2 = NULL;
+    free2d(term1_W);
+    free2d(term2_W);
+    free2d(term1_b);
+    free2d(term2_b);
+    term1_W = NULL;
+    term2_W = NULL;    
+    term1_b = NULL;
+    term2_b = NULL;
 
     //calculate second momentum
     mul_factor = 1-m->beta2;
-    dARRAY * scaled_grads_w = power(temp->DENSE->dW,2);
-    term1 = mulScalar(scaled_grads_w,mul_factor);
+    dARRAY * scaled_grads_w = power(temp->DENSE->dW,2.0f);
+    dARRAY * scaled_grads_b = power(temp->DENSE->db,2.0f);
+    term1_W = mulScalar(scaled_grads_w,mul_factor);
+    term1_b = mulScalar(scaled_grads_b,mul_factor);
 
     free2d(scaled_grads_w);
-    scaled_grads_w = NULL;
-
-    mul_factor = m->beta2;
-    dARRAY * ptr_v_t_dW = m->v_t_dW[layer];
-    term2 = mulScalar(ptr_v_t_dW,mul_factor);
-    free2d(ptr_v_t_dW);
-    ptr_v_t_dW = NULL;
-
-    m->v_t_dW[layer] = add(term1,term2);
-
-    free2d(term1);
-    free2d(term2);
-    term1 = NULL;
-    term2 = NULL;
-
-    //calculate v_t_db
-    mul_factor = 1-m->beta2;
-    dARRAY * scaled_grads_b = power(temp->DENSE->db,2);
-    term1 = mulScalar(scaled_grads_b,mul_factor);
-
     free2d(scaled_grads_b);
+    scaled_grads_w = NULL;
     scaled_grads_b = NULL;
 
     mul_factor = m->beta2;
+    dARRAY * ptr_v_t_dW = m->v_t_dW[layer];
     dARRAY * ptr_v_t_db = m->v_t_db[layer];
-    term2 = mulScalar(ptr_v_t_db,mul_factor);
+    term2_W = mulScalar(ptr_v_t_dW,mul_factor);
+    term2_b = mulScalar(ptr_v_t_db,mul_factor);
+    
+    free2d(ptr_v_t_dW);
     free2d(ptr_v_t_db);
+    ptr_v_t_dW = NULL;
     ptr_v_t_db = NULL;
 
-    m->v_t_db[layer] = add(term1,term2);
+    m->v_t_dW[layer] = add(term1_W,term2_W);
+    m->v_t_db[layer] = add(term1_b,term2_b);
 
-    free2d(term1);
-    free2d(term2);
-    term1 = NULL;
-    term2 = NULL;
-    
+    free2d(term1_W);
+    free2d(term2_W);
+    free2d(term1_b);
+    free2d(term2_b);
+    term1_W = NULL;
+    term2_W = NULL;
+    term1_b = NULL;
+    term2_b = NULL;
+
     free2d(temp->DENSE->dW);
     free2d(temp->DENSE->db);
     temp->DENSE->dW = NULL;
     temp->DENSE->db = NULL;
 
-    float first_momentum_scaling_factor = 1-pow(m->beta1,m->time_step);
-    float second_momentum_scaling_factor = 1-pow(m->beta2,m->time_step);
+    float first_momentum_scaling_factor = 1-powf(m->beta1,m->time_step);
+    float second_momentum_scaling_factor = 1-powf(m->beta2,m->time_step);
+    
     ptr_m_t_dW = m->m_t_dW[layer];
     ptr_m_t_db = m->m_t_db[layer];
+    
     dARRAY * m_t_dW_corrected = divScalar(ptr_m_t_dW,first_momentum_scaling_factor);
     dARRAY * m_t_db_corrected = divScalar(ptr_m_t_db,first_momentum_scaling_factor);
+
     ptr_v_t_dW = m->v_t_dW[layer];
     ptr_v_t_db = m->v_t_db[layer];
+    
     dARRAY * v_t_dW_corrected = divScalar(ptr_v_t_dW,second_momentum_scaling_factor);
     dARRAY * v_t_db_corrected = divScalar(ptr_v_t_db,second_momentum_scaling_factor);
     
@@ -201,8 +193,8 @@ void adam(){
     temp->DENSE->dropout_mask = NULL;
     temp->DENSE->dZ = NULL;
     m->output = NULL;
+    
     layer++;
-
     temp = temp->next_layer;
   }
 }
