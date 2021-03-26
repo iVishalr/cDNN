@@ -1,8 +1,8 @@
 #include <model.h>
-#include <cross_entropy_loss.h>
+#include <loss.h>
 
 extern __Model__ * m;
-cross_entropy_loss_layer * loss_layer = NULL;
+loss_layer * loss_layer_ = NULL;
 
 void forward_pass_L2_LOSS(){
   int number_of_examples = m->y_train_mini_batch[m->current_mini_batch]->shape[1];
@@ -145,7 +145,7 @@ void backward_pass_L2_LOSS(){
     dARRAY * class_sum = sum(temp,0);
     free2d(temp);
     temp = NULL;
-    loss_layer->grad_out = mulScalar(class_sum,-1.0);
+    loss_layer_->grad_out = mulScalar(class_sum,-1.0);
     free2d(class_sum);
     class_sum = NULL;
   }
@@ -167,18 +167,18 @@ void backward_pass_L2_LOSS(){
     temp2 = NULL;
     temp3 = NULL;
 
-    loss_layer->grad_out = mulScalar(lgrad2,-1.0f);
+    loss_layer_->grad_out = mulScalar(lgrad2,-1.0f);
     free2d(lgrad2);
     lgrad2 = NULL;
   }
 }
 
-void (cross_entropy_loss)(cross_entropy_loss_args args){
-  loss_layer = (cross_entropy_loss_layer*)malloc(sizeof(cross_entropy_loss_layer));
-  loss_layer->cost = 0.0;
-  loss_layer->grad_out = NULL;
-  loss_layer->forward = forward_pass_L2_LOSS;
-  loss_layer->backward = backward_pass_L2_LOSS;
+void (cross_entropy_loss)(loss_args args){
+  loss_layer_ = (loss_layer*)malloc(sizeof(loss_layer));
+  loss_layer_->cost = 0.0;
+  loss_layer_->grad_out = NULL;
+  loss_layer_->forward = forward_pass_L2_LOSS;
+  loss_layer_->backward = backward_pass_L2_LOSS;
   // loss_layer->gnd_truth = m->y_train_mini_batch[m->current_mini_batch];
-  append_graph(loss_layer,"loss");
+  append_graph(loss_layer_,"loss");
 }

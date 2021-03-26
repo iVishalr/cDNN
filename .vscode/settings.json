@@ -5,6 +5,8 @@
     "activations.h": "c",
     "model.h": "c",
     "cross_entropy_loss.h": "c",
-    "neural_net.h": "c"
+    "neural_net.h": "c",
+    "utils.h": "c",
+    "loss.h": "c"
   }
 }

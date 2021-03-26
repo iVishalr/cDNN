@@ -1,8 +1,8 @@
 #include <model.h>
-#include <MSELoss.h>
+#include <loss.h>
 
 extern __Model__ * m;
-mse_loss_layer * loss_layer_mse = NULL;
+loss_layer * loss_layer_mse = NULL;
 
 void forward_pass_MSE_LOSS(){
   //Store the number of training examples in a variable
@@ -82,8 +82,8 @@ void backward_pass_MSE_LOSS(){
   temp = NULL;
 }
 
-void (MSELoss)(mse_loss_args args){
-  loss_layer_mse = (mse_loss_layer*)malloc(sizeof(mse_loss_layer));
+void (MSELoss)(loss_args args){
+  loss_layer_mse = (loss_layer*)malloc(sizeof(loss_layer));
   loss_layer_mse->cost = 0.0;
   loss_layer_mse->grad_out = NULL;
   loss_layer_mse->forward = forward_pass_MSE_LOSS;

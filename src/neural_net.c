@@ -16,7 +16,7 @@ Computation_Graph * new_node(void * layer, char * type){
     new->type = INPUT;
   }
   else if(!strcasecmp(type,"Loss")){
-    new->LOSS = (cross_entropy_loss_layer*)layer;
+    new->LOSS = (loss_layer*)layer;
     new->type = LOSS;
   }
   return new;
@@ -104,9 +104,9 @@ Computation_Graph * destroy_Graph(Computation_Graph * G){
       layer=NULL;
     }
     else if(prev->type==LOSS){
-      cross_entropy_loss_layer * layer = prev->LOSS;
+      loss_layer * layer = prev->LOSS;
       if(layer->grad_out!=NULL) free2d(layer->grad_out);
-      if(layer->gnd_truth!=NULL) free2d(layer->gnd_truth);
+      // if(layer->gnd_truth!=NULL) free2d(layer->gnd_truth);
       prev->prev_layer = NULL;
       free(layer);
       layer = NULL;

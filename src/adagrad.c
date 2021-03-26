@@ -11,8 +11,8 @@ void adagrad(){
       temp = temp->next_layer;
       continue;
     }
-    dARRAY * scaled_grads_dW = power(temp->DENSE->dW,2);
-    dARRAY * scaled_grads_db = power(temp->DENSE->db,2);
+    dARRAY * scaled_grads_dW = power(temp->DENSE->dW,2.0f);
+    dARRAY * scaled_grads_db = power(temp->DENSE->db,2.0f);
     dARRAY * ptr_cache_dW = m->cache_dW[layer];
     dARRAY * ptr_cache_db = m->cache_db[layer];
 

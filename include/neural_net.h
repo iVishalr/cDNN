@@ -4,8 +4,7 @@
 #include "Dense.h"
 #include "Input.h"
 
-#include "cross_entropy_loss.h"
-#include "MSELoss.h"
+#include "loss.h"
 
 #include "gradient_descent.h"
 #include "momentum.h"
@@ -23,7 +22,7 @@ typedef struct computational_graph{
   {
     Dense_layer * DENSE;
     Input_layer * INPUT;
-    cross_entropy_loss_layer * LOSS;
+    loss_layer * LOSS;
   };
 }Computation_Graph;
 
