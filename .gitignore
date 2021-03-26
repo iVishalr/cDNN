@@ -4,6 +4,5 @@
 SGDTrainingLog
 temp
 new_temp
-val_acc.png
-train_acc.png
-cost.png
+*.png
+*.zip

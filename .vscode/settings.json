@@ -3,6 +3,8 @@
   "files.associations": {
     "random": "c",
     "activations.h": "c",
-    "model.h": "c"
+    "model.h": "c",
+    "cross_entropy_loss.h": "c",
+    "neural_net.h": "c"
   }
 }
