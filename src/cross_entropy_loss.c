@@ -18,7 +18,7 @@ void forward_pass_L2_LOSS(){
     log_y_hat->matrix = (float*)calloc(act_dims[0]*act_dims[1],sizeof(float));
 
     for(int i=0;i<act_dims[0]*act_dims[1];i++){
-      log_y_hat->matrix[i] = log(m->output->matrix[i]);
+      log_y_hat->matrix[i] = log(m->output->matrix[i])+m->epsilon;
     }
     log_y_hat->shape[0] = act_dims[0];
     log_y_hat->shape[1] = act_dims[1];
@@ -38,9 +38,9 @@ void forward_pass_L2_LOSS(){
     log_a = (dARRAY*)malloc(sizeof(dARRAY));
     log_a->matrix = (float*)calloc(act_dims[0]*act_dims[1],sizeof(float));
 
-    #pragma omp parallel for num_threads(8)
+    // #pragma omp parallel for num_threads(8)
     for(int i=0;i<act_dims[0]*act_dims[1];i++){
-      log_a->matrix[i] = logf(m->output->matrix[i]);
+      log_a->matrix[i] = log(m->output->matrix[i]) + m->epsilon;
     }
     log_a->shape[0] = act_dims[0];
     log_a->shape[1] = act_dims[1];
@@ -52,9 +52,9 @@ void forward_pass_L2_LOSS(){
     log_one_y_hat = (dARRAY*)malloc(sizeof(dARRAY));
     log_one_y_hat->matrix = (float*)calloc(act_dims[0]*act_dims[1],sizeof(float));
     
-    #pragma omp parallel for num_threads(8)
+    // #pragma omp parallel for num_threads(8)
     for(int i=0;i<act_dims[0]*act_dims[1];i++){
-      log_one_y_hat->matrix[i] = logf(temp_sub->matrix[i]);
+      log_one_y_hat->matrix[i] = log(temp_sub->matrix[i]) + m->epsilon;
     }
     log_one_y_hat->shape[0] = act_dims[0];
     log_one_y_hat->shape[1] = act_dims[1];

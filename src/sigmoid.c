@@ -20,8 +20,8 @@ dARRAY * forward_pass_sigmoid(){
       exp_res = (float)exp(m->current_layer->DENSE->cache->matrix[i]);
       sigmoid_outf->matrix[i] = exp_res/(1.0f + exp_res);
     }
-    if(sigmoid_outf->matrix[i]==1.0f) sigmoid_outf->matrix[i] = 0.99997;
-    else if(sigmoid_outf->matrix[i]==0.0f) sigmoid_outf->matrix[i] = 0.00015;
+    // if(sigmoid_outf->matrix[i]>=0.99f) sigmoid_outf->matrix[i] = 0.98980;
+    // else if(sigmoid_outf->matrix[i]<=0.00001f) sigmoid_outf->matrix[i] = 0.0015;
   }
   sigmoid_outf->shape[0] = m->current_layer->DENSE->cache->shape[0];
   sigmoid_outf->shape[1] = m->current_layer->DENSE->cache->shape[1];

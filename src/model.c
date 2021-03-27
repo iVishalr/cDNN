@@ -255,7 +255,7 @@ dARRAY * calculate_val_test_acc(dARRAY * input_features,dARRAY * gnd_truth){
   }
 }
 
-void append_to_file(float * arr ,char * filename,char * mode){
+void dump_to_file(float * arr ,char * filename,char * mode){
   FILE * fp = NULL;
   fp = fopen(filename,mode);
   if(fp==NULL){
@@ -271,6 +271,7 @@ void __fit__(){
   int i = 1;
   int index = 0;
   int iterations=0;
+  int flag_cost = 0;
   float sum_cost = m->train_cost*m->current_iter;
   float sum_train_acc = m->train_accuracy*m->current_iter;
   float sum_train_val_acc = m->cross_val_accuracy*m->current_iter;
@@ -282,12 +283,12 @@ void __fit__(){
   }
   else iterations = m->num_iter;
   while(i<=iterations){
+    flag_cost=0;
     for(int mini_batch=0;mini_batch<m->num_mini_batches;mini_batch++){
       m->current_mini_batch = mini_batch;
       __forward__();
       sum_cost += m->iter_cost;
       sum_train_acc += calculate_accuracy(m->output,m->y_train_mini_batch[m->current_mini_batch]);
-      // sum_train_acc += calculate_accuracy(m->output,m->Y_train);
       dARRAY * temp = calculate_val_test_acc(m->x_cv,m->Y_cv);
       sum_train_val_acc += temp->matrix[0];
       if(m->print_cost){
@@ -298,11 +299,10 @@ void __fit__(){
         train_acc_arr[index] = m->train_accuracy;
         val_acc_arr[index] = m->cross_val_accuracy;
         printf("\033[96m%d. %d. Cost : \033[0m%f ",i,mini_batch,m->train_cost);
-        // printf("\033[96m%d. Cost : \033[0m%f ",i,m->train_cost);
         printf("\033[96m train_acc : \033[0m%f ",m->train_accuracy);
         printf("\033[96m val_acc : \033[0m%f\n",m->cross_val_accuracy);
         if(train_cost_arr[index]>=2.5*train_cost_arr[0]){
-          printf("Cost is exploding hence exiting. Try reducing your learning rate and try again!\n");
+          printf("\033[96mCost is exploding hence exiting. Try reducing your learning rate and try again!\033[0m\n");
           exit(EXIT_FAILURE);
         }
         index++;
@@ -338,10 +338,12 @@ void __fit__(){
         char buffer[1024];
         snprintf(buffer,sizeof(buffer),"model_%d_%s.t7",i,asctime (timeinfo));
         __save_model__(buffer);
-
-        // append_to_file(train_cost_arr,"./bin/cost.data","ab+");
-        // append_to_file(train_acc_arr,"./bin/train_acc.data","ab+");
-        // append_to_file(val_acc_arr,"./bin/val_acc.data","ab+");
+        if(flag_cost==0){
+          dump_to_file(train_cost_arr,"./bin/cost.data","ab+");
+          dump_to_file(train_acc_arr,"./bin/train_acc.data","ab+");
+          dump_to_file(val_acc_arr,"./bin/val_acc.data","ab+");
+          flag_cost=1;
+        }
       }
       m->current_iter += 1;
       free(temp);
@@ -350,9 +352,12 @@ void __fit__(){
     i++;
     if(m->num_iter==-1) iterations = i;
   }
-  append_to_file(train_cost_arr,"./bin/cost.data","ab+");
-  append_to_file(train_acc_arr,"./bin/train_acc.data","ab+");
-  append_to_file(val_acc_arr,"./bin/val_acc.data","ab+");
+  if(flag_cost==0){
+    dump_to_file(train_cost_arr,"./bin/cost.data","wb+");
+    dump_to_file(train_acc_arr,"./bin/train_acc.data","wb+");
+    dump_to_file(val_acc_arr,"./bin/val_acc.data","wb+");
+    flag_cost=1;
+  }
 }
 
 void __predict__(dARRAY * input_feature){
@@ -472,7 +477,7 @@ void __save_model__(char * filename){
   if( access(destpath,F_OK)==0) {
     if(remove(destpath)==0){}
   } 
-  fp = fopen(destpath,"ab+");
+  fp = fopen(destpath,"wb+");
   if(fp==NULL){
     printf("\033[1;31mFile Error : \033[93m Could not open the specified file!\033[0m\n");
     exit(EXIT_FAILURE);
@@ -497,9 +502,9 @@ void __save_model__(char * filename){
   fp = NULL;
 }
 
-dARRAY * load_x_train(int * dims){
+dARRAY * load_x_train(char * filename,int * dims){
   FILE * fp = NULL;
-  fp = fopen("./data/X_train.data","rb");
+  fp = fopen(filename,"rb");
   if(fp==NULL){
     printf("\033[1;31mFile Error : \033[93m Could not open the specified file!\033[0m\n");
     exit(EXIT_FAILURE);
@@ -519,9 +524,9 @@ dARRAY * load_x_train(int * dims){
   return X_train;
 }
 
-dARRAY * load_y_train(int * dims){
+dARRAY * load_y_train(char * filename,int * dims){
   FILE * fp = NULL;
-  fp = fopen("./data/y_train.data","rb");
+  fp = fopen(filename,"rb");
   if(fp==NULL){
     printf("\033[1;31mFile Error : \033[93m Could not open the specified file!\033[0m\n");
     exit(EXIT_FAILURE);
@@ -541,9 +546,9 @@ dARRAY * load_y_train(int * dims){
   return y_train;
 }
 
-dARRAY * load_x_cv(int * dims){
+dARRAY * load_x_cv(char * filename,int * dims){
   FILE * fp = NULL;
-  fp = fopen("./data/X_cv.data","rb");
+  fp = fopen(filename,"rb");
   if(fp==NULL){
     printf("\033[1;31mFile Error : \033[93m Could not open the specified file!\033[0m\n");
     exit(EXIT_FAILURE);
@@ -563,9 +568,9 @@ dARRAY * load_x_cv(int * dims){
   return X_CV;
 }
 
-dARRAY * load_y_cv(int * dims){
+dARRAY * load_y_cv(char * filename,int * dims){
   FILE * fp = NULL;
-  fp = fopen("./data/y_cv.data","rb");
+  fp = fopen(filename,"rb");
   if(fp==NULL){
     printf("\033[1;31mFile Error : \033[93m Could not open the specified file!\033[0m\n");
     exit(EXIT_FAILURE);
@@ -585,9 +590,9 @@ dARRAY * load_y_cv(int * dims){
   return y_cv;
 }
 
-dARRAY * load_x_test(int * dims){
+dARRAY * load_x_test(char * filename,int * dims){
   FILE * fp = NULL;
-  fp = fopen("./data/X_test.data","rb");
+  fp = fopen(filename,"rb");
   if(fp==NULL){
     printf("\033[1;31mFile Error : \033[93m Could not open the specified file!\033[0m\n");
     exit(EXIT_FAILURE);
@@ -606,9 +611,9 @@ dARRAY * load_x_test(int * dims){
   return x_test;
 }
 
-dARRAY * load_y_test(int * dims){
+dARRAY * load_y_test(char * filename,int * dims){
   FILE * fp = NULL;
-  fp = fopen("./data/y_test.data","rb");
+  fp = fopen(filename,"rb");
   if(fp==NULL){
     printf("\033[1;31mFile Error : \033[93m Could not open the specified file!\033[0m\n");
     exit(EXIT_FAILURE);
