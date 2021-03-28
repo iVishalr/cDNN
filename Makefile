@@ -3,7 +3,7 @@
 #-----------------------
 CC=gcc
 CCL=clang 
-ATTR=-I ./include/ -lm -funroll-loops -O3 -fopenmp -Ofast -ffp-contract=fast --fast-math -I /opt/OpenBLAS/include/ -L/opt/OpenBLAS/lib -lopenblas
+ATTR=-I ./include/ -lm -funroll-loops -O3 -fopenmp -Ofast -ffp-contract=fast --fast-math -I /opt/OpenBLAS/include/ -L/opt/OpenBLAS/lib -lopenblas -lncurses
 CFLAGS=-c -Wall -Wrestrict
 
 # 
@@ -42,12 +42,13 @@ targets:
 project:  $(BUILD)/utils.o $(BUILD)/relu.o $(BUILD)/sigmoid.o $(BUILD)/tanh.o $(BUILD)/softmax.o \
 $(BUILD)/neural_net.o $(BUILD)/Dense.o $(BUILD)/Input.o $(BUILD)/cross_entropy_loss.o $(BUILD)/MSELoss.o\
 $(BUILD)/gradient_descent.o $(BUILD)/momentum.o $(BUILD)/adam.o $(BUILD)/adagrad.o $(BUILD)/rmsprop.o \
+$(BUILD)/progressbar.o $(BUILD)/statusbar.o \
 $(BUILD)/model.o \
 $(BUILD)/plot.o $(BUILD)/test_network.o 
 	$(CC) $(BUILD)/utils.o $(BUILD)/relu.o $(BUILD)/sigmoid.o $(BUILD)/tanh.o $(BUILD)/softmax.o \
 	$(BUILD)/neural_net.o $(BUILD)/Dense.o $(BUILD)/Input.o $(BUILD)/cross_entropy_loss.o $(BUILD)/MSELoss.o \
 	$(BUILD)/gradient_descent.o $(BUILD)/momentum.o $(BUILD)/adam.o $(BUILD)/adagrad.o $(BUILD)/rmsprop.o \
-	$(BUILD)/model.o $(BUILD)/plot.o $(BUILD)/test_network.o $(ATTR)
+	$(BUILD)/model.o $(BUILD)/plot.o $(BUILD)/test_network.o $(BUILD)/progressbar.o $(BUILD)/statusbar.o $(ATTR)
 	@echo "\033[92mBuild Successful\033[0m"
 $(BUILD)/utils.o: $(SRC)/utils.c
 	$(CC) $(CFLAGS) -o $@ $< $(ATTR)
@@ -83,6 +84,12 @@ $(BUILD)/model.o: $(SRC)/model.c
 	$(CC) $(CFLAGS) -o $@ $< $(ATTR)
 $(BUILD)/plot.o: $(SRC)/plot.c
 	$(CC) $(CFLAGS) -o $@ $< $(ATTR)
+
+$(BUILD)/progressbar.o: $(SRC)/progressbar.c
+	$(CC) $(CFLAGS) -o $@ $< $(ATTR)
+$(BUILD)/statusbar.o: $(SRC)/statusbar.c
+	$(CC) $(CFLAGS) -o $@ $< $(ATTR)
+
 $(BUILD)/test_network.o: $(SRC)/test_network.c
 	$(CC) $(CFLAGS) -o $@ $< $(ATTR)
 

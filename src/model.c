@@ -1,4 +1,5 @@
 #include <model.h>
+#include <progressbar.h>
 
 __Model__ * m;
 
@@ -511,12 +512,17 @@ dARRAY * load_x_train(char * filename,int * dims){
   }
   dARRAY * x_train = (dARRAY*)malloc(sizeof(dARRAY));
   x_train->matrix = (float*)calloc(dims[0]*dims[1],sizeof(float));
+  progressbar * progress = progressbar_new("\033[1;32mLoading X_train :\033[0m",dims[1]);
   for(int j=0;j<dims[0]*dims[1];j++){
     fscanf(fp,"%f ",&x_train->matrix[j]);
+    if(j%dims[0]==0)
+      progressbar_inc(progress);
   }
+  progressbar_finish(progress);
   x_train->shape[0] = dims[1];
   x_train->shape[1] = dims[0];
-
+  
+  
   dARRAY * X_train = transpose(x_train);
   free2d(x_train);
   x_train = NULL;
@@ -533,9 +539,13 @@ dARRAY * load_y_train(char * filename,int * dims){
   }
   dARRAY * Y_train = (dARRAY*)malloc(sizeof(dARRAY));
   Y_train->matrix = (float*)calloc(dims[0]*dims[1],sizeof(float));
+  progressbar * progress = progressbar_new("\033[1;32mLoading y_train :\033[0m",dims[1]);
   for(int j=0;j<dims[0]*dims[1];j++){
     fscanf(fp,"%f ",&Y_train->matrix[j]);
+    if(j%dims[0]==0)
+      progressbar_inc(progress);
   }
+  progressbar_finish(progress);
   Y_train->shape[0] = dims[1];
   Y_train->shape[1] = dims[0];
 
@@ -555,9 +565,13 @@ dARRAY * load_x_cv(char * filename,int * dims){
   }
   dARRAY * x_cv = (dARRAY*)malloc(sizeof(dARRAY));
   x_cv->matrix = (float*)calloc(dims[0]*dims[1],sizeof(float));
+  progressbar * progress = progressbar_new("\033[1;32mLoading X_cv :\033[0m",dims[1]);
   for(int j=0;j<dims[0]*dims[1];j++){
     fscanf(fp,"%f ",&x_cv->matrix[j]);
+    if(j%dims[0]==0)
+      progressbar_inc(progress);
   }
+  progressbar_finish(progress);
   x_cv->shape[0] = dims[1];
   x_cv->shape[1] = dims[0];
 
@@ -577,9 +591,13 @@ dARRAY * load_y_cv(char * filename,int * dims){
   }
   dARRAY * Y_cv = (dARRAY*)malloc(sizeof(dARRAY));
   Y_cv->matrix = (float*)calloc(dims[0]*dims[1],sizeof(float));
+  progressbar * progress = progressbar_new("\033[1;32mLoading y_cv :\033[0m",dims[1]);
   for(int j=0;j<dims[0]*dims[1];j++){
     fscanf(fp,"%f ",&Y_cv->matrix[j]);
+    if(j%dims[0]==0)
+      progressbar_inc(progress);
   }
+  progressbar_finish(progress);
   Y_cv->shape[0] = dims[1];
   Y_cv->shape[1] = dims[0];
 
@@ -599,9 +617,13 @@ dARRAY * load_x_test(char * filename,int * dims){
   }
   dARRAY * x_test_temp = (dARRAY*)malloc(sizeof(dARRAY));
   x_test_temp->matrix = (float*)calloc(dims[0]*dims[1],sizeof(float));
+  progressbar * progress = progressbar_new("\033[1;32mLoading X_test :\033[0m",dims[1]);
   for(int j=0;j<dims[0]*dims[1];j++){
     fscanf(fp,"%f ",&x_test_temp->matrix[j]);
+    if(j%dims[0]==0)
+      progressbar_inc(progress);
   }
+  progressbar_finish(progress);
   x_test_temp->shape[0] = dims[1];
   x_test_temp->shape[1] = dims[0];
   dARRAY * x_test = transpose(x_test_temp);
@@ -620,9 +642,13 @@ dARRAY * load_y_test(char * filename,int * dims){
   }
   dARRAY * Y_test = (dARRAY*)malloc(sizeof(dARRAY));
   Y_test->matrix = (float*)calloc(dims[0]*dims[1],sizeof(float));
+  progressbar * progress = progressbar_new("\033[1;32mLoading y_test :\033[0m",dims[1]);
   for(int j=0;j<dims[0]*dims[1];j++){
     fscanf(fp,"%f ",&Y_test->matrix[j]);
+    if(j%dims[0]==0)
+      progressbar_inc(progress);
   }
+  progressbar_finish(progress);
   Y_test->shape[0] = dims[1];
   Y_test->shape[1] = dims[0];
 
@@ -679,29 +705,20 @@ void create_mini_batches(){
 
   int remaining_mem_block = (m->x_train->shape[1]-((num_mini_batches-1)*m->mini_batch_size));
   
-  printf("Mini-Batch-Size : %d, Number of Batches to Create : %d\n",m->mini_batch_size,num_mini_batches);
-  printf("Remaining block size: %d\n",remaining_mem_block);
-  
   for(int i=0;i<num_mini_batches;i++){
     m->x_train_mini_batch[i] = NULL;
     m->y_train_mini_batch[i] = NULL;
   }
 
-  printf("DATA IN Y_TRAIN : %f %f %f %f\n",m->Y_train->matrix[0],m->Y_train->matrix[5],m->Y_train->matrix[10],m->Y_train->matrix[15]);
-
   dARRAY * X_train = transpose(m->x_train);
   dARRAY * Y_train = transpose(m->Y_train);
-  printf("Shape(X_train) : ");
-  shape(X_train);
-  printf("Shape(Y_train) : ");
-  shape(Y_train);
   
   free2d(m->x_train);
   free2d(m->Y_train);
   m->x_train = NULL;
   m->Y_train = NULL;
 
-  
+  progressbar * progress = progressbar_new("\033[91mCreating Mini Batches :\033[0m",num_mini_batches*2);
   for(int i=0;i<num_mini_batches;i++){
     int row = 0;
     dARRAY * temp = (dARRAY*)malloc(sizeof(dARRAY));
@@ -729,9 +746,8 @@ void create_mini_batches(){
     m->x_train_mini_batch[i] = transpose(temp);
     free2d(temp);
     temp = NULL;
+    progressbar_inc(progress);
   }
-
-  shape(m->x_train_mini_batch[0]);
 
   for(int i=0;i<num_mini_batches;i++){
     int row = 0;
@@ -760,18 +776,9 @@ void create_mini_batches(){
     m->y_train_mini_batch[i] = transpose(temp);
     free2d(temp);
     temp = NULL;
-    shape(m->y_train_mini_batch[i]);
+    progressbar_inc(progress);
   }
-  printf("outside loop\n");
-  for(int i=0;i<num_mini_batches;i++){
-    // printf("Shape(X_mini[%d]) : ",i);
-    // shape(m->x_train_mini_batch[i]);
-    // printf("Shape(Y_mini[%d]) : ",i);
-    shape(m->y_train_mini_batch[i]);
-    printf("\n");
-  }
-  // printf("DATA IN Y_TRAIN MINI BATCH [0] : %f %f %f %f\n",m->y_train_mini_batch[0]->matrix[0],m->y_train_mini_batch[0]->matrix[5],m->y_train_mini_batch[0]->matrix[10],m->y_train_mini_batch[0]->matrix[15]);
-  printf("Created Mini Batches!\n");
+  progressbar_finish(progress);
 }
 
 void __summary__(){}
@@ -898,20 +905,10 @@ void (Model)(Model_args model_args){
   m->num_iter = model_args.num_iter;
 
   create_mini_batches();
-  printf("Adding loss functions\n");
   if(!strcasecmp(m->loss,"cross_entropy_loss")) cross_entropy_loss();
   if(!strcasecmp(m->loss,"MSELoss")) MSELoss();
 
-  printf("Setting up input size\n");
   m->input_size = m->x_train_mini_batch[0]->shape[0];
-  // m->input_size = m->x_train->shape[0];
-  // m->output_size = model_args.Y_train->shape[0];
-
-  // if(m->input_size!=m->graph->INPUT->input_features_size){
-  //   printf("\033[1;31mModel Error : \033[93m Size of Input Layer does not match the size of x_train.\033[0m\n");
-  //   printf("\033[96mHint : \033[93mCheck if layer_size of input layer == x_train->shape[0]\033[0m\n");
-  //   exit(EXIT_FAILURE);
-  // }
   
   m->print_cost = model_args.print_cost;
   m->init = __init__;

@@ -11,6 +11,7 @@
 #include <errno.h>
 #include <cblas.h>
 #include <sys/time.h>
+#include <termcap.h>
 
 #ifdef __cplusplus
 extern "C"{
