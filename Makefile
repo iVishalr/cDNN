@@ -41,13 +41,13 @@ targets:
 	@$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$'
 project:  $(BUILD)/utils.o $(BUILD)/relu.o $(BUILD)/sigmoid.o $(BUILD)/tanh.o $(BUILD)/softmax.o \
 $(BUILD)/neural_net.o $(BUILD)/Dense.o $(BUILD)/Input.o $(BUILD)/cross_entropy_loss.o $(BUILD)/MSELoss.o\
-$(BUILD)/gradient_descent.o $(BUILD)/momentum.o $(BUILD)/adam.o $(BUILD)/adagrad.o $(BUILD)/rmsprop.o \
+$(BUILD)/sgd.o $(BUILD)/momentum.o $(BUILD)/adam.o $(BUILD)/adagrad.o $(BUILD)/rmsprop.o \
 $(BUILD)/progressbar.o $(BUILD)/statusbar.o \
 $(BUILD)/model.o \
 $(BUILD)/plot.o $(BUILD)/test_network.o 
 	$(CC) $(BUILD)/utils.o $(BUILD)/relu.o $(BUILD)/sigmoid.o $(BUILD)/tanh.o $(BUILD)/softmax.o \
 	$(BUILD)/neural_net.o $(BUILD)/Dense.o $(BUILD)/Input.o $(BUILD)/cross_entropy_loss.o $(BUILD)/MSELoss.o \
-	$(BUILD)/gradient_descent.o $(BUILD)/momentum.o $(BUILD)/adam.o $(BUILD)/adagrad.o $(BUILD)/rmsprop.o \
+	$(BUILD)/sgd.o $(BUILD)/momentum.o $(BUILD)/adam.o $(BUILD)/adagrad.o $(BUILD)/rmsprop.o \
 	$(BUILD)/model.o $(BUILD)/plot.o $(BUILD)/test_network.o $(BUILD)/progressbar.o $(BUILD)/statusbar.o $(ATTR)
 	@echo "\033[92mBuild Successful\033[0m"
 $(BUILD)/utils.o: $(SRC)/utils.c
@@ -70,7 +70,7 @@ $(BUILD)/cross_entropy_loss.o: $(SRC)/cross_entropy_loss.c
 	$(CC) $(CFLAGS) -o $@ $< $(ATTR)
 $(BUILD)/MSELoss.o: $(SRC)/MSELoss.c
 	$(CC) $(CFLAGS) -o $@ $< $(ATTR)
-$(BUILD)/gradient_descent.o: $(SRC)/gradient_descent.c
+$(BUILD)/sgd.o: $(SRC)/sgd.c
 	$(CC) $(CFLAGS) -o $@ $< $(ATTR)
 $(BUILD)/momentum.o: $(SRC)/momentum.c
 	$(CC) $(CFLAGS) -o $@ $< $(ATTR)

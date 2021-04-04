@@ -1,4 +1,4 @@
-#include <gradient_descent.h>
+#include <sgd.h>
 #include <model.h>
 
 extern __Model__ * m;
