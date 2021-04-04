@@ -924,25 +924,25 @@ void dump_image(dARRAY * images){
 void (Model)(Model_args model_args){
   get_safe_nn_threads();
 
-  m->x_train = model_args.x_train;
-  m->x_test = model_args.x_test;
-  m->x_cv = model_args.x_cv;
+  m->x_train = model_args.X_train;
+  m->x_test = model_args.X_test;
+  m->x_cv = model_args.X_cv;
 
-  m->Y_train = model_args.Y_train;
-  m->Y_test = model_args.Y_test;
-  m->Y_cv = model_args.Y_cv;
+  m->Y_train = model_args.y_train;
+  m->Y_test = model_args.y_test;
+  m->Y_cv = model_args.y_cv;
 
   m->ckpt_every = model_args.checkpoint_every;
 
   //initialize regualrization hyperparameters
   m->loss = model_args.loss;
-  m->lambda = model_args.lambda;
+  m->lambda = model_args.weight_decay;
   m->regularization = model_args.regularization;
 
   m->num_of_training_examples = m->x_train->shape[1];
   //initialize hyperparameters for various optimizers
   m->optimizer = model_args.optimizer; // Optimizer choice
-  m->learning_rate = model_args.learning_rate; // hyperparameter for step size for optimization algorithm
+  m->learning_rate = model_args.lr; // hyperparameter for step size for optimization algorithm
   m->time_step = 0; // timestep - required for Adam update, for bias correction
   m->beta = model_args.beta; //hyperparameter - used for RMSProp, Denotes Decay_rate for weighted average
   m->beta1 = model_args.beta1; // hyperparameter - used for Adam and RMSProp, Decay rate for estimation of first moment
@@ -956,8 +956,8 @@ void (Model)(Model_args model_args){
     m->cache_dW[i] = NULL; // for AdaGrad
     m->cache_db[i] = NULL;
   }
-  m->mini_batch_size = model_args.mini_batch_size;
-  m->num_iter = model_args.num_iter;
+  m->mini_batch_size = model_args.batch_size;
+  m->num_iter = model_args.epochs;
 
   create_mini_batches();
   if(!strcasecmp(m->loss,"cross_entropy_loss")) cross_entropy_loss();
@@ -977,5 +977,5 @@ void (Model)(Model_args model_args){
   m->test = __test__;
   m->init();
   m->total_parameters = get_total_params();
-  printf("Total Trainable Parameters : %ld\n",m->total_parameters);
+  // printf("Total Trainable Parameters : %ld\n",m->total_parameters);
 }

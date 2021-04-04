@@ -31,17 +31,11 @@ int main(){
   Dense(.layer_size=32,.activation="relu",.layer_type="hidden",.dropout=0.5);
   Dense(.layer_size=16,.activation="relu",.layer_type="hidden");
   Dense(.layer_size=1,.activation="sigmoid",.initializer="random",.layer_type="output");
-  Model(.x_train=x_train,.Y_train=y_train,.x_cv=x_cv,.Y_cv=y_cv,.x_test=x_test,.Y_test=y_test,\
-        .num_iter=1000,.learning_rate=4.67e-5,.optimizer="adam",.checkpoint_every=-1,.mini_batch_size=32,\
-
-       );
-      //  .loss="MSELoss"
-      // .regularization="L2",.lambda=5e-4,
-      //SGD, Momentum - lr = 4.67e-3
-  // m->load_model("TESTING_MODEL_SAVE.t7");
+  Model(.X_train=x_train,.y_train=y_train,.X_cv=x_cv,.y_cv=y_cv,.X_test=x_test,.y_test=y_test,\
+        .epochs=1000,.lr=4.67e-5,.optimizer="adam",.checkpoint_every=-1,.batch_size=32);
+  
   m->fit();
   m->test();
-  // m->save_model("TESTING_MODEL_SAVE2.t7");
 
   dARRAY * test_img1 = load_test_image("test_img1.data");
   dARRAY * test_img2 = load_test_image("test_img2.data");

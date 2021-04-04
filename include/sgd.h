@@ -1,21 +1,22 @@
  /** 
-  * File:    rmsprop.h 
+  * File:    sgd.h 
   * 
   * Author:  Vishal R (vishalr@pesu.pes.edu or vishalramesh01@gmail.com) 
   * 
   * Summary of File: 
-  *   This file contains all the function headers required for RMSProp Optimizer. 
+  *   This file contains all the function headers required for Gradient Descent Optimizer. 
   */ 
 
-#ifndef RMSPROP_H
-#define RMSPROP_H
+#ifndef SGD_H
+#define SGD_H
+
+#include "utils.h"
 
 #ifdef __cplusplus
 extern "C"{
 #endif
-  void RMSProp();
+  void SGD();
 #ifdef __cplusplus
 }
 #endif
-
 #endif

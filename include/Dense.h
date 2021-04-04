@@ -1,3 +1,12 @@
+ /** 
+  * File:    MSELoss.h 
+  * 
+  * Author:  Vishal R (vishalr@pesu.pes.edu or vishalramesh01@gmail.com) 
+  * 
+  * Summary of File: 
+  *   This file contains all the function headers required for implementation of Dense Layers. 
+  */ 
+
 #ifndef DENSE_LAYER_H_
 #define DENSE_LAYER_H_
 
@@ -44,12 +53,20 @@ typedef struct dense{
   __init_params initalize_params;
   char * initializer;
   float dropout;
-  float lambda;
   dARRAY * dropout_mask;
   int isTraining;
   char * layer_type;
 }Dense_layer;
 
-#define Dense(...) Dense((dense_args){.layer_size=20,.activation="relu",.initializer="he",.dropout=1.0,.lambda=0.0,.layer_type="hidden",__VA_ARGS__});
+/**!
+* @brief Function : Dense - Constructor that constructs the Dense Layer.
+* @param layer_size Specifies the number of nodes in the layer.
+* @param activation Specifies the acitvation function to be used.
+* @param initializer Specifies the type of weight initialization to be used.
+* @param dropout Specifies the probability of dropping out neurons in the layer.
+* @param layer_type Specifies the type of layer.
+* @return void
+*/ 
+#define Dense(...) Dense((dense_args){.layer_size=20,.activation="relu",.initializer="he",.dropout=1.0,.layer_type="hidden",__VA_ARGS__});
 
 #endif //DENSE_H_

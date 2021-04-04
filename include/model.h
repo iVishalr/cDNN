@@ -1,3 +1,13 @@
+ /** 
+  * File:    model.h 
+  * 
+  * Author:  Vishal R (vishalr@pesu.pes.edu or vishalramesh01@gmail.com) 
+  * 
+  * Summary of File: 
+  *   This file contains all the function headers and model objects. 
+  *   Functions allow the user of the software to create simple Artificial Neural Networks in C. 
+  */ 
+
 #ifndef MODEL_H
 #define MODEL_H
 
@@ -5,19 +15,19 @@
 #include "utils.h"
 
 typedef struct model_args{
-  dARRAY * x_train;
-  dARRAY * Y_train;
-  dARRAY * x_cv;
-  dARRAY * Y_cv;
-  dARRAY * x_test;
-  dARRAY * Y_test;
-  float learning_rate;
-  int mini_batch_size;
-  int num_iter;
+  dARRAY * X_train;
+  dARRAY * y_train;
+  dARRAY * X_cv;
+  dARRAY * y_cv;
+  dARRAY * X_test;
+  dARRAY * y_test;
+  float lr;
+  int batch_size;
+  int epochs;
   char * optimizer;
   char * loss;
   char * regularization;
-  float lambda;
+  float weight_decay;
   int print_cost;
   float beta;
   float beta1;
@@ -74,12 +84,14 @@ extern "C"{
 typedef struct model{
   Computation_Graph * graph;
   Computation_Graph * current_layer;
+  
   int number_of_layers;
 
   float learning_rate;
   int mini_batch_size;
   int num_mini_batches;
   int current_mini_batch;
+
   dARRAY * x_train;
   dARRAY * Y_train;
   dARRAY * x_test;
@@ -100,12 +112,13 @@ typedef struct model{
   float beta;
   float beta1;
   float beta2;
+  float epsilon;
   int time_step;
+
   dARRAY * m_t_dW[1024];
   dARRAY * v_t_dW[1024];
   dARRAY * m_t_db[1024];
   dARRAY * v_t_db[1024];
-  float epsilon;
   dARRAY * cache_dW[1024];
   dARRAY * cache_db[1024];
 
@@ -133,18 +146,47 @@ typedef struct model{
   __model_backward__ backward;
 }__Model__;
 
+/**! 
+ * @brief  Function : create_model - Constructor that creates a model object that is responsible for the overall functioning of the network.
+ * 
+ * @return void
+*/
 #define create_model(...) create_model();
 
+/**! 
+ * @brief  Function Model - Constructor that defines the model parameters and constructs 
+ * and initializes the layers with the arguments specified.
+ * 
+ * @param X_train dARRAY pointing to training set (X_train)
+ * @param y_train dARRAY pointing to the labels for training set (y_train) 
+ * @param X_cv dARRAY pointing to validation set (X_val)
+ * @param y_cv dARRAY pointing to the labels for validation set (y_val)
+ * @param X_test dARRAY pointing to test set (X_test)
+ * @param y_test dARRAY pointing to the labels for test set. (y_test) 
+ * 
+ * @param epochs Number of epochs the model must train for. (Hyperparameter)
+ * @param batch_size Specifies the batch_size to be used for training. (Hyperparameter) 
+ * @param lr Specifies the learning rate for the model. (Hyperparameter)
+ * @param weight_decay Specifies the weight decay to be used in regularization. (Hyperparameter) 
+ * @param beta Specifies the decay value that will be used during parameter updates. (Hyperparameter) 
+ * @param beta1 Specifies the decay value that will be used during parameter updates. (Hyperparameter) 
+ * @param beta2 Specifies the decay value that will be used during parameter updates. (Hyperparameter) 
+ * 
+ * @param loss Specifies the loss function to be used.  
+ * @param optimizer Specifies the optimizer to be used for training. 
+ * @param regularization Specifies the type of regularization to be applied during training. 
+ * @param checkpoint_every Specifies the interval at which the model will be saved.
+*/
 #define Model(...) Model((Model_args){\
-.x_train=NULL,.Y_train=NULL,\
-.x_cv=NULL,.Y_cv=NULL,\
-.x_test=NULL,.Y_test=NULL,\
-.num_iter=10,\
-.mini_batch_size=64,\
+.X_train=NULL,.y_train=NULL,\
+.X_cv=NULL,.y_cv=NULL,\
+.X_test=NULL,.y_test=NULL,\
+.epochs=10,\
+.batch_size=64,\
 .optimizer="Adam",\
 .regularization=NULL,\
-.lambda=0.0,\
-.learning_rate=3e-4,\
+.weight_decay=0.0,\
+.lr=3e-4,\
 .print_cost=1,\
 .beta=0.9,\
 .beta1=0.9,\
@@ -152,6 +194,11 @@ typedef struct model{
 .loss="cross_entropy_loss",\
 .checkpoint_every=2500,__VA_ARGS__});
 
+/**! 
+ * @brief  Function : destroy_model - Constructor that is responsible for deallocating memory
+ * assigned to the model.
+ * @return void
+*/
 #define destroy_model(...) destroy_model();
 
 #endif

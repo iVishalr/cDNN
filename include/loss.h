@@ -1,3 +1,12 @@
+ /** 
+  * File:    loss.h 
+  * 
+  * Author:  Vishal R (vishalr@pesu.pes.edu or vishalramesh01@gmail.com) 
+  * 
+  * Summary of File: 
+  *   This file contains all the function headers required for CrossEntropyLoss and Mean Squared Error loss functions. 
+  */ 
+
 #ifndef LOSS_H
 #define LOSS_H
 

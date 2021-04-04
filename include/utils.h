@@ -1,3 +1,12 @@
+ /** 
+  * File:    utils.h 
+  * 
+  * Author:  Vishal R (vishalr@pesu.pes.edu or vishalramesh01@gmail.com) 
+  * 
+  * Summary of File: 
+  *   Matrix operation library required for cdnn. Contains all the header files for matrix operations. 
+  */ 
+
 #ifndef UTILS_H
 #define UTILS_H
 

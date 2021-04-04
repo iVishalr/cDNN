@@ -1,3 +1,12 @@
+ /** 
+  * File:    activations.h 
+  * 
+  * Author:  Vishal R (vishalr@pesu.pes.edu or vishalramesh01@gmail.com) 
+  * 
+  * Summary of File: 
+  *   This file contains all the function headers to create non-linearity functions like ReLu, sigmoid and so on. 
+  */ 
+
 #ifndef ACTIVATIONS_H
 #define ACTIVATIONS_H
 

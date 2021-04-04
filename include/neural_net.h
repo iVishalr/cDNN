@@ -1,3 +1,13 @@
+ /** 
+  * File:    neural_net.h 
+  * 
+  * Author:  Vishal R (vishalr@pesu.pes.edu or vishalramesh01@gmail.com) 
+  * 
+  * Summary of File: 
+  *   This file contains all the function headers required for creating static Computation Graphs.
+  *   Also contains header files for memory management of the graph and connects all the layers in the neural network. 
+  */ 
+
 #ifndef NEURAL_NET_H
 #define NEURAL_NET_H
 
@@ -6,7 +16,7 @@
 
 #include "loss.h"
 
-#include "gradient_descent.h"
+#include "sgd.h"
 #include "momentum.h"
 #include "adam.h"
 #include "adagrad.h"

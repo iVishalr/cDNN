@@ -365,7 +365,6 @@ void (Dense)(dense_args dense_layer_args){
   layer->backward = backward_pass_DENSE;
   layer->dropout_mask = NULL;
   layer->dropout = dense_layer_args.dropout;
-  layer->lambda = dense_layer_args.lambda;
   layer->dA = NULL;
   layer->db = NULL;
   layer->dW = NULL;

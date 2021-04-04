@@ -1,3 +1,11 @@
+ /** 
+  * File:    plot.h 
+  * 
+  * Author:  Vishal R (vishalr@pesu.pes.edu or vishalramesh01@gmail.com) 
+  * 
+  * Summary of File: 
+  *   This file contains all the function headers required for plotting graphs. 
+  */ 
 #ifndef PLOT_H
 #define PLOT_H
 
