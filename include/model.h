@@ -61,6 +61,7 @@ extern "C"{
   dARRAY * load_y_cv(char * filename, int * dims);
   dARRAY * load_x_test(char * filename, int * dims);
   dARRAY * load_y_test(char * filename, int * dims);
+  void early_stopping_handler(int num);
   void create_mini_batches();
   void dump_to_file(float * arr ,char * filename,char * mode);
   void dump_image(dARRAY * images);

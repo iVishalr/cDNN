@@ -81,7 +81,6 @@ dARRAY * init_bias(int * bias_dims){
 }
 
 void forward_pass_DENSE(){
-  // printf("forward DENSE\n");
   //Compute Z = W.A + b
   //Z is the linear output of the gate
   //W is the weights of the current layer
@@ -109,7 +108,16 @@ void forward_pass_DENSE(){
     int dropout_mask_dims[] = {Z->shape[0],Z->shape[1]};
     
     dARRAY * dropout_mask_temp = NULL;
-    dropout_mask_temp = randn(dropout_mask_dims);
+
+    dropout_mask_temp = (dARRAY*)malloc(sizeof(dARRAY));
+    dropout_mask_temp->matrix = (float*)calloc(dropout_mask_dims[0]*dropout_mask_dims[1],sizeof(float));
+    
+    #pragma omp parallel for num_threads(8) shared(dropout_mask_temp)
+    for(int i=0;i<dropout_mask_dims[0]*dropout_mask_dims[1];i++){
+      dropout_mask_temp->matrix[i] = (float)(rand()/RAND_MAX);
+    }
+    dropout_mask_temp->shape[0] = dropout_mask_dims[0];
+    dropout_mask_temp->shape[1] = dropout_mask_dims[1];
     
     m->current_layer->DENSE->dropout_mask = (dARRAY*)malloc(sizeof(dARRAY));
     m->current_layer->DENSE->dropout_mask->matrix = (float*)calloc(dropout_mask_dims[0]*dropout_mask_dims[1],sizeof(float));
@@ -127,7 +135,6 @@ void forward_pass_DENSE(){
     //we need to scale our activations so that loss doesnt change in the end as we will be forward propagating through
     //less neurons. This will change loss if activations are not scaled.
     dARRAY * Z_drop_out_temp = multiply(Z,m->current_layer->DENSE->dropout_mask);
-
     Z_drop_out = divScalar(Z_drop_out_temp,m->current_layer->DENSE->dropout);
     
     free2d(Z_drop_out_temp);
@@ -190,7 +197,6 @@ void forward_pass_DENSE(){
 }
 
 void backward_pass_DENSE(){
-  // printf("BACKWARD DENSE\n");
   //Store the number of training examples in a variable
   float num_examples = m->y_train_mini_batch[m->current_mini_batch]->shape[1];
   // float num_examples = m->Y_train->shape[1];
@@ -327,7 +333,7 @@ void backward_pass_DENSE(){
     dARRAY * prev_layer_A_temp = NULL;
     prev_layer_A_temp = dot(weight_transpose,layer->dZ);
     
-    if(layer->dropout==(float)1.0){
+    if(layer->dropout==(float)1.0 || prev_layer->dropout_mask==NULL){
       prev_layer->dA = prev_layer_A_temp;
       prev_layer_A_temp = NULL;
     }

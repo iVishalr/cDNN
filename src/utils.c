@@ -66,7 +66,7 @@ dARRAY * eye(int * dims){
 dARRAY * transpose(dARRAY * restrict Matrix){
   if(Matrix==NULL){
     printf("\033[1;31mError:\033[93m Matrix is empty. Call transpose() only after intializing dARRAY object.\033[0m\n");
-    return NULL;
+    exit(EXIT_FAILURE);
   }
   if(Matrix->shape[0]==1 && Matrix->shape[1]==1) return Matrix;
   dARRAY * matrix = (dARRAY*)malloc(sizeof(dARRAY));
@@ -103,19 +103,23 @@ dARRAY * transposem(dARRAY * restrict Matrix){
 
 /**!
  * Finds the dot product (Matrix Multiplication) of two matrices. 
- * @param MatrixA First Matrix (float * __restrict__) 
- * @param MatrixB Second Matrix (float * __restrict__) 
+ * @param MatrixA First Matrix
+ * @param MatrixB Second Matrix
  * @result Returns a pointer to the result of dot(MatrixA,MatrixB) 
  * @return A pointer to the result of dot(MatrixA,MatrixB) 
 */
 dARRAY * dot(dARRAY * MatrixA, dARRAY * MatrixB){
   if(MatrixA->shape[1]!=MatrixB->shape[0]){
     printf("\033[1;31mError:\033[93m Shape error while performing dot(). Matrix dimensions do not align. %d(dim1) != %d(dim0)\033[0m\n",MatrixA->shape[1],MatrixB->shape[0]);
-    return NULL;
+    exit(EXIT_FAILURE);
   }
-  if(MatrixB == NULL || MatrixA == NULL){
-    printf("\033[1;31mError:\033[93m One of the input matrices is empty. Call dot() only after initializing dARRAY object\033[0m\n");
-    return NULL;
+  if(MatrixA == NULL){
+    printf("\033[1;31mError:\033[93m MatrixA is empty. Call dot() only after initializing dARRAY object\033[0m\n");
+    exit(EXIT_FAILURE);
+  }
+  if(MatrixB == NULL){
+    printf("\033[1;31mError:\033[93m MatrixB is empty. Call dot() only after initializing dARRAY object\033[0m\n");
+    exit(EXIT_FAILURE);
   }
   long long int m,n,k;
   m = MatrixA->shape[0];
@@ -180,9 +184,13 @@ dARRAY * dotm(dARRAY * MatrixA, dARRAY * MatrixB){
  * @return A pointer to the result of multiply(MatrixA,MatrixB) 
 */
 dARRAY * multiply(dARRAY * restrict MatrixA, dARRAY * restrict MatrixB){
-  if(MatrixB == NULL || MatrixA == NULL){
-    printf("\033[1;31mError:\033[93m One of the input matrices is empty. Call multiply() only after initializing dARRAY object\033[0m\n");
-    return NULL;
+  if(MatrixA == NULL){
+    printf("\033[1;31mError:\033[93m MatrixA is empty. Call multiply() only after initializing dARRAY object\033[0m\n");
+    exit(EXIT_FAILURE);
+  }
+  if(MatrixB == NULL){
+    printf("\033[1;31mError:\033[93m MatrixB is empty. Call multiply() only after initializing dARRAY object\033[0m\n");
+    exit(EXIT_FAILURE);
   }
   dARRAY * temp = NULL;
   int x = 0, y = 0;
@@ -252,9 +260,13 @@ dARRAY * multiply(dARRAY * restrict MatrixA, dARRAY * restrict MatrixB){
  * @return A pointer to the result of divison(MatrixA,MatrixB) 
 */
 dARRAY * divison(dARRAY * restrict MatrixA, dARRAY * restrict MatrixB){
-  if(MatrixB == NULL || MatrixA == NULL){
-    printf("\033[1;31mError:\033[93m One of the input matrices is empty. Call divison() only after initializing dARRAY object\033[0m\n");
-    return NULL;
+  if(MatrixA == NULL){
+    printf("\033[1;31mError:\033[93m MatrixA is empty. Call divison() only after initializing dARRAY object\033[0m\n");
+    exit(EXIT_FAILURE);
+  }
+  if(MatrixB == NULL){
+    printf("\033[1;31mError:\033[93m MatrixB is empty. Call divison() only after initializing dARRAY object\033[0m\n");
+    exit(EXIT_FAILURE);
   }
   dARRAY * temp = NULL;
   int x = size(MatrixA);
@@ -319,9 +331,13 @@ dARRAY * divison(dARRAY * restrict MatrixA, dARRAY * restrict MatrixB){
  * @return A pointer to the result of add(MatrixA,MatrixB) 
 */
 dARRAY * add(dARRAY * MatrixA, dARRAY * MatrixB){
-  if(MatrixB == NULL || MatrixA == NULL){
-    printf("\033[1;31mError:\033[93m One of the input matrices is empty. Call add() only after initializing dARRAY object\033[0m\n");
-    return NULL;
+  if(MatrixA == NULL){
+    printf("\033[1;31mError:\033[93m MatrixA is empty. Call add() only after initializing dARRAY object\033[0m\n");
+    exit(EXIT_FAILURE);
+  }
+  if(MatrixB == NULL){
+    printf("\033[1;31mError:\033[93m MatrixB is empty. Call add() only after initializing dARRAY object\033[0m\n");
+    exit(EXIT_FAILURE);
   }
   dARRAY * bcast_arr = NULL;
   int x = size(MatrixA);
@@ -380,9 +396,13 @@ dARRAY * add(dARRAY * MatrixA, dARRAY * MatrixB){
  * @return A pointer to the result of subtract(MatrixA,MatrixB) 
 */
 dARRAY * subtract(dARRAY * MatrixA, dARRAY * MatrixB){
-  if(MatrixB == NULL || MatrixA == NULL){
-    printf("\033[1;31mError:\033[93m One of the input matrices is empty. Call subtract() only after initializing dARRAY object\033[0m\n");
-    return NULL;
+  if(MatrixA == NULL){
+    printf("\033[1;31mError:\033[93m MatrixA is empty. Call subtract() only after initializing dARRAY object\033[0m\n");
+    exit(EXIT_FAILURE);
+  }
+  if(MatrixB == NULL){
+    printf("\033[1;31mError:\033[93m MatrixB is empty. Call subtract() only after initializing dARRAY object\033[0m\n");
+    exit(EXIT_FAILURE);
   }
   dARRAY * bcast_arr = NULL;
   int x = size(MatrixA);
@@ -441,12 +461,10 @@ dARRAY * subtract(dARRAY * MatrixA, dARRAY * MatrixB){
  * @return A pointer to the result of addScalar(matrix,scalar) 
 */
 dARRAY * addScalar(dARRAY * matrix, float scalar){
-  if(matrix==NULL){
-    printf("\033[1;31mError:\033[93m Matrix is empty. Call addScalar() only after intializing dARRAY object.\033[0m\n");
-    return NULL;
+  if(matrix == NULL){
+    printf("\033[1;31mError:\033[93m matrix is empty. Call addScalar() only after initializing dARRAY object\033[0m\n");
+    exit(EXIT_FAILURE);
   }
-  // float * mul_matrix = (float*)calloc(matrix->shape[0]*matrix->shape[1],sizeof(float));
-
   dARRAY * result = (dARRAY*)malloc(sizeof(dARRAY));
   result->matrix = (float*)calloc(matrix->shape[0]*matrix->shape[1],sizeof(float));
   omp_set_num_threads(nn_threads);
@@ -467,9 +485,9 @@ dARRAY * addScalar(dARRAY * matrix, float scalar){
  * @return A pointer to the result of subScalar(matrix,scalar) 
 */
 dARRAY * subScalar(dARRAY * matrix, float scalar){
-  if(matrix==NULL){
-    printf("\033[1;31mError:\033[93m Matrix is empty. Call subScalar() only after intializing dARRAY object.\033[0m\n");
-    return NULL;
+  if(matrix == NULL){
+    printf("\033[1;31mError:\033[93m matrix is empty. Call subScalar() only after initializing dARRAY object\033[0m\n");
+    exit(EXIT_FAILURE);
   }
   dARRAY * result = (dARRAY*)malloc(sizeof(dARRAY));
   result->matrix = (float*)calloc(matrix->shape[0]*matrix->shape[1],sizeof(float));
@@ -491,9 +509,9 @@ dARRAY * subScalar(dARRAY * matrix, float scalar){
  * @return A pointer to the result of mulScalar(matrix,scalar) 
 */
 dARRAY * mulScalar(dARRAY * matrix, float scalar){
-  if(matrix==NULL){
-    printf("\033[1;31mError:\033[93m Matrix is empty. Call mulScalar() only after intializing dARRAY object.\033[0m\n");
-    return NULL;
+  if(matrix == NULL){
+    printf("\033[1;31mError:\033[93m matrix is empty. Call mulScalar() only after initializing dARRAY object\033[0m\n");
+    exit(EXIT_FAILURE);
   }
   dARRAY * result = (dARRAY*)malloc(sizeof(dARRAY));
   result->matrix = (float*)calloc(matrix->shape[0]*matrix->shape[1],sizeof(float));
@@ -531,9 +549,9 @@ dARRAY * mulScalarm(dARRAY * matrix, float scalar){
  * @return A pointer to the result of divScalar(matrix,scalar) 
 */
 dARRAY * divScalar(dARRAY * matrix, float scalar){
-  if(matrix==NULL){
-    printf("\033[1;31mError:\033[93m Matrix is empty. Call divScalar() only after intializing dARRAY object.\033[0m\n");
-    return NULL;
+  if(matrix == NULL){
+    printf("\033[1;31mError:\033[93m matrix is empty. Call divScalar() only after initializing dARRAY object\033[0m\n");
+    exit(EXIT_FAILURE);
   }
   dARRAY * result = (dARRAY*)malloc(sizeof(dARRAY));
   result->matrix = (float*)calloc(matrix->shape[0]*matrix->shape[1],sizeof(float));
@@ -573,9 +591,9 @@ dARRAY * divScalarm(dARRAY * matrix, float scalar){
  * @return A pointer to the result of power(matrix,power) 
 */
 dARRAY * power(dARRAY * matrix, float power){
-  if(matrix==NULL){
-    printf("\033[1;31mError:\033[93m Matrix is empty. Call power() only after intializing dARRAY object.\033[0m\n");
-    return NULL;
+  if(matrix == NULL){
+    printf("\033[1;31mError:\033[93m matrix is empty. Call power() only after initializing dARRAY object\033[0m\n");
+    exit(EXIT_FAILURE);
   }
   dARRAY * result = (dARRAY*)malloc(sizeof(dARRAY));
   result->matrix = (float*)calloc(matrix->shape[0]*matrix->shape[1],sizeof(float));
@@ -590,9 +608,9 @@ dARRAY * power(dARRAY * matrix, float power){
 }
 
 dARRAY * squareroot(dARRAY * matrix){
-  if(matrix==NULL){
-    printf("\033[1;31mError:\033[93m Matrix is empty. Call squareroot() only after intializing dARRAY object.\033[0m\n");
-    return NULL;
+  if(matrix == NULL){
+    printf("\033[1;31mError:\033[93m matrix is empty. Call squareroot() only after initializing dARRAY object\033[0m\n");
+    exit(EXIT_FAILURE);
   }
   dARRAY * result = (dARRAY*)malloc(sizeof(dARRAY));
   result->matrix = (float*)calloc(matrix->shape[0]*matrix->shape[1],sizeof(float));
@@ -607,9 +625,9 @@ dARRAY * squareroot(dARRAY * matrix){
 }
 
 dARRAY * exponentional(dARRAY * matrix){
-  if(matrix==NULL){
-    printf("\033[1;31mError:\033[93m Matrix is empty. Call power() only after intializing dARRAY object.\033[0m\n");
-    return NULL;
+  if(matrix == NULL){
+    printf("\033[1;31mError:\033[93m matrix is empty. Call exponential() only after initializing dARRAY object\033[0m\n");
+    exit(EXIT_FAILURE);
   }
   dARRAY * result = (dARRAY*)malloc(sizeof(dARRAY));
   result->matrix = (float*)calloc(matrix->shape[0]*matrix->shape[1],sizeof(float));

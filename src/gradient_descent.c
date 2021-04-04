@@ -56,7 +56,7 @@ void SGD(){
     ptr_layer_W = NULL;
     ptr_layer_b = NULL;
     
-    if(temp->DENSE->dropout_mask!=NULL && temp->DENSE->dropout<(float)1.0)
+    if(temp->DENSE->dropout_mask!=NULL)
       free2d(temp->DENSE->dropout_mask);
     if(temp->DENSE->A!=NULL)
       free2d(temp->DENSE->A);

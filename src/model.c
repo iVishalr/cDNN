@@ -283,6 +283,7 @@ void __fit__(){
     iterations = i;
   }
   else iterations = m->num_iter;
+  signal(SIGINT,early_stopping_handler);
   while(i<=iterations){
     flag_cost=0;
     for(int mini_batch=0;mini_batch<m->num_mini_batches;mini_batch++){
@@ -359,6 +360,60 @@ void __fit__(){
     dump_to_file(val_acc_arr,"./bin/val_acc.data","wb+");
     flag_cost=1;
   }
+}
+
+void early_stopping_handler(int num){
+  while(1){
+    printf("\nYou have stopped the training process! Would you like to save the model? [Y/N] : ");
+    char ch = (char)getchar();
+    if(ch=='Y' || ch=='y'){
+      while(1){
+        cleanSTDIN();
+        printf("Would you like to specify a name for your model? [Y/N] : ");
+        char choice = (char)getchar();
+        if(choice=='Y' || choice=='y'){
+          char name[100];
+          cleanSTDIN();
+          printf("Enter a name [Please use xxx.t7 as the filename] : "); 
+          scanf("%s",name);
+          __save_model__(name);
+          break;
+        }
+        else if(choice=='N' || choice=='n'){
+          cleanSTDIN();
+          time_t rawtime;
+          struct tm * timeinfo;
+
+          time ( &rawtime );
+          timeinfo = localtime ( &rawtime );
+      
+          char buffer[1024];
+          snprintf(buffer,sizeof(buffer),"model_%s.t7",asctime (timeinfo));
+          __save_model__(buffer);
+          break;
+        }
+        else{
+          printf("Invalid Option entered!\n");
+          sleep_my(1000);
+          continue;
+        }
+      }
+      break;
+    }
+    else if(ch=='N' || ch=='n'){
+      cleanSTDIN();
+      printf("Model not saved!\n");
+      break;
+    }
+    else{
+      printf("Invalid Option entered!\n");
+      sleep_my(1000);
+      cleanSTDIN();
+      continue;
+    }
+  }
+  destroy_model();
+  exit(EXIT_SUCCESS);  
 }
 
 void __predict__(dARRAY * input_feature){
