@@ -1,5 +1,5 @@
-#include <activations.h>
-#include <model.h>
+#include <cdnn/activations.h>
+#include <cdnn/model.h>
 
 extern __Model__ * m;
 

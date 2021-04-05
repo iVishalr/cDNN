@@ -1,5 +1,5 @@
-#include <model.h>
-#include <progressbar.h>
+#include <cdnn/model.h>
+#include <cdnn/progressbar.h>
 
 __Model__ * m;
 

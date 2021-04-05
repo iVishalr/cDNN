@@ -1,5 +1,5 @@
-#include <model.h>
-#include <Input.h>
+#include <cdnn/model.h>
+#include <cdnn/Input.h>
 
 extern __Model__ * m;
 

@@ -1,9 +1,12 @@
 *.png
 *.data
 *.out
-SGDTrainingLog
 temp
 new_temp
 *.png
 *.zip
 *.t7
+*.dylib
+*.dll
+*.so
+*.o

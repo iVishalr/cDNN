@@ -1,5 +1,5 @@
-#include <model.h>
-#include <momentum.h>
+#include <cdnn/model.h>
+#include <cdnn/momentum.h>
 
 extern __Model__ * m;
 

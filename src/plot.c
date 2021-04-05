@@ -1,5 +1,5 @@
-#include <plot.h>
-#include <model.h>
+#include <cdnn/plot.h>
+#include <cdnn/model.h>
 
 extern __Model__ * m;
 

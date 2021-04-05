@@ -1,4 +1,4 @@
-#include "./utils.h"
+#include <cdnn/utils.h>
 
 float cache;
 int return_cache;

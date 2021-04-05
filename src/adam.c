@@ -1,5 +1,5 @@
-#include <adam.h>
-#include <model.h>
+#include <cdnn/adam.h>
+#include <cdnn/model.h>
 
 extern __Model__ * m;
 

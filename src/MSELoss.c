@@ -1,5 +1,5 @@
-#include <model.h>
-#include <loss.h>
+#include <cdnn/model.h>
+#include <cdnn/loss.h>
 
 extern __Model__ * m;
 loss_layer * loss_layer_mse = NULL;

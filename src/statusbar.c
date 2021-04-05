@@ -9,7 +9,7 @@
 * statusbar -- a C class (by convention) for displaying progress
 * on the command line (to stderr).
 */
-#include <statusbar.h>
+#include <cdnn/statusbar.h>
 #include <ncurses.h>
 
 statusbar *statusbar_new_with_format(const char *label, const char *format)

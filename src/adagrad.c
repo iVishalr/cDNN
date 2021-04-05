@@ -1,5 +1,5 @@
-#include <adagrad.h>
-#include <model.h>
+#include <cdnn/adagrad.h>
+#include <cdnn/model.h>
 
 extern __Model__ * m;
 

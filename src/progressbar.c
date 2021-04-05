@@ -13,7 +13,7 @@
 #include <termcap.h>  /* tgetent, tgetnum */
 #include <assert.h>
 #include <limits.h>
-#include <progressbar.h>
+#include <cdnn/progressbar.h>
 
 
 ///  How wide we assume the screen is if termcap fails.

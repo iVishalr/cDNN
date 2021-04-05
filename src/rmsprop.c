@@ -1,5 +1,5 @@
-#include <rmsprop.h>
-#include <model.h>
+#include <cdnn/rmsprop.h>
+#include <cdnn/model.h>
 
 extern __Model__ * m;
 //cache = cache * decay_rate + (1-decay_rate) * dx^2

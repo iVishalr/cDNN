@@ -1,5 +1,5 @@
-#include <sgd.h>
-#include <model.h>
+#include <cdnn/sgd.h>
+#include <cdnn/model.h>
 
 extern __Model__ * m;
 

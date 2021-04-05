@@ -1,5 +1,5 @@
-#include <neural_net.h>
-#include <model.h>
+#include <cdnn/neural_net.h>
+#include <cdnn/model.h>
 
 extern __Model__ * m;
 

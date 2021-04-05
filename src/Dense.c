@@ -1,5 +1,5 @@
-#include <model.h>
-#include <Dense.h>
+#include <cdnn/model.h>
+#include <cdnn/Dense.h>
 
 extern __Model__ * m;
 
