@@ -52,6 +52,7 @@ extern "C"{
   dARRAY * b_cast(dARRAY * MatrixA, dARRAY * MatrixB);
   dARRAY * reshape(dARRAY * matrix, int * dims);
 
+  int * permutation(int length);
   float mean(dARRAY * matrix);
   float var(dARRAY * matrix, char * type);
   float std(dARRAY * matrix, char * type);

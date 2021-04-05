@@ -800,6 +800,29 @@ dARRAY * randn(int * dims){
 }
 
 /**!
+ * Function creates an array that contains shuffled indices 
+ * @param length Number of elements in the array to be shuffled 
+ * @result Pointer to the array containing shuffled indices 
+ * @return Pointer to the array containing shuffled indices 
+*/
+int * permutation(int length){
+  int * permute_arr = (int*)malloc(sizeof(int)*length);
+  #pragma omp parallel for num_threads(nn_threads) shared(permute_arr)
+  for(int i=0;i<length;i++){
+    permute_arr[i] = i;
+  }
+  srand(time(NULL));
+  #pragma omp parallel for
+  for(int i = length-1;i>0;i--){
+    int j = rand()%(i+1);
+    int temp = permute_arr[i];
+    permute_arr[i] = permute_arr[j];
+    permute_arr[j] = temp;
+  }
+  return permute_arr;
+}
+
+/**!
  * Function reshapes a given matrix to specified dimensions 
  * @param matrix Matrix to be reshaped 
  * @param dims An array of matrix dimension [rows,columns] 

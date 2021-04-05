@@ -278,7 +278,9 @@ void __fit__(){
   float sum_train_val_acc = m->cross_val_accuracy*m->current_iter;
   float * train_cost_arr = (float*)calloc(m->num_iter==-1?1000000:m->num_iter*m->num_mini_batches,sizeof(float));
   float * train_acc_arr = (float*)calloc(m->num_iter==-1?1000000:m->num_iter*m->num_mini_batches,sizeof(float));
-  float * val_acc_arr = (float*)calloc(m->num_iter==-1?1000000:m->num_iter*m->num_mini_batches,sizeof(float));
+  float * val_acc_arr = NULL;
+  if(m->Y_cv!=NULL && m->x_cv!=NULL)
+    val_acc_arr = (float*)calloc(m->num_iter==-1?1000000:m->num_iter*m->num_mini_batches,sizeof(float));
   if(m->num_iter==-1){
     iterations = i;
   }
@@ -286,23 +288,31 @@ void __fit__(){
   signal(SIGINT,early_stopping_handler);
   while(i<=iterations){
     flag_cost=0;
+    int * shuffle = permutation(m->num_mini_batches);
     for(int mini_batch=0;mini_batch<m->num_mini_batches;mini_batch++){
-      m->current_mini_batch = mini_batch;
+      m->current_mini_batch = shuffle[mini_batch];
       __forward__();
       sum_cost += m->iter_cost;
       sum_train_acc += calculate_accuracy(m->output,m->y_train_mini_batch[m->current_mini_batch]);
-      dARRAY * temp = calculate_val_test_acc(m->x_cv,m->Y_cv);
-      sum_train_val_acc += temp->matrix[0];
+      dARRAY * temp = NULL;
+      if(m->Y_cv!=NULL && m->x_cv!=NULL){
+        temp = calculate_val_test_acc(m->x_cv,m->Y_cv);
+        sum_train_val_acc += temp->matrix[0];
+      }
       if(m->print_cost){
         m->train_cost = i==m->current_iter ? sum_cost/(float)i : sum_cost/(float)m->current_iter;
         m->train_accuracy = i==m->current_iter ? sum_train_acc/(float)i : sum_train_acc/(float)m->current_iter;
-        m->cross_val_accuracy = i==m->current_iter ? sum_train_val_acc/(float)i : sum_train_val_acc/(float)m->current_iter;
         train_cost_arr[index] = m->train_cost;
         train_acc_arr[index] = m->train_accuracy;
-        val_acc_arr[index] = m->cross_val_accuracy;
+        if(m->Y_cv!=NULL && m->x_cv!=NULL){
+          m->cross_val_accuracy = i==m->current_iter ? sum_train_val_acc/(float)i : sum_train_val_acc/(float)m->current_iter;
+          val_acc_arr[index] = m->cross_val_accuracy;
+        }
         printf("\033[96m%d. %d. Cost : \033[0m%f ",i,mini_batch,m->train_cost);
         printf("\033[96m train_acc : \033[0m%f ",m->train_accuracy);
-        printf("\033[96m val_acc : \033[0m%f\n",m->cross_val_accuracy);
+        if(m->Y_cv!=NULL && m->x_cv!=NULL)
+          printf("\033[96m val_acc : \033[0m%f",m->cross_val_accuracy);
+        printf("\n");
         if(train_cost_arr[index]>=2.5*train_cost_arr[0]){
           printf("\033[96mCost is exploding hence exiting. Try reducing your learning rate and try again!\033[0m\n");
           exit(EXIT_FAILURE);
@@ -353,6 +363,8 @@ void __fit__(){
     }
     i++;
     if(m->num_iter==-1) iterations = i;
+    free(shuffle);
+    shuffle=NULL;
   }
   if(flag_cost==0){
     dump_to_file(train_cost_arr,"./bin/cost.data","wb+");
