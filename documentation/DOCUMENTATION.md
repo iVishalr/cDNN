@@ -747,3 +747,460 @@ dARRAY * A = randn(dims);
 free2d(A);
 A = NULL; //Just to be safe
 ```
+
+#### 2. Static Computation Graphs
+
+cDNN uses static computation graphs for organizing and wireing up your neural networks. Using computation graphs makes gradient flow between layers of neural network easier to calculate.
+
+The computation graph used here is a Directed Acyclic Graph (DAG) which is topologically sorted. Internally, cDNN uses a fancier version of doubly linked list where each node in the linked list can be of different type.
+
+```C
+enum layer_type {INPUT, DENSE, LOSS};
+typedef struct computational_graph{
+  struct computational_graph * next_layer;
+  struct computational_graph * prev_layer;
+  enum layer_type type;
+  union
+  {
+    Dense_layer * DENSE;
+    Input_layer * INPUT;
+    loss_layer * LOSS;
+  };
+}Computation_Graph;
+```
+
+The `Computation_Graph` object contains has serveral functions that can be used to insert layers like `Dense` layer and so on into the linked list.
+
+These functions will be used internally by the layers and the user need not worry about adding/deleting the layer to linked list.
+
+#### 3. Neural Network
+
+cDNN comes with a few layers like `Input(), Dense()` which can be used to create ANNs.
+
+Each layer in cDNN follows a `Forward()` and `Backward()` API. The `Forward()` function is responsible for the behaviour of layer in the forward pass of the neural network. Similarly, `Backward()` is responsible for the behaviour of layer during the backward pass of the neural network. This is where gradient calculation and gradient flow takes place. Using this API it is easier to create scalable models as we need to just define the behaviour of a certain layer in the forward pass and backward pass rather than using one big equation to calculate loss and perform backpropagation.
+
+General workflow in creating neural networks would be something like this. First you will take in the features and examples from your dataset as one big matrix. Traverse down the computation graph by passing the output of one layer as input of next layer and in the end compute a loss. Using the loss, we need to find the gradients of loss function with respect to all the parameters present in model. Using the API we discussed above, makes this process easier. This step is known as Backpropagation which will be discussed later. After backpropagtion, we need to use the computed gradients and perform parameter updates.
+
+##### 3. 1. Forward Pass
+
+```C
+void __forward__(){
+  Computation_Graph * temp = m->graph;
+  while(temp!=NULL){
+    m->current_layer = temp;
+    if(temp->type==INPUT) temp->INPUT->forward();
+    else if(temp->type==DENSE) temp->DENSE->forward();
+    else if(temp->type==LOSS) temp->LOSS->forward();
+    temp = temp->next_layer;
+  }
+}
+```
+
+In forward prop, we will traverse down the computation graph as shown above. This function calls `forward()` method of all the layers present in the model.
+
+##### 3. 2. Backward Pass
+
+```C
+void __backward__(){
+  Computation_Graph * temp = m->current_layer;
+  while(temp->prev_layer!=NULL){
+    m->current_layer = temp;
+    if(temp->type==INPUT) temp->INPUT->backward();
+    else if(temp->type==DENSE) temp->DENSE->backward();
+    else if(temp->type==LOSS) temp->LOSS->backward();
+    temp = temp->prev_layer;
+  }
+}
+```
+
+In backprop, we will traverse up the computation graph as shown above. This function calls `backward()` method of all the layers present in the model.
+
+The backward pass is responsible for all the gradient calculations. The gradients calculated at the intermediate layers will flow through the layers until the very first layer using the chain rule of calculus.
+
+Notice how we make use of the Forward/Backward API we discussed earlier. This is how famous libraries like PyTorch and Tensorflow implement neural networks internally.
+
+We will look into how the gradients are calculated at the individual layers in the next section.
+
+#### 4. Layers in cDNN
+
+##### 4. 1. `Input()`
+
+This layer is responsible for taking in the flattened datatset and feed it into the `Dense` layers.
+
+```C
+Input(.layer_size=12288);
+```
+
+**Arguments** :
+
+The `Input` layer takes in a required argument called `layer_size`.
+
+1. `layer_size` - Denotes the number of nodes to be present in the `Input` Layer. `layer_size` must be equal to the number of features in your training set.
+
+**Note** : The arguments to `Input()` must be preceded by a period (`.`). This is because `Input()` uses a structure to accept arguments from the user. The use of this method is made more clear in the upcoming layers.
+
+**`Forward()`** :
+
+```C
+void forward_pass_input(){
+  m->graph->INPUT->A = m->x_train_mini_batch[m->current_mini_batch];
+}
+```
+
+**`Backward()`** :
+
+```C
+void backward_pass_input(){ }
+```
+
+We don't use backward pass for input layer hence we will leave it blank but keep the function just to satisfy our API.
+
+_Internal Implementation_ :
+
+```C
+typedef struct input_layer{
+  int input_features_size;
+  dARRAY * A;
+  __compute forward;
+  __compute backward;
+}Input_layer;
+
+typedef struct input_args{
+  int layer_size;
+}Input_args;
+
+void (Input)(Input_args input_layer_args){
+  Input_layer * layer = (Input_layer*)malloc(sizeof(Input_layer));
+  layer->input_features_size = input_layer_args.layer_size;
+  layer->forward = forward_pass_input;
+  layer->backward = backward_pass_input;
+  //Append to computation graph
+  append_graph(layer,"Input");
+}
+```
+
+You can see how we are using a structure to pass arguments to the layer.
+
+`__compute` is just a pointer to a function. This helps to create object oriented programming in C even though it is a procedural programming language. This is completely safe to do and authors or linux have also used this everywhere.
+
+##### 4. 2. `Dense()`
+
+`Dense()` layer performs a linear transformation $$Z = W.X + b$$ on its inputs ($X$). It also applies dropout if it is enabled and pass the result to an activation function ($A$).
+
+**Arguments** :
+
+1. **`.layer_size`** - Specifies number of nodes in the layer.
+   <br>
+2. **`.layer_type`** - Specifies the type of `Dense` layer used.
+   &nbsp;&nbsp;&nbsp;&nbsp;`.layer_type="hidden"` the dense layer behaves as a hidden layer in the network.
+   &nbsp;&nbsp;&nbsp;&nbsp;`.layer_type="output"` the layer behaves as the last layer which is the output layer of the network.
+   <br>
+3. **`.activation`** - Specifies the type of activation function ($A$) to use for the layer.
+   &nbsp;&nbsp;&nbsp;&nbsp;`.activation="relu"` - tells layer to use the $ReLu$ Activation function.
+   $$
+   ReLu(x) = \begin{split} \begin{Bmatrix} x & x > 0 \\
+   0 & x < 0 \end{Bmatrix}\end{split}
+   $$
+   &nbsp;&nbsp;&nbsp;&nbsp;`.activation="sigmoid"` - tells layer to use the $sigmoid$ Activation function.
+   $$Sigmoid(x) = \frac{1}{1+e^{-x}}$$
+   &nbsp;&nbsp;&nbsp;&nbsp;`.activation="tanh"` - tells layer to use the $tanh$ Activation function.
+   $$TanH(x) = \frac{e^x - e^{-x}}{e^x+e^{-x}}$$
+   &nbsp;&nbsp;&nbsp;&nbsp;`.activation="softmax"` - tells layer to apply a $softmax$ Activation function.
+   $$Softmax(x) = \frac{e^x_i}{\sum{e^x}}$$
+   <br>
+4. **`.dropout`** - Specifies the dropout to be used in the layer.
+   &nbsp;&nbsp;&nbsp;&nbsp;`.dropout=1.0` - No dropout will be applied.
+   &nbsp;&nbsp;&nbsp;&nbsp;`.dropout=0.5` - Specifies that there is a 50% chance of dropping out certain nodes in the layer.
+   &nbsp;&nbsp;&nbsp;&nbsp;`.dropout=x` - Specifies that there is a x\*100% chance of dropping out certain nodes in the layer.  
+    &nbsp;&nbsp;&nbsp;&nbsp;`x` must be within 0.0 and 1.0
+   &nbsp;&nbsp;&nbsp;&nbsp; By default,`Dense()` will use `.dropout=1.0`.
+   <br>
+5. **`.initializer`** - Specifies the type of initialization to be used for initializing the layer weights.
+   &nbsp;&nbsp;&nbsp;&nbsp;`.initializer="he"` - $He$ initialization will be used for weight initialization.
+   $$He = \sqrt{\frac{2}{n^{[l-1]}}}$$
+   &nbsp;&nbsp;&nbsp;&nbsp;`.initializer="xavier"` - $Xavier$ initialization will be used for weight initialization.
+   $$Xavier = \sqrt{\frac{1}{n^{[l-1]}}}$$
+   &nbsp;&nbsp;&nbsp;&nbsp;`.initializer="random"` - Weights will be intialized to random values using normal distribution.
+   $$W = randn(dims)$$
+   &nbsp;&nbsp;&nbsp;&nbsp;`.initializer="zeros"` - Weights will be set to zero. **Don't use this option**. It is just there to show that network fails to break symmetry when $$W = 0$$.
+   &nbsp;&nbsp;&nbsp;&nbsp; By default,`Dense()` will use `.initializer="he"`.
+
+_Example_:
+
+```C
+Dense(.layer_size=32,.activation="relu",.layer_type="hidden",.dropout=0.5);
+```
+
+In the above example, we are defining a Dense layer with 32 neurons/nodes. We apply `relu` activation and a dropout of 0.5.
+
+**`Forward()`** :
+For the above example, the forward pass would be something like this :
+
+$$
+Z = W\ .\ X + b\\
+Z' = Dropout(Z,prob=0.5)\\
+A = ReLu(Z')
+$$
+
+**`Backward()`** :
+
+For the above example, the backward pass would be something like this :
+
+$$
+dZ = A'(Z')\ *\ dA\\
+dA = W^{[next\_layer]T}\ .\ dZ^{[next\_layer]}\\
+dW = dZ\ .\ X^T\\
+db = dZ
+$$
+
+_Note : the above backprop equations are just for illustrations. There may be dimension mismatches._
+
+The basic idea employed here is, if we are traversing the computation graph from bottom to top, the gradient flow would be somthing like this :
+For a function $f(x)$,
+
+1. We will find the $local\ gradients$ :
+   $$\frac{\delta f(x,y,z)}{\delta x}\ ,\ \frac{\delta f(x,y,z)}{\delta y}\ ,\ \frac{\delta f(x,y,z)}{\delta z}$$
+2. We will have a gradient from below called $global\ gradients$
+3. Using chain rule of calculus,
+   $$
+   d\theta = local\ gradient\ *\ global\ gradients\\
+   dx = \frac{\delta f(x,y,z)}{\delta x}\ *\ global\ gradients\\
+   dy = \frac{\delta f(x,y,z)}{\delta y}\ *\ global\ gradients\\
+   dz = \frac{\delta f(x,y,z)}{\delta z}\ *\ global\ gradients\\
+   global\ gradients = \delta f
+   $$
+
+Now $dx,\ dy,\ dz$ are gradients that are 'flowing' into inputs $x,\ y,\ and\ z$. Gradients $dx,\ dy,\ dz$ become a global gradient for functions present above $f(x)$. Remember, we are traversing the computation graph from last node to first node. That's why we are refering to gradients coming from below and flowing to above functions.
+
+It's kind of difficult to explain this without a computation graph.
+
+##### 4. 3. `Model()`
+
+This layer is responsible for putting the model together. Basically it combines all the layers and initializes the weights according to the initializer used. It also adds a loss function to the computation graph and initializes the optimizer's internal state.
+
+**Arguments** :
+
+1. **`.X_train`** - Specifies a pointer to the training set containing features.
+2. **`.y_train`** - Specifies a pointer to the training set containing true labels.
+3. **`.X_cv`** - Specifies a pointer to the validation set containing features.
+4. **`.y_cv`** - Specifies a pointer to the validation set containing true labels.
+5. **`.X_test`** - Specifies a pointer to the test set containing features.
+6. **`.y_test`** - Specifies a pointer to the test set containing true labels.
+7. **`.epochs`** - Specifies the number of epochs the model must perform.
+8. **`.batch_size`** - Specifies the batch_size for the model.
+9. **`.optimizer`** - Specifies the optimizer to be used for training.
+   &nbsp;&nbsp;&nbsp;&nbsp; `.optimizer="adam"` - Uses the $Adam$ optimization for parameter updates.
+   &nbsp;&nbsp;&nbsp;&nbsp; `.optimizer="adagrad"` - Uses the $Adagrad$ optimization for parameter updates.
+   &nbsp;&nbsp;&nbsp;&nbsp; `.optimizer="rmsprop"` - Uses the $RMSProp$ optimization for parameter updates.
+   &nbsp;&nbsp;&nbsp;&nbsp; `.optimizer="momentum"` - Uses the $Momentum$ optimization for parameter updates.
+   &nbsp;&nbsp;&nbsp;&nbsp; `.optimizer="sgd"` - Uses the $Gradient\ Descent$ optimization for parameter updates.
+   By default, `.optimizer="adam"`.
+10. **`.regularization`** - Specifies the type of regularization to be used for training.
+    &nbsp;&nbsp;&nbsp;&nbsp; `.regularization="L1"` - Uses the $L1$ regularization for training.
+    &nbsp;&nbsp;&nbsp;&nbsp; `.regularization="L2"` - Uses the $L2$ regularization for training.
+    By default, `.regularization="L2"`.
+11. **`.weight_decay`** - Specifies the regularization strength for training.
+12. **`.lr`** - Specifies the learning rate for training.
+13. **`.beta`** - Specifies the decay value that will be used during parameter updates.
+    By default, `.beta=0.9`.
+14. **`.beta1`** - Specifies the decay value that will be used for first order moment calculations during parameter updates.
+    By default, `.beta1=0.9`.
+15. **`.beta2`** - Specifies the decay value that will be used for second order moment calculations during parameter updates.
+    By default, `.beta2=0.999`.
+16. **`.loss`** - Specifies the loss function to be used for training.
+    &nbsp;&nbsp;&nbsp;&nbsp; `.loss="cross_entropy_loss"` - Uses the $CrossEntropyLoss$ function for training.
+    &nbsp;&nbsp;&nbsp;&nbsp; `.loss="MSELoss"` - Uses the $MSELoss$ function for training.
+    By default, `.loss="cross_entropy_loss"`.
+17. **`.checkpoint_every`** - Specifies how often (in epochs) the model must be saved.
+    By default, `.checkpoint_every=2500`. (2500th epoch).
+
+All the above arguments except `.X_train,y_train` are optional arguments. To achieve this functionality, we use structures to accept the arguments from the user and pass it to the model. The user cannot remember all the arguments that must be provided hence this method is the only suitable way.
+
+Default initalization for all arguments is given below :
+
+```C
+Model(...) Model((Model_args){\
+.X_train=NULL,.y_train=NULL,\
+.X_cv=NULL,.y_cv=NULL,\
+.X_test=NULL,.y_test=NULL,\
+.epochs=10,\
+.batch_size=64,\
+.optimizer="Adam",\
+.regularization=NULL,\
+.weight_decay=0.0,\
+.lr=3e-4,\
+.print_cost=1,\
+.beta=0.9,\
+.beta1=0.9,\
+.beta2=0.999,\
+.loss="cross_entropy_loss",\
+.checkpoint_every=2500,__VA_ARGS__});
+```
+
+#### 5. Model Saving/Loading
+
+##### 5. 1. Saving the Model
+
+After the model has been trained, the model paramters can be saved by using the following function.
+
+```C
+save_model(char * filename)
+```
+
+_Example_ :
+
+```C
+save_model("./model/DOGS_VS_CATS.t7");
+```
+
+Please use `.t7` format for loading and saving model.
+
+##### 5. 2. Loading the Model
+
+A trained model can be loaded in by using the following function.
+
+```C
+load_model(char * filename)
+```
+
+_Example_ :
+
+```C
+load_model("./model/DOGS_VS_CATS.t7");
+```
+
+Please use `.t7` format for loading and saving model.
+
+#### 6. Loading Dataset into Memory
+
+The following functions can be used to load the dataset into memory for training.
+
+```C
+dARRAY * load_x_train(char * filename, int * dims);
+dARRAY * load_y_train(char * filename, int * dims);
+dARRAY * load_x_cv(char * filename, int * dims);
+dARRAY * load_y_cv(char * filename, int * dims);
+dARRAY * load_x_test(char * filename, int * dims);
+dARRAY * load_y_test(char * filename, int * dims);
+```
+
+_Example_ :
+
+```C
+int x_train_dims[] = {12288,100};
+int y_train_dims[] = {2,100};
+int x_cv_dims[] = {12288,100};
+int y_cv_dims[] = {2,100};
+int x_test_dims[] = {12288,100};
+int y_test_dims[] = {2,100};
+
+dARRAY * x_train = load_x_train("./data/X_train.t7",x_train_dims);
+dARRAY * y_train = load_y_train("./data/y_train.t7",y_train_dims);
+dARRAY * x_cv = load_x_cv("./data/X_cv.t7",x_cv_dims);
+dARRAY * y_cv = load_y_cv("./data/y_cv.t7",y_cv_dims);
+dARRAY * x_test = load_x_test("./data/X_test.t7",x_test_dims);
+dARRAY * y_test = load_y_test("./data/y_test.t7",y_test_dims);
+```
+
+The loaded dataset can be passed to the model as shown below. Here we are creating a 2-layer neural network.
+
+```C
+Input(.layer_size=12288);
+Dense(.layer_size=64,.activation="relu",.initializer="he",.layer_type="hidden");
+Dense(.layer_size=2,.activation="softmax",.initializer="random",.layer_type="output");
+Model(.X_train=x_train,.y_train=y_train,.X_cv=x_cv,.y_cv=y_cv,.X_test=x_test,.y_test=y_test,.epochs=1000,.lr=3.67e-5,.optimizer="adam");
+```
+
+#### 7. Training and Testing the Model
+
+##### 7. 1. Training the Model
+
+`Fit()` can be used to train the model.
+
+_Example_ :
+
+```C
+Input(.layer_size=12288);
+Dense(.layer_size=64,.activation="relu",.initializer="he",.layer_type="hidden");
+Dense(.layer_size=2,.activation="softmax",.initializer="random",.layer_type="output");
+Model(.X_train=x_train,.y_train=y_train,.X_cv=x_cv,.y_cv=y_cv,.X_test=x_test,.y_test=y_test,.epochs=1000,.lr=3.67e-5,.optimizer="adam");
+
+Fit();
+```
+
+##### 7. 2. Testing the Model
+
+`Test()` can be used to test the model on your test_set.
+
+_Example_ :
+
+```C
+Input(.layer_size=12288);
+Dense(.layer_size=64,.activation="relu",.initializer="he",.layer_type="hidden");
+Dense(.layer_size=2,.activation="softmax",.initializer="random",.layer_type="output");
+Model(.X_train=x_train,.y_train=y_train,.X_cv=x_cv,.y_cv=y_cv,.X_test=x_test,.y_test=y_test,.epochs=1000,.lr=3.67e-5,.optimizer="adam");
+
+Fit();
+Test();
+```
+
+##### 7. 3. Testing on individual images
+
+`load_test_image()` can be used to load a test image in memory.
+`Predict()` can be used for getting the model predictions.
+
+_Example_ :
+
+```C
+Input(.layer_size=12288);
+Dense(.layer_size=64,.activation="relu",.initializer="he",.layer_type="hidden");
+Dense(.layer_size=2,.activation="softmax",.initializer="random",.layer_type="output");
+Model(.X_train=x_train,.y_train=y_train,.X_cv=x_cv,.y_cv=y_cv,.X_test=x_test,.y_test=y_test,.epochs=1000,.lr=3.67e-5,.optimizer="adam");
+
+Fit();
+Test();
+
+dARRAY * test_img1 = load_test_image("test_img1.data");
+dARRAY * test_img2 = load_test_image("test_img2.data");
+
+Predict(test_img1);
+Predict(test_img2);
+```
+
+#### 8. Plotting Model Metrics
+
+`Plot_scores()` can be used to plot the model metrics.
+
+_Example_ :
+
+```C
+Input(.layer_size=12288);
+Dense(.layer_size=64,.activation="relu",.initializer="he",.layer_type="hidden");
+Dense(.layer_size=2,.activation="softmax",.initializer="random",.layer_type="output");
+Model(.X_train=x_train,.y_train=y_train,.X_cv=x_cv,.y_cv=y_cv,.X_test=x_test,.y_test=y_test,.epochs=1000,.lr=3.67e-5,.optimizer="adam");
+
+Fit();
+Plot_score();
+```
+
+#### 9. Early Stopping
+
+There is an option to run your model infinitely. Setting `.epochs=-1` runs the model forever. To stop training, press `CTRL + C`. cDNN will ask you if you want to save the model or not. Please follow the menu options to save the model and to give it a name.
+
+#### 10. Additional Notes
+
+1. `Adam(), RMSProp() and Adagrad()` are powerful optimizers. If you have used a high learning rate, there is a possibility of getting `nan or inf` as the cost after a while during training.
+
+Setting learning rate correctly is important. For me, `lr > 4.65e-5` was working well.
+
+2. Remember to set the `.layer_size` to be equal to the number of features you are using in training set.
+
+3. `Softmax()` outputs a tensor with `num_of_classes` elements. If you are trying to train say CIFAR-10, your output layer must have 10 as `.layer_size`. Otherwise you may get something else as the output.
+
+4. While organizing your training, val and test sets, remember that cDNN puts your features along rows. Meaning, it stacks your examples along columns and the rows will represent features.
+
+$$X\_train = \begin{bmatrix} f_11 & f_12 & \cdots & f_1n\\f_21 & f_22 & \cdots & f_2n\\\vdots & \vdots &  \ddots & \vdots\\f_m1 & f_m2 & \cdots & f_mn\end{bmatrix}$$
+
+Here, there are `n` examples stacked column wise and each example has `m` features which are stacked row wise.
+
+5. There are no pre-processing functions available in cDNN. Please do it in Python and extract the pixel values one by one if you are working with images and write it to a `.t7` file and then load it in using cDNN functions.

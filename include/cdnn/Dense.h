@@ -18,7 +18,6 @@ typedef struct dense_arg{
   char * activation;
   char * initializer;
   float dropout;
-  float lambda;
   char * layer_type;
 }dense_args; 
 

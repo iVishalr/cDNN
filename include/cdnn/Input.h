@@ -38,6 +38,6 @@ typedef struct input_layer{
 * @param layer_size Specifies the number of nodes in the layer which is equivalent to number of features in training set.
 * @return void
 */ 
-#define Input(...) Input((Input_args){.layer_size=20,__VA_ARGS__});
+#define Input(...) Input((Input_args){.layer_size=0,__VA_ARGS__});
 
 #endif //INPUT_H

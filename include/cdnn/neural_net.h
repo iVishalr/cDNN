@@ -23,7 +23,7 @@
 #include "rmsprop.h"
 
 
-enum layer_type {NONE, INPUT, DENSE, LOSS, OPTIMIZER};
+enum layer_type {NONE, INPUT, DENSE, LOSS};
 typedef struct computational_graph{
   struct computational_graph * next_layer;
   struct computational_graph * prev_layer;
