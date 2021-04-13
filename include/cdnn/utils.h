@@ -20,6 +20,7 @@
 #include <errno.h>
 #include <cblas.h>
 #include <sys/time.h>
+#include <sys/stat.h>
 #include <termcap.h>
 
 #ifdef __cplusplus

@@ -79,8 +79,13 @@ dARRAY * transpose(dARRAY * restrict Matrix){
 }
 
 
-
-dARRAY * transposem(dARRAY * restrict Matrix){
+/**!
+ * Finds the transpose of the given matrix (legacy implementation leaving it here for reference (fast transpose without using CBLAS)). 
+ * @param Matrix The input Matrix of dARRAY Object 
+ * @result A pointer to the result of Transpose_my(Matrix) 
+ * @return A pointer to the result of Transpose_my(Matrix) 
+*/
+dARRAY * transpose_my(dARRAY * restrict Matrix){
   if(Matrix==NULL){
     printf("\033[1;31mError:\033[93m Matrix is empty. Call transpose() only after intializing dARRAY object.\033[0m\n");
     return NULL;
@@ -88,14 +93,11 @@ dARRAY * transposem(dARRAY * restrict Matrix){
   if(Matrix->shape[0]==1 && Matrix->shape[1]==1) return Matrix;
   dARRAY * matrix = (dARRAY*)malloc(sizeof(dARRAY));
   matrix->matrix = (float*)calloc(Matrix->shape[0]*Matrix->shape[1],sizeof(float));
-  omp_set_num_threads(2);
-  double start = omp_get_wtime();
+  omp_set_num_threads(nn_threads);
   #pragma omp parallel for num_threads(nn_threads) shared(Matrix,matrix) schedule(static)
   for(int i=0;i<Matrix->shape[0];i++)
     for(int j=0;j<Matrix->shape[1];j++)
       matrix->matrix[j*Matrix->shape[0]+i] = Matrix->matrix[i*Matrix->shape[1]+j];
-  double end = omp_get_wtime();
-  printf("Transpose took %lf seconds\n",(end-start));
   matrix->shape[0] = Matrix->shape[1];
   matrix->shape[1] = Matrix->shape[0];
   return matrix;
@@ -145,7 +147,14 @@ dARRAY * dot(dARRAY * MatrixA, dARRAY * MatrixB){
   return result;
 }
 
-dARRAY * dotm(dARRAY * MatrixA, dARRAY * MatrixB){
+/**!
+ * Finds the dot product (Matrix Multiplication) of two matrices (legacy implementation leaving here for reference (fast matrix multiplication without using CBLAS)). 
+ * @param MatrixA First Matrix
+ * @param MatrixB Second Matrix
+ * @result Returns a pointer to the result of dot_my(MatrixA,MatrixB) 
+ * @return A pointer to the result of dot_my(MatrixA,MatrixB) 
+*/
+dARRAY * dot_my(dARRAY * MatrixA, dARRAY * MatrixB){
   if(MatrixA->shape[1]!=MatrixB->shape[0]){
     printf("\033[1;31mError:\033[93m Shape error while performing dot(). Matrix dimensions do not align. %d(dim1) != %d(dim0)\033[0m\n",MatrixA->shape[1],MatrixB->shape[0]);
     return NULL;
@@ -178,8 +187,8 @@ dARRAY * dotm(dARRAY * MatrixA, dARRAY * MatrixB){
 
 /**!
  * Function performs element-wise multiplication on two matrices. 
- * @param MatrixA First Matrix (float *) 
- * @param MatrixB Second Matrix (float *) 
+ * @param MatrixA First Matrix
+ * @param MatrixB Second Matrix
  * @result Returns a pointer to the result of multiply(MatrixA,MatrixB) 
  * @return A pointer to the result of multiply(MatrixA,MatrixB) 
 */
@@ -254,8 +263,8 @@ dARRAY * multiply(dARRAY * restrict MatrixA, dARRAY * restrict MatrixB){
 
 /**!
  * Function performs element-wise divison on two matrices. 
- * @param MatrixA First Matrix (float *) 
- * @param MatrixB Second Matrix (float *) 
+ * @param MatrixA First Matrix
+ * @param MatrixB Second Matrix
  * @result Returns a pointer to the result of divison(MatrixA,MatrixB) 
  * @return A pointer to the result of divison(MatrixA,MatrixB) 
 */
@@ -325,8 +334,8 @@ dARRAY * divison(dARRAY * restrict MatrixA, dARRAY * restrict MatrixB){
 
 /**!
  * Function performs element-wise addition on two matrices. 
- * @param MatrixA First Matrix (float *) 
- * @param MatrixB Second Matrix (float *) 
+ * @param MatrixA First Matrix 
+ * @param MatrixB Second Matrix
  * @result Returns a pointer to the result of add(MatrixA,MatrixB) 
  * @return A pointer to the result of add(MatrixA,MatrixB) 
 */
@@ -359,19 +368,10 @@ dARRAY * add(dARRAY * MatrixA, dARRAY * MatrixB){
   dARRAY * result = (dARRAY*)malloc(sizeof(dARRAY));
   result->matrix = (float*)calloc(MatrixA->shape[0]*MatrixA->shape[1],sizeof(float));
   if(x==y){
-    // omp_set_num_threads(nn_threads);
-    // #pragma omp parallel for num_threads(nn_threads) shared(MatrixA,MatrixB,result) schedule(static)
-    // for(int i=0;i<MatrixA->shape[0]*MatrixA->shape[1];i++){
-    //   result->matrix[i] = MatrixA->matrix[i] + MatrixB->matrix[i];
-    // }
     cblas_scopy(MatrixB->shape[0]*MatrixB->shape[1],MatrixB->matrix,1,result->matrix,1);
     cblas_saxpy(MatrixA->shape[0]*MatrixA->shape[1],1,MatrixA->matrix,1,result->matrix,1);
   }
   else{
-    // omp_set_num_threads(nn_threads);
-    // #pragma omp parallel for num_threads(nn_threads) shared(MatrixA,MatrixB,bcast_arr,result) schedule(static)
-    // for(int i=0;i<MatrixA->shape[0]*MatrixA->shape[1];i++)
-    //     result->matrix[i] = x>y ? MatrixA->matrix[i] + bcast_arr->matrix[i] : bcast_arr->matrix[i] + MatrixB->matrix[i];
     if(x>y){
       cblas_scopy(MatrixA->shape[0]*MatrixA->shape[1],bcast_arr->matrix,1,result->matrix,1);
       cblas_saxpy(MatrixA->shape[0]*MatrixA->shape[1],1,MatrixA->matrix,1,result->matrix,1);
@@ -390,8 +390,8 @@ dARRAY * add(dARRAY * MatrixA, dARRAY * MatrixB){
 
 /**!
  * Function performs element-wise subtraction on two matrices. 
- * @param MatrixA First Matrix (float *) 
- * @param MatrixB Second Matrix (float *) 
+ * @param MatrixA First Matrix
+ * @param MatrixB Second Matrix
  * @result Returns a pointer to the result of subtract(MatrixA,MatrixB) 
  * @return A pointer to the result of subtract(MatrixA,MatrixB) 
 */
@@ -423,19 +423,10 @@ dARRAY * subtract(dARRAY * MatrixA, dARRAY * MatrixB){
   dARRAY * result = (dARRAY*)malloc(sizeof(dARRAY));
   result->matrix = (float*)calloc(MatrixA->shape[0]*MatrixA->shape[1],sizeof(float));
   if(x==y){
-    // omp_set_num_threads(nn_threads);
-    // #pragma omp parallel for num_threads(nn_threads) shared(MatrixA,MatrixB,result) schedule(static)
-    // for(int i=0;i<MatrixA->shape[0]*MatrixA->shape[1];i++){
-    //   result->matrix[i] = MatrixA->matrix[i] + MatrixB->matrix[i];
-    // }
     cblas_scopy(MatrixA->shape[0]*MatrixA->shape[1],MatrixA->matrix,1,result->matrix,1);
     cblas_saxpy(MatrixB->shape[0]*MatrixB->shape[1],-1,MatrixB->matrix,1,result->matrix,1);
   }
   else{
-    // omp_set_num_threads(nn_threads);
-    // #pragma omp parallel for num_threads(nn_threads) shared(MatrixA,MatrixB,bcast_arr,result) schedule(static)
-    // for(int i=0;i<MatrixA->shape[0]*MatrixA->shape[1];i++)
-    //     result->matrix[i] = x>y ? MatrixA->matrix[i] + bcast_arr->matrix[i] : bcast_arr->matrix[i] + MatrixB->matrix[i];
     if(x>y){
       cblas_scopy(MatrixA->shape[0]*MatrixA->shape[1],MatrixA->matrix,1,result->matrix,1);
       cblas_saxpy(MatrixA->shape[0]*MatrixA->shape[1],-1,bcast_arr->matrix,1,result->matrix,1);
@@ -607,6 +598,12 @@ dARRAY * power(dARRAY * matrix, float power){
   return result;
 }
 
+/**!
+ * Function finds the sqrt() of the elements of a matrix. 
+ * @param matrix A matrix of dARRAY Object 
+ * @result A pointer to the result of squareroot(matrix) 
+ * @return A pointer to the result of squareroot(matrix) 
+*/
 dARRAY * squareroot(dARRAY * matrix){
   if(matrix == NULL){
     printf("\033[1;31mError:\033[93m matrix is empty. Call squareroot() only after initializing dARRAY object\033[0m\n");
@@ -624,6 +621,12 @@ dARRAY * squareroot(dARRAY * matrix){
   return result;
 }
 
+/**!
+ * Function finds the exp() of the elements of a matrix. 
+ * @param matrix A matrix of dARRAY Object 
+ * @result A pointer to the result of exponential(matrix) 
+ * @return A pointer to the result of exponential(matrix) 
+*/
 dARRAY * exponentional(dARRAY * matrix){
   if(matrix == NULL){
     printf("\033[1;31mError:\033[93m matrix is empty. Call exponential() only after initializing dARRAY object\033[0m\n");
@@ -703,10 +706,9 @@ dARRAY * b_cast(dARRAY * MatrixA, dARRAY * MatrixB){
 }
 
 /**!
- * Function raises the elements of a matrix to the specified power. 
+ * Function finds the sum of elements of matrix. 
  * @param matrix A matrix of dARRAY Object 
- * @param axis If axis == 1, then sums all elements in a row. If axis == 0, then sums all the elements in a column
- * @param dims An array of matrix dimensions [rows,columns] 
+ * @param axis If axis == 1, then sums all elements in a row. If axis == 0, then sums all the elements in a column.
  * @result A pointer to the result of sum(matrix,axis) 
  * @return A pointer to the result of sum(matrix,axis) 
 */
@@ -757,6 +759,12 @@ dARRAY * sum(dARRAY * matrix, int axis){
   return new;
 }
 
+/**!
+ * Function finds the frobenius_norm of matrix. 
+ * @param matrix A matrix of dARRAY Object 
+ * @result A pointer to the result of frobenius_norm(matrix) 
+ * @return A pointer to the result of frobenius_norm(matrix) 
+*/
 float frobenius_norm(dARRAY * matrix){
   float frobenius_norm = 0.0;
   omp_set_num_threads(nn_threads);
@@ -767,6 +775,12 @@ float frobenius_norm(dARRAY * matrix){
   return frobenius_norm;
 }
 
+/**!
+ * Function finds the Manhattan_distance of matrix. 
+ * @param matrix A matrix of dARRAY Object 
+ * @result Result of Manhattan_distance(matrix) 
+ * @return Result of Manhattan_distance(matrix) 
+*/
 float Manhattan_distance(dARRAY * matrix){
   float dist = 0.0;
   omp_set_num_threads(nn_threads);
@@ -990,19 +1004,23 @@ void shape(dARRAY * A){
   printf("(%d,%d)\n",A->shape[0],A->shape[1]);
 }
 
+//Function to create a time delay. Mimicks thread.sleep() of Java
 void sleep_my(int milliseconds) {
-  //Function to create a time delay. Mimicks thread.sleep() of Java
   unsigned int duration = time(0) + (milliseconds/1000);
   while(time(0)<duration);
 }
 
+//This function is used instead of fflush(stdin) as it is a bad practice to use it 
+//due to undefined behaviour.
 void cleanSTDIN() {
-  //This function is used instead of fflush(stdin) as it is a bad practice to use it 
-  //due to undefined behaviour.
   int ch;
   while ((ch = getchar()) != '\n' && ch != EOF){}
 }
 
+/**!
+ * Function calculates the safe numbe rof threads to use. 
+ * @return void 
+*/
 void get_safe_nn_threads(){
   int num_cpu_cores = sysconf(_SC_NPROCESSORS_CONF);
   if(num_cpu_cores<=16){

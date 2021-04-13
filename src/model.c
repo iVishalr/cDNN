@@ -88,15 +88,6 @@ void __backward__(){
 }
 
 float calculate_accuracy(dARRAY * predicted, dARRAY * gnd_truth){
-  if(m->testing){
-    printf("Ground Truth\n");
-    for(int  i=0;i<gnd_truth->shape[0];i++){
-      for(int j=0;j<gnd_truth->shape[1];j++){
-        printf("%d ",(int)gnd_truth->matrix[i*gnd_truth->shape[1]+j]);
-      }
-      printf("\n");
-    }
-  }
   int success = 0;
   dARRAY * temp = (dARRAY*)malloc(sizeof(dARRAY));
   temp->matrix = (float*)calloc(predicted->shape[0]*predicted->shape[1],sizeof(float));
@@ -106,33 +97,12 @@ float calculate_accuracy(dARRAY * predicted, dARRAY * gnd_truth){
   temp->shape[0] = predicted->shape[0];
   temp->shape[1] = predicted->shape[1];
 
-  if(m->testing){
-    printf("Predicted array : \n");
-    if(temp==NULL) printf("predicted was null for some reason\n");
-    for(int  i=0;i<temp->shape[0];i++){
-      for(int j=0;j<temp->shape[1];j++){
-        if((int)temp->matrix[i*temp->shape[1]+j]==(int)gnd_truth->matrix[i*gnd_truth->shape[1]+j])
-          printf("\033[92m%d\033[0m ",(int)temp->matrix[i*temp->shape[1]+j]);
-        else{
-          printf("\033[1;31m%d\033[0m ",(int)temp->matrix[i*temp->shape[1]+j]);
-        }
-      }
-      printf("\n");
-    }
-  }  
-
   for(int i = 0;i<predicted->shape[0]*predicted->shape[1];i++){
     if(temp->matrix[i]==gnd_truth->matrix[i]) success++;
   }
-  if(m->testing)
-    printf("number of success : %d\n",success);
   if(predicted->shape[0]!=1) success = success/predicted->shape[0];
-  if(m->testing)
-    printf("number of success/2 : %d\n",success);
   free2d(temp);
   temp = NULL;
-  if(m->testing)
-    printf("Avg accuracy : %f\n",success/(float)predicted->shape[1]);
   return success/(float)predicted->shape[1];
 }
 
@@ -257,10 +227,14 @@ dARRAY * calculate_val_test_acc(dARRAY * input_features,dARRAY * gnd_truth){
 }
 
 void dump_to_file(float * arr ,char * filename,char * mode){
+  struct stat st = {0};
+  if (stat("./bin/", &st) == -1) {
+    mkdir("./bin/", 0700);
+  }
   FILE * fp = NULL;
   fp = fopen(filename,mode);
   if(fp==NULL){
-    printf("\033[1;31mFile Error : \033[93m Could not open the specified file!\033[0m\n");
+    printf("\033[1;31mFile Error : \033[93mCould not open %s file!\033[0m\n",filename);
     exit(EXIT_FAILURE);
   }
   for(int i=0;i<m->num_iter*m->num_mini_batches;i++)
@@ -279,8 +253,10 @@ void __fit__(){
   float * train_cost_arr = (float*)calloc(m->num_iter==-1?1000000:m->num_iter*m->num_mini_batches,sizeof(float));
   float * train_acc_arr = (float*)calloc(m->num_iter==-1?1000000:m->num_iter*m->num_mini_batches,sizeof(float));
   float * val_acc_arr = NULL;
-  if(m->Y_cv!=NULL && m->x_cv!=NULL)
+
+  if(m->Y_cv!=NULL && m->x_cv!=NULL){
     val_acc_arr = (float*)calloc(m->num_iter==-1?1000000:m->num_iter*m->num_mini_batches,sizeof(float));
+  }
   if(m->num_iter==-1){
     iterations = i;
   }
@@ -310,8 +286,9 @@ void __fit__(){
         }
         printf("\033[96m%d. %d. Cost : \033[0m%f ",i,mini_batch,m->train_cost);
         printf("\033[96m train_acc : \033[0m%f ",m->train_accuracy);
-        if(m->Y_cv!=NULL && m->x_cv!=NULL)
+        if(m->Y_cv!=NULL && m->x_cv!=NULL){
           printf("\033[96m val_acc : \033[0m%f",m->cross_val_accuracy);
+        }
         printf("\n");
         if(train_cost_arr[index]>=2.5*train_cost_arr[0]){
           printf("\033[96mCost is exploding hence exiting. Try reducing your learning rate and try again!\033[0m\n");
@@ -340,26 +317,27 @@ void __fit__(){
         printf("Optimizer selected is not available\n");
         exit(EXIT_FAILURE);
       }
-      if(m->ckpt_every!=-1 && (i%m->ckpt_every==0 || (i==m->num_iter && m->num_iter!=-1))){
-        time_t rawtime;
-        struct tm * timeinfo;
-
-        time ( &rawtime );
-        timeinfo = localtime ( &rawtime );
-    
-        char buffer[1024];
-        snprintf(buffer,sizeof(buffer),"model_%d_%s.t7",i,asctime (timeinfo));
-        __save_model__(buffer);
-        if(flag_cost==0){
-          dump_to_file(train_cost_arr,"./bin/cost.data","ab+");
-          dump_to_file(train_acc_arr,"./bin/train_acc.data","ab+");
-          dump_to_file(val_acc_arr,"./bin/val_acc.data","ab+");
-          flag_cost=1;
-        }
-      }
       m->current_iter += 1;
       free(temp);
       temp = NULL;
+    }
+    if(m->ckpt_every!=-1 && (i%m->ckpt_every==0 || (i==m->num_iter && m->num_iter!=-1))){
+      time_t rawtime;
+      struct tm * timeinfo;
+
+      time ( &rawtime );
+      timeinfo = localtime ( &rawtime );
+  
+      char buffer[1024];
+      snprintf(buffer,sizeof(buffer),"model_%d_%s.t7",i,asctime (timeinfo));
+      __save_model__(buffer);
+      if(flag_cost==0){
+        dump_to_file(train_cost_arr,"./bin/cost.data","ab+");
+        dump_to_file(train_acc_arr,"./bin/train_acc.data","ab+");
+        if(m->x_cv!=NULL || m->Y_cv!=NULL)
+      dump_to_file(val_acc_arr,"./bin/val_acc.data","wb+");
+        flag_cost=1;
+      }
     }
     i++;
     if(m->num_iter==-1) iterations = i;
@@ -369,9 +347,17 @@ void __fit__(){
   if(flag_cost==0){
     dump_to_file(train_cost_arr,"./bin/cost.data","wb+");
     dump_to_file(train_acc_arr,"./bin/train_acc.data","wb+");
-    dump_to_file(val_acc_arr,"./bin/val_acc.data","wb+");
+    if(m->x_cv!=NULL || m->Y_cv!=NULL)
+      dump_to_file(val_acc_arr,"./bin/val_acc.data","wb+");
     flag_cost=1;
   }
+}
+
+/**
+ * Function that is used to initiate model training. 
+*/
+void Fit(){
+  __fit__();
 }
 
 void early_stopping_handler(int num){
@@ -424,44 +410,65 @@ void early_stopping_handler(int num){
       continue;
     }
   }
-  destroy_model();
+  Destroy_Model();
   exit(EXIT_SUCCESS);  
 }
 
-void __predict__(dARRAY * input_feature){
+dARRAY * __predict__(dARRAY * input_feature,int verbose){
   m->graph->INPUT->A = input_feature;
   m->predicting = 1;
   dARRAY * prediction = calculate_val_test_acc(input_feature,NULL);
-  
-  if(prediction->shape[0]!=1){
-    printf("Score : [%f,%f]\n",prediction->matrix[0],prediction->matrix[1]);
-    if(prediction->matrix[0]>=0.5 && prediction->matrix[1]<0.5) printf("CAT\n");
-    else printf("DOG\n");
+  dARRAY * prediction_trans = transpose(prediction);
+  if(verbose){
+    printf("[");
+    for(int i = 0;i<prediction_trans->shape[0];i++){
+      for(int j=0;j<prediction_trans->shape[1];j++){
+        if(j<prediction_trans->shape[1]-1)
+        printf("%f, ",prediction_trans->matrix[i*prediction_trans->shape[1]+j]);
+        else
+        printf("%f",prediction_trans->matrix[i*prediction_trans->shape[1]+j]);
+      }
+    }
+    printf("]\n");
   }
-  else{
-    printf("Score : %f\n",prediction->matrix[0]);
-    if(prediction->matrix[0]>=0.5) printf("DOG\n");
-    else printf("CAT\n");
-  }
+  free2d(prediction);
   m->predicting=0;
+  return prediction_trans;
+}
+
+/**!
+ * Function that is used to test your model on arbitrary input_features. 
+ * @param input_feature Features to be passed to your model. 
+ * @param verbose Specifies whether or not to print the classification scores (verbose=1 or verbose=0)
+ * @return Returns a dARRAY pointing to the output values of the model.
+*/
+dARRAY * Predict(dARRAY * input_feature,int verbose){
+  return __predict__(input_feature,verbose);
 }
 
 void __test__(){
-  // m->testing=1;
+  if(m->x_test==NULL || m->Y_test==NULL){
+    printf("\033[1;31mDataset Error : \033[93mTest set has not been provided.\033[0m\n");
+    return;
+  }
   dARRAY * acc = calculate_val_test_acc(m->x_test,m->Y_test);
   printf("\033[96mTest Accuracy : \033[0m%f\n",acc->matrix[0]);
   free2d(acc);
   acc = NULL;
 }
 
+/**
+ * Function that is used to test your model against your test set. 
+*/
+void Test(){
+  __test__();
+}
 
 void __load_model__(char * filename){
   if(strstr(filename,".t7")==NULL){
-    printf("\033[1;31mFileExtension Error : \033[93m Please use \".t7\" extension only. Other extensions are not supported currently.\033[0m\n");
+    printf("\033[1;31mFileExtension Error : \033[93mPlease use \".t7\" extension only. Other extensions are not supported currently.\033[0m\n");
     exit(EXIT_FAILURE);
   }
-  char destpath[1024];
-  snprintf (destpath, sizeof(destpath), "./model/%s", filename);
   dARRAY weights[m->number_of_layers-1];
   dARRAY biases[m->number_of_layers-1];
 
@@ -474,9 +481,9 @@ void __load_model__(char * filename){
   }
   temp = m->graph->next_layer;
   FILE * fp = NULL;
-  fp = fopen(destpath,"rb");
+  fp = fopen(filename,"rb");
   if(fp==NULL){
-    printf("\033[1;31mFile Error : \033[93m Could not open the specified file!\033[0m\n");
+    printf("\033[1;31mFile Error : \033[93mCould not open %s file!\033[0m\n",filename);
     exit(EXIT_FAILURE);
   }
   for(int i=0;i<m->number_of_layers-1;i++){
@@ -534,20 +541,26 @@ void __load_model__(char * filename){
   temp = NULL;
 }
 
+/**!
+ * Function that is used to load a model. 
+ * @param filename Name of the file where the model resides. 
+*/
+void Load_Model(char * filename){
+  __load_model__(filename);
+}
+
 void __save_model__(char * filename){
   if(strstr(filename,".t7")==NULL){
-    printf("\033[1;31mFileExtension Error : \033[93m Please use \".t7\" extension only. Other extensions are not supported currently.\033[0m\n");
+    printf("\033[1;31mFileExtension Error : \033[93mPlease use \".t7\" extension only. Other extensions are not supported currently.\033[0m\n");
     exit(EXIT_FAILURE);
   }
-  char destpath[1024];
-  snprintf (destpath, sizeof(destpath), "./model/%s", filename);
   FILE * fp = NULL;
-  if( access(destpath,F_OK)==0) {
-    if(remove(destpath)==0){}
+  if( access(filename,F_OK)==0) {
+    if(remove(filename)==0){}
   } 
-  fp = fopen(destpath,"wb+");
+  fp = fopen(filename,"wb+");
   if(fp==NULL){
-    printf("\033[1;31mFile Error : \033[93m Could not open the specified file!\033[0m\n");
+    printf("\033[1;31mFile Error : \033[93mCould not open %s file!\033[0m\n",filename);
     exit(EXIT_FAILURE);
   }
   Computation_Graph * temp = m->graph->next_layer;
@@ -570,11 +583,24 @@ void __save_model__(char * filename){
   fp = NULL;
 }
 
+/**!
+ * Function that is used to save a model. 
+ * @param filename Name of the file where the model will be saved. 
+*/
+void Save_Model(char * filename){
+  __save_model__(filename);
+}
+
+/**!
+ * Function that is used to load X_train from file. 
+ * @param filename Name of the file where the X_train resides. 
+ * @param dims Dimensions of your training set (Features,Number of examples)
+*/
 dARRAY * load_x_train(char * filename,int * dims){
   FILE * fp = NULL;
   fp = fopen(filename,"rb");
   if(fp==NULL){
-    printf("\033[1;31mFile Error : \033[93m Could not open the specified file!\033[0m\n");
+    printf("\033[1;31mFile Error : \033[93mCould not open %s file!\033[0m\n",filename);
     exit(EXIT_FAILURE);
   }
   dARRAY * x_train = (dARRAY*)malloc(sizeof(dARRAY));
@@ -597,11 +623,16 @@ dARRAY * load_x_train(char * filename,int * dims){
   return X_train;
 }
 
+/**!
+ * Function that is used to load y_train from file. 
+ * @param filename Name of the file where the y_train resides. 
+ * @param dims Dimensions of your training set (Number of classes,Number of examples)
+*/
 dARRAY * load_y_train(char * filename,int * dims){
   FILE * fp = NULL;
   fp = fopen(filename,"rb");
   if(fp==NULL){
-    printf("\033[1;31mFile Error : \033[93m Could not open the specified file!\033[0m\n");
+    printf("\033[1;31mFile Error : \033[93mCould not open %s file!\033[0m\n",filename);
     exit(EXIT_FAILURE);
   }
   dARRAY * Y_train = (dARRAY*)malloc(sizeof(dARRAY));
@@ -623,11 +654,16 @@ dARRAY * load_y_train(char * filename,int * dims){
   return y_train;
 }
 
+/**!
+ * Function that is used to load X_cv from file. 
+ * @param filename Name of the file where the X_cv resides. 
+ * @param dims Dimensions of your validation set (Features,Number of examples)
+*/
 dARRAY * load_x_cv(char * filename,int * dims){
   FILE * fp = NULL;
   fp = fopen(filename,"rb");
   if(fp==NULL){
-    printf("\033[1;31mFile Error : \033[93m Could not open the specified file!\033[0m\n");
+    printf("\033[1;31mFile Error : \033[93mCould not open %s file!\033[0m\n",filename);
     exit(EXIT_FAILURE);
   }
   dARRAY * x_cv = (dARRAY*)malloc(sizeof(dARRAY));
@@ -649,11 +685,16 @@ dARRAY * load_x_cv(char * filename,int * dims){
   return X_CV;
 }
 
+/**!
+ * Function that is used to load y_cv from file. 
+ * @param filename Name of the file where the y_cv resides. 
+ * @param dims Dimensions of your validation set (Number of classes,Number of examples)
+*/
 dARRAY * load_y_cv(char * filename,int * dims){
   FILE * fp = NULL;
   fp = fopen(filename,"rb");
   if(fp==NULL){
-    printf("\033[1;31mFile Error : \033[93m Could not open the specified file!\033[0m\n");
+    printf("\033[1;31mFile Error : \033[93mCould not open %s file!\033[0m\n",filename);
     exit(EXIT_FAILURE);
   }
   dARRAY * Y_cv = (dARRAY*)malloc(sizeof(dARRAY));
@@ -675,11 +716,16 @@ dARRAY * load_y_cv(char * filename,int * dims){
   return y_cv;
 }
 
+/**!
+ * Function that is used to load X_test from file. 
+ * @param filename Name of the file where the X_test resides. 
+ * @param dims Dimensions of your test set (Features,Number of examples)
+*/
 dARRAY * load_x_test(char * filename,int * dims){
   FILE * fp = NULL;
   fp = fopen(filename,"rb");
   if(fp==NULL){
-    printf("\033[1;31mFile Error : \033[93m Could not open the specified file!\033[0m\n");
+    printf("\033[1;31mFile Error : \033[93m Could not open %s file!\033[0m\n",filename);
     exit(EXIT_FAILURE);
   }
   dARRAY * x_test_temp = (dARRAY*)malloc(sizeof(dARRAY));
@@ -700,11 +746,16 @@ dARRAY * load_x_test(char * filename,int * dims){
   return x_test;
 }
 
+/**!
+ * Function that is used to load y_test from file. 
+ * @param filename Name of the file where the y_test resides. 
+ * @param dims Dimensions of your test set (Number of classes,Number of examples)
+*/
 dARRAY * load_y_test(char * filename,int * dims){
   FILE * fp = NULL;
   fp = fopen(filename,"rb");
   if(fp==NULL){
-    printf("\033[1;31mFile Error : \033[93m Could not open the specified file!\033[0m\n");
+    printf("\033[1;31mFile Error : \033[93mCould not open %s file!\033[0m\n",filename);
     exit(EXIT_FAILURE);
   }
   dARRAY * Y_test = (dARRAY*)malloc(sizeof(dARRAY));
@@ -726,20 +777,20 @@ dARRAY * load_y_test(char * filename,int * dims){
   return y_test;
 }
 
-dARRAY * load_test_image(char * filename){
+dARRAY * load_image(char * filename,int * dims){
   FILE * fp = NULL;
   fp = fopen(filename,"rb");
   if(fp==NULL){
-    printf("\033[1;31mFile Error : \033[93m Could not open the specified file!\033[0m\n");
+    printf("\033[1;31mFile Error : \033[93m Could not open %s file!\033[0m\n",filename);
     exit(EXIT_FAILURE);
   }
   dARRAY * image = (dARRAY*)malloc(sizeof(dARRAY));
-  image->matrix = (float*)calloc(12288*1,sizeof(float));
-  for(int j=0;j<12288;j++){
+  image->matrix = (float*)calloc(dims[0]*dims[1],sizeof(float));
+  for(int j=0;j<dims[0]*dims[1];j++){
     fscanf(fp,"%f ",&image->matrix[j]);
   }
-  image->shape[0] = 12288;
-  image->shape[1] = 1;
+  image->shape[0] = dims[0];
+  image->shape[1] = dims[1];
   fclose(fp);
   fp=NULL;
   return image;
@@ -785,7 +836,7 @@ void create_mini_batches(){
   m->x_train = NULL;
   m->Y_train = NULL;
 
-  progressbar * progress = progressbar_new("\033[91mCreating Mini Batches :\033[0m",num_mini_batches*2);
+  progressbar * progress = progressbar_new("\033[1;32mCreating Mini Batches :\033[0m",num_mini_batches*2);
   for(int i=0;i<num_mini_batches;i++){
     int row = 0;
     dARRAY * temp = (dARRAY*)malloc(sizeof(dARRAY));
@@ -863,7 +914,7 @@ long int get_total_params(){
   return total_params;
 }
 
-void (create_model)(){
+void (Create_Model)(){
   m = NULL;
   m = (__Model__*)malloc(sizeof(__Model__));
   m->graph = NULL;
@@ -874,14 +925,12 @@ void (create_model)(){
   m->output_size = 0;
 }
 
-void (destroy_model)(){
+void (Destroy_Model)(){
   destroy_Graph(m->graph);
   if(m->x_cv!=NULL)
   free2d(m->x_cv);
   if(m->Y_cv!=NULL)
   free2d(m->Y_cv);
-  if(m->output!=NULL)
-  // free2d(m->output);
   if(m->x_test!=NULL)
   free2d(m->x_test);
   if(m->Y_test!=NULL)
@@ -910,14 +959,20 @@ void (destroy_model)(){
   free(m->y_train_mini_batch);
   m->x_train_mini_batch = NULL;
   m->y_train_mini_batch = NULL;
-  m->x_train = m->Y_train = m->x_cv = m->x_test = m->Y_test = m->Y_cv = m->output = NULL;
+  m->x_train = NULL;
+  m->Y_train = NULL;
+  m->x_cv = NULL;
+  m->x_test = NULL;
+  m->Y_test = NULL;
+  m->Y_cv = NULL;
+  m->output = NULL;
   free(m);
   m = NULL;
 }
 
-void dump_image(dARRAY * images){
+void dump_image(dARRAY * images,char * filename){
   FILE * fp = NULL;
-  fp = fopen("./mini_batchy.data","a+");
+  fp = fopen(filename,"a+");
   if(fp==NULL){
     exit(EXIT_FAILURE);
   }
@@ -935,6 +990,11 @@ void dump_image(dARRAY * images){
 
 void (Model)(Model_args model_args){
   get_safe_nn_threads();
+
+  if(model_args.X_train==NULL || model_args.y_train==NULL){
+    printf("\033[1;31mDataset Error : \033[93mNo dataset passed to the model constructor.\033[0m\n");
+    exit(EXIT_FAILURE);
+  }
 
   m->x_train = model_args.X_train;
   m->x_test = model_args.X_test;
@@ -984,10 +1044,9 @@ void (Model)(Model_args model_args){
   m->load_model = __load_model__;
   m->save_model = __save_model__;
   m->fit = __fit__;
-  m->predict = __predict__;
+  // m->predict = __predict__;
   m->summary = __summary__;
   m->test = __test__;
   m->init();
   m->total_parameters = get_total_params();
-  // printf("Total Trainable Parameters : %ld\n",m->total_parameters);
 }

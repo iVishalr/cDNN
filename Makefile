@@ -44,6 +44,7 @@ install: lib$(LIB_NAME).$(SHARED_SUFFIX)
 	@install -d $(INCLUDE_DIR)/$(LIB_NAME)
 	@install $(INCLUDE)/*.h $(INCLUDE_DIR)/$(LIB_NAME)
 	@echo "#include <$(LIB_NAME)/model.h>" > $(INCLUDE_DIR)/$(LIB_NAME).h
+	@echo "\033[92mInstalled Successfully!\033[0m"
 
 clean:
 	rm -rf $(BUILD) a.out a.exe $(INSTALL_DIR)/lib$(LIB_NAME).$(SHARED_SUFFIX) $(HEADERS) $(INCLUDE_DIR)/$(LIB_NAME).h $(INCLUDE_DIR)/$(LIB_NAME)

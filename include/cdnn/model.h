@@ -40,7 +40,7 @@ extern "C"{
 #endif
   typedef void (*__model_init__)();
   typedef void (*__model_fit__)();
-  typedef void (*__model_predict__)(dARRAY * input_feature);
+  typedef void (* __model_predict__)(dARRAY * input_feature);
   typedef void (*__model_save__)(char * file_name);
   typedef void (*__model_load__)();
   typedef void (*__model_summary__)();
@@ -48,7 +48,7 @@ extern "C"{
   typedef void (*__model_backward__)();
   typedef void (*__model_test__)();
   void __initialize_params__();
-  void (create_model)();
+  void (Create_Model)();
   void (Model)(Model_args model_args);
   void __init__();
   void __forward__();
@@ -57,7 +57,7 @@ extern "C"{
   void __load_model__();
   void __save_model__();
   void __summary__();
-  void __predict__();
+  dARRAY * __predict__();
   void __test__();
   float calculate_accuracy(dARRAY * predicted, dARRAY * gnd_truth);
   float calculate_test_val_acc(dARRAY * input_features,dARRAY * gnd_truth);
@@ -71,12 +71,17 @@ extern "C"{
   dARRAY * load_y_cv(char * filename, int * dims);
   dARRAY * load_x_test(char * filename, int * dims);
   dARRAY * load_y_test(char * filename, int * dims);
+  dARRAY * Predict(dARRAY * input_feature,int verbose);
+  void Fit();
+  void Test();
+  void Load_Model(char * filename);
+  void Save_Model(char * filename);
   void early_stopping_handler(int num);
   void create_mini_batches();
   void dump_to_file(float * arr ,char * filename,char * mode);
-  void dump_image(dARRAY * images);
-  dARRAY * load_test_image(char * filename);
-  void (destroy_model)();
+  void dump_image(dARRAY * images,char * filename);
+  dARRAY * load_image(char * filename,int * dims);
+  void (Destroy_Model)();
 #ifdef __cplusplus
 }
 #endif
@@ -151,7 +156,7 @@ typedef struct model{
  * 
  * @return void
 */
-#define create_model(...) create_model();
+#define Create_Model(...) Create_Model();
 
 /**! 
  * @brief  Function Model - Constructor that defines the model parameters and constructs 
@@ -199,6 +204,6 @@ typedef struct model{
  * assigned to the model.
  * @return void
 */
-#define destroy_model(...) destroy_model();
+#define Destroy_Model(...) Destroy_Model();
 
 #endif
