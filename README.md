@@ -215,4 +215,5 @@ Avoid making commits directly to `main branch`. Create your own branch and make 
 
 #### License
 
-cDNN has a MIT-style license, as found in [LICENSE](https://github.com/iVishalr/cDNN/blob/main/LICENSE) file.
+cDNN has a MIT-style license, as found in [LICENSE](https://github.com/iVishalr/cDNN/blob/main/LICENCE) file.
+
