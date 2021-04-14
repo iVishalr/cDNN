@@ -1,10 +1,6 @@
-#<center>cDNN</center>
-
----
+# cDNN
 
 **cDNN** is a Deep Learning Library written in C Programming Language. cDNN provides functions that can be used to create Artificial Neural Networks (ANN). These functions are designed to be as efficient as possible both in performance and memory.
-
----
 
 #### Features
 
@@ -39,10 +35,13 @@ The above structure data type is used to create matrices. `float * matrix` store
 The elements of a matrix are stored in a RowMajor fashion in memory.
 
 Consider the following matrix :
-$$\begin{bmatrix} 1 & 2 & 1 \\ 3 & 0 & 1 \\ 0 & 2 & 4 \end{bmatrix}$$
+
+<img src="https://bit.ly/3mLxKRM" align="center" border="0" alt="\begin{bmatrix} 1 & 2 & 1 \\ 3 & 0 & 1 \\ 0 & 2 & 4 \end{bmatrix}" width="89" height="68" />
+
 
 The matrix has a shape `(3,3)`. The elements of the matrix would be stored in memory as follows :
-$$\begin{bmatrix} 1 & 2 & 1 & 3 & 0 & 1 & 0 & 2 & 4 \end{bmatrix}$$
+
+<img src="https://bit.ly/3tgqb8d" align="center" border="0" alt="\begin{bmatrix} 1 & 2 & 1 & 3 & 0 & 1 & 0 & 2 & 4 \end{bmatrix}" width="200" height="28" />
 
 `float * matrix` stores the above array and `int shape[2] = {3,3}`. The shape of the matrix helps us to know the dimensions of the matrix and helps to perform matrix-matrix operations accordingly.
 
@@ -151,14 +150,12 @@ Author : Vishal R
 Email ID : vishalr@pesu.pes.edu or vishalramesh01@gmail.com
 Abstract : Implements a 5 layer neural network using cDNN
 */
-#include <cdnn.h>
-#include <cdnn/plot.h>
 
-extern __Model__ * m;
+#include <cdnn.h>
 
 int main(){
 
-  create_model();
+  Create_Model();
 
   int x_train_dims[] = {12288,100};
   int y_train_dims[] = {2,100};
@@ -185,32 +182,32 @@ int main(){
   Model(.X_train=x_train,.y_train=y_train,.X_cv=x_cv,.y_cv=y_cv,.X_test=x_test,.y_test=y_test,\
         .epochs=1000,.lr=3.67e-5,.optimizer="adam",.checkpoint_every=-1,.batch_size=32);
 
-  m->fit();
-  m->test();
+  Fit();
+  Test();
 
-  dARRAY * test_img1 = load_test_image("test_img1.data");
-  dARRAY * test_img2 = load_test_image("test_img2.data");
+  dARRAY * test_img1 = load_image("test_img1.data");
+  dARRAY * test_img2 = load_image("test_img2.data");
 
-  m->predict(test_img1);
-  m->predict(test_img2);
+  dARRAY * img1_score = Predict(test_img1);
+  dARRAY * img2_score = Predict(test_img2);
 
   free2d(test_img1);
   free2d(test_img2);
-  plot_train_scores();
-  destroy_model();
+
+  Destroy_Model();
 }
 ```
 
 Above file shows how to create a 5 layer neural network using cDNN library.
 
-Additional examples are available in the [Examples](https://github.com/iVishalr/cdnn/Examples) folder
+Additional examples are available in the [Examples](https://github.com/iVishalr/cDNN/Examples) folder
 
 #### Contributions
 
 If you like this library and would like to make it better, you are free to do so. It takes a team effort to make things better. Hence I would love to have you on board.
 
-Avoid making commits directly to `main/master branch`. Create your own branch and make a pull request. After your pull request is approved, the changes you have made would be merged with the main code.
+Avoid making commits directly to `main branch`. Create your own branch and make a pull request. After your pull request is approved, the changes you have made would be merged with the main code.
 
 #### License
 
-cDNN has a MIT-style license, as found in [LICENSE](https://github.com/iVishalr/cdnn/LICENSE) file.
+cDNN has a MIT-style license, as found in [LICENSE](https://github.com/iVishalr/cDNN/LICENSE) file.
