@@ -38,12 +38,15 @@ The elements of a matrix are stored in a RowMajor fashion in memory.
 
 Consider the following matrix :
 
-<img src="https://bit.ly/3mLxKRM" align="center" border="0" alt="\begin{bmatrix} 1 & 2 & 1 \\ 3 & 0 & 1 \\ 0 & 2 & 4 \end{bmatrix}" width="89" height="68" />
-
+<p align="center">
+<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/1.png" alt="matrix" height="100px" width="200px" ></img>
+</p>
 
 The matrix has a shape `(3,3)`. The elements of the matrix would be stored in memory as follows :
 
-<img src="https://bit.ly/3tgqb8d" align="center" border="0" alt="\begin{bmatrix} 1 & 2 & 1 & 3 & 0 & 1 & 0 & 2 & 4 \end{bmatrix}" width="200" height="28" />
+<p align="center">
+<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/2.png" alt="matrix" height="50px" width="300px" ></img>
+</p>
 
 `float * matrix` stores the above array and `int shape[2] = {3,3}`. The shape of the matrix helps us to know the dimensions of the matrix and helps to perform matrix-matrix operations accordingly.
 
@@ -202,7 +205,7 @@ int main(){
 
 Above file shows how to create a 5 layer neural network using cDNN library.
 
-Additional examples are available in the [Examples](https://github.com/iVishalr/cDNN/Examples) folder
+Additional examples are available in the [Examples](https://github.com/iVishalr/cDNN/blob/main/examples) folder
 
 #### Contributions
 
@@ -212,4 +215,4 @@ Avoid making commits directly to `main branch`. Create your own branch and make 
 
 #### License
 
-cDNN has a MIT-style license, as found in [LICENSE](https://github.com/iVishalr/cDNN/LICENSE) file.
+cDNN has a MIT-style license, as found in [LICENSE](https://github.com/iVishalr/cDNN/blob/main/LICENSE) file.
