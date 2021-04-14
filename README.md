@@ -13,7 +13,7 @@
 
 #### Documentation
 
-The documentation of cDNN is available here. I have tried to document it as extensively as possible. Feel free to modify or correct it.
+The documentation of cDNN is available [here](https://github.com/iVishalr/cDNN/blob/main/documentation/DOCUMENTATION.md). I have tried to document it as extensively as possible. Feel free to modify or correct it.
 
 #### More about cDNN
 
