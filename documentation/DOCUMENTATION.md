@@ -1,6 +1,4 @@
-#<center>cDNN</center>
-
----
+# cDNN
 
 **cDNN** is a Deep Learning Library written in C Programming Language.
 
@@ -33,10 +31,16 @@ The above example creates a `(2,2)` matrix where each element is zero. `zeros()`
 The elements of a matrix are stored in a RowMajor fashion in memory.
 
 Consider the following matrix :
-$$matrix = \begin{bmatrix} 1 & 2 & 3 \\ 4 & 5 & 6 \\ 7 & 8 & 9 \end{bmatrix}$$
+
+<p align="center">
+<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/1.png" alt="matrix" height="100px" width="200px"></img>
+</p>
 
 The matrix has a shape `(3,3)`. The elements of the matrix would be stored in memory as follows :
-$$matrix = \begin{bmatrix} 1. & 2. & 3. & 4. & 5. & 6. & 7. & 8. & 9. \end{bmatrix}$$
+
+<p align="center">
+<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/2.png" alt="matrix" height="50px" width="400px"></img>
+</p>
 
 `float * matrix` stores the above array and `int shape[2] = {3,3}`. The shape of the matrix helps us to know the dimensions of the matrix.
 
@@ -184,7 +188,8 @@ dARRAY * B = reshape(A,new_dims);
 ```
 
 _Output_ :
-$Input : A = \begin{bmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix}$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; $Output : B = \begin{bmatrix} 1 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 1 \end{bmatrix}$
+
+<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/3.png" alt="reshape_output" height="100px" width="650px"></img>
 
 ##### 1. 6. `size()`
 
@@ -206,7 +211,8 @@ printf("%d",size(A));
 ```
 
 _Output_ :
-$9$
+
+`9`
 
 ##### 1. 7. `add()`
 
@@ -231,7 +237,8 @@ dARRAY * C = add(A,B);
 ```
 
 _Output_ :
-$C = \begin{bmatrix} 2 & 2 & 2 \\ 2 & 2 & 2 \\ 2 & 2 & 2 \end{bmatrix}$
+
+<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/4.png" alt="matrix" height="100px" width="200px"></img>
 
 _Example_ :
 
@@ -246,11 +253,8 @@ dARRAY * C = add(A,B);
 ```
 
 _Output_ :
-$Input : A = \begin{bmatrix} 1 & 1 & 1 \\ 1 & 1 & 1 \\ 1 & 1 & 1 \end{bmatrix}_{(3,3)} , B = \begin{bmatrix} 1 & 1 & 1\end{bmatrix}_{(1,3)}$
 
-$broadcast(B = \begin{bmatrix} 1 & 1 & 1\end{bmatrix}_{(1,3)}) = \begin{bmatrix} 1 & 1 & 1 \\ 1 & 1 & 1 \\ 1 & 1 & 1 \end{bmatrix}_{(3,3)}$
-
-$Output : C =  \begin{bmatrix} 1 & 1 & 1 \\ 1 & 1 & 1 \\ 1 & 1 & 1 \end{bmatrix}_A +  \begin{bmatrix} 1 & 1 & 1 \\ 1 & 1 & 1 \\ 1 & 1 & 1 \end{bmatrix}_B = \begin{bmatrix} 2 & 2 & 2 \\ 2 & 2 & 2 \\ 2 & 2 & 2 \end{bmatrix}$
+<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/5.png" alt="matrix" height="300px" width="650px"></img>
 
 _Example_ :
 
@@ -265,11 +269,8 @@ dARRAY * C = add(A,B);
 ```
 
 _Output_ :
-$Input : A = \begin{bmatrix} 1 & 1 & 1 & 1\\ 1 & 1 & 1 & 1\\ 1 & 1 & 1 & 1\\ 1 & 1 & 1 & 1\end{bmatrix}_{(4,4)} , B = \begin{bmatrix} 1 \\ 1 \\ 1 \\ 1\end{bmatrix}_{(4,1)}$
 
-$broadcast(B = \begin{bmatrix} 1\\ 1\\ 1\\ 1\end{bmatrix}_{(4,1)}) = \begin{bmatrix} 1 & 1 & 1 & 1\\ 1 & 1 & 1 & 1\\ 1 & 1 & 1 & 1\\ 1 & 1 & 1 & 1\end{bmatrix}_{(4,4)}$
-
-$Output : C =  \begin{bmatrix} 1 & 1 & 1 & 1\\ 1 & 1 & 1 & 1\\ 1 & 1 & 1 & 1\\ 1 & 1 & 1 & 1\end{bmatrix}_A +  \begin{bmatrix} 1 & 1 & 1 & 1\\ 1 & 1 & 1 & 1\\ 1 & 1 & 1 & 1\\ 1 & 1 & 1 & 1\end{bmatrix}_B = \begin{bmatrix} 2 & 2 & 2 & 2\\ 2 & 2 & 2 & 2\\ 2 & 2 & 2 & 2\\2 & 2 & 2 & 2\end{bmatrix}$
+<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/6.png" alt="matrix" height="300px" width="650px"></img>
 
 ##### 1. 8. `subtract()`
 
@@ -298,11 +299,8 @@ dARRAY * C = subtract(A,B);
 ```
 
 _Output_ :
-$Input : A = \begin{bmatrix} 1 & 1 & 1 & 1\\ 1 & 1 & 1 & 1\\ 1 & 1 & 1 & 1\\ 1 & 1 & 1 & 1\end{bmatrix}_{(4,4)} , B = \begin{bmatrix} 1 \\ 1 \\ 1 \\ 1\end{bmatrix}_{(4,1)}$
 
-$broadcast(B = \begin{bmatrix} 1\\ 1\\ 1\\ 1\end{bmatrix}_{(4,1)}) = \begin{bmatrix} 1 & 1 & 1 & 1\\ 1 & 1 & 1 & 1\\ 1 & 1 & 1 & 1\\ 1 & 1 & 1 & 1\end{bmatrix}_{(4,4)}$
-
-$Output : C =  \begin{bmatrix} 1 & 1 & 1 & 1\\ 1 & 1 & 1 & 1\\ 1 & 1 & 1 & 1\\ 1 & 1 & 1 & 1\end{bmatrix}_A -  \begin{bmatrix} 1 & 1 & 1 & 1\\ 1 & 1 & 1 & 1\\ 1 & 1 & 1 & 1\\ 1 & 1 & 1 & 1\end{bmatrix}_B = \begin{bmatrix} 0 & 0 & 0 & 0\\ 0 & 0 & 0 & 0\\ 0 & 0 & 0 & 0\\0 & 0 & 0 & 0\end{bmatrix}$
+<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/7.png" alt="matrix" height="300px" width="650px"></img>
 
 ##### 1. 9. `multiply()`
 
@@ -329,11 +327,8 @@ dARRAY * C = multiply(A,B);
 ```
 
 _Output_ :
-$Input : A = \begin{bmatrix} 0.432 & 0.213\\ 0.8453 & 0.4331\end{bmatrix}_{(2,2)} , B = \begin{bmatrix} 0.5323 \\ 0.2134\end{bmatrix}_{(2,1)}$
 
-$broadcast(B = \begin{bmatrix} 0.5323 \\ 0.2134\end{bmatrix}_{(2,1)}) = B = \begin{bmatrix} 0.5323 & 0.5323\\ 0.2134 & 0.2134\end{bmatrix}_{(2,2)}$
-
-$Output : C =  \begin{bmatrix} 0.432 & 0.213\\ 0.8453 & 0.4331\end{bmatrix}_A* \begin{bmatrix} 0.5323 & 0.5323\\ 0.2134 & 0.2134\end{bmatrix}_B = \begin{bmatrix} 0.2299 & 0.1133 \\ 0.1803 & 0.0924\end{bmatrix}$
+<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/8.png" alt="matrix" height="300px" width="650px"></img>
 
 ##### 1. 10. `divison()`
 
@@ -362,11 +357,8 @@ dARRAY * C = divison(A,B);
 ```
 
 _Output_ :
-$Input : A = \begin{bmatrix} 0.432 & 0.213\\ 0.8453 & 0.4331\end{bmatrix}_{(2,2)} , B = \begin{bmatrix} 0.5323 \\ 0.2134\end{bmatrix}_{(2,1)}$
 
-$broadcast(B = \begin{bmatrix} 0.5323 \\ 0.2134\end{bmatrix}_{(2,1)}) = B = \begin{bmatrix} 0.5323 & 0.5323\\ 0.2134 & 0.2134\end{bmatrix}_{(2,2)}$
-
-$Output : C =  \begin{bmatrix} 0.432 & 0.213\\ 0.8453 & 0.4331\end{bmatrix} ÷ \begin{bmatrix} 0.5323 & 0.5323\\ 0.2134 & 0.2134\end{bmatrix}_B = \begin{bmatrix} 0.8115 & 0.4001 \\ 3.9611 & 2.0295\end{bmatrix}$
+<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/9.png" alt="matrix" height="300px" width="650px"></img>
 
 ##### 1. 11. `addScalar()`
 
@@ -388,9 +380,8 @@ dARRAY * B = addScalar(A,10.0);
 ```
 
 _Output_ :
-$Input : A = \begin{bmatrix} 1 & 1\\ 1 & 1\end{bmatrix}_{(2,2)}$
 
-$Output : B =  \begin{bmatrix} 1 & 1\\ 1 & 1\end{bmatrix} + 10.0 = \begin{bmatrix} 11.0 & 11.0 \\ 11.0 & 11.0\end{bmatrix}$
+<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/10.png" alt="matrix" height="200px" width="400px"></img>
 
 ##### 1. 12. `subScalar()`
 
@@ -412,9 +403,8 @@ dARRAY * B = subScalar(A,10.0);
 ```
 
 _Output_ :
-$Input : A = \begin{bmatrix} 1 & 1\\ 1 & 1\end{bmatrix}_{(2,2)}$
 
-$Output : B =  \begin{bmatrix} 1 & 1\\ 1 & 1\end{bmatrix} - 10.0 = \begin{bmatrix} -9.0 & -9.0 \\ -9.0 & -9.0\end{bmatrix}$
+<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/11.png" alt="matrix" height="200px" width="400px"></img>
 
 ##### 1. 13. `mulScalar()`
 
@@ -436,9 +426,8 @@ dARRAY * B = mulScalar(A,10.0);
 ```
 
 _Output_ :
-$Input : A = \begin{bmatrix} 1 & 1\\ 1 & 1\end{bmatrix}_{(2,2)}$
 
-$Output : B =  \begin{bmatrix} 1 & 1\\ 1 & 1\end{bmatrix} * 10.0 = \begin{bmatrix} 10.0 & 10.0 \\ 10.0 & 10.0\end{bmatrix}$
+<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/12.png" alt="matrix" height="200px" width="400px"></img>
 
 ##### 1. 14. `divScalar()`
 
@@ -460,9 +449,8 @@ dARRAY * B = divScalar(A,10.0);
 ```
 
 _Output_ :
-$Input : A = \begin{bmatrix} 1 & 1\\ 1 & 1\end{bmatrix}_{(2,2)}$
 
-$Output : B =  \begin{bmatrix} 1 & 1\\ 1 & 1\end{bmatrix} ÷ 10.0 = \begin{bmatrix} 0.1 & 0.1 \\ 0.1 & 0.1\end{bmatrix}$
+<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/13.png" alt="matrix" height="200px" width="400px"></img>
 
 ##### 1. 15. `power()`
 
@@ -691,7 +679,8 @@ int template = permutation(5);
 ```
 
 _Output_ :
-$\begin{bmatrix} 1 & 3 & 0 & 2 & 4\end{bmatrix}$
+
+<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/14.png" alt="matrix" height="30px" width="150px"></img>
 
 ##### 1. 25. `frobenius_norm()`
 
@@ -887,7 +876,13 @@ You can see how we are using a structure to pass arguments to the layer.
 
 ##### 4. 2. `Dense()`
 
-`Dense()` layer performs a linear transformation $$Z = W.X + b$$ on its inputs ($X$). It also applies dropout if it is enabled and pass the result to an activation function ($A$).
+`Dense()` layer performs a linear transformation 
+
+<p align="center">
+<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/15.png" alt="matrix" height="50px" width="150px"></img>
+</p>
+
+on its inputs (`X`). It also applies dropout if it is enabled and pass the result to an activation function (`A`).
 
 **Arguments** :
 
@@ -898,17 +893,30 @@ You can see how we are using a structure to pass arguments to the layer.
    &nbsp;&nbsp;&nbsp;&nbsp;`.layer_type="output"` the layer behaves as the last layer which is the output layer of the network.
    <br>
 3. **`.activation`** - Specifies the type of activation function ($A$) to use for the layer.
-   &nbsp;&nbsp;&nbsp;&nbsp;`.activation="relu"` - tells layer to use the $ReLu$ Activation function.
-   $$
-   ReLu(x) = \begin{split} \begin{Bmatrix} x & x > 0 \\
-   0 & x < 0 \end{Bmatrix}\end{split}
-   $$
-   &nbsp;&nbsp;&nbsp;&nbsp;`.activation="sigmoid"` - tells layer to use the $sigmoid$ Activation function.
-   $$Sigmoid(x) = \frac{1}{1+e^{-x}}$$
-   &nbsp;&nbsp;&nbsp;&nbsp;`.activation="tanh"` - tells layer to use the $tanh$ Activation function.
-   $$TanH(x) = \frac{e^x - e^{-x}}{e^x+e^{-x}}$$
-   &nbsp;&nbsp;&nbsp;&nbsp;`.activation="softmax"` - tells layer to apply a $softmax$ Activation function.
-   $$Softmax(x) = \frac{e^x_i}{\sum{e^x}}$$
+   &nbsp;&nbsp;&nbsp;&nbsp;`.activation="relu"` - tells layer to use the 'ReLu' Activation function.
+   
+   <p align="center">
+   <img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/16.png" alt="matrix" height="100px" width="200px"></img>
+   </p>
+   
+   &nbsp;&nbsp;&nbsp;&nbsp;`.activation="sigmoid"` - tells layer to use the 'sigmoid' Activation function.
+   
+   <p align="center">
+   <img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/17.png" alt="matrix" height="80px" width="200px"></img>
+   </p>
+   
+   &nbsp;&nbsp;&nbsp;&nbsp;`.activation="tanh"` - tells layer to use the 'tanh' Activation function.
+   
+   <p align="center">
+   <img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/18.png" alt="matrix" height="80px" width="200px"></img>
+   </p>
+   
+   &nbsp;&nbsp;&nbsp;&nbsp;`.activation="softmax"` - tells layer to apply a 'softmax' Activation function.
+   
+   <p align="center">
+   <img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/19.png" alt="matrix" height="80px" width="200px"></img>
+   </p>
+   
    <br>
 4. **`.dropout`** - Specifies the dropout to be used in the layer.
    &nbsp;&nbsp;&nbsp;&nbsp;`.dropout=1.0` - No dropout will be applied.
@@ -918,13 +926,25 @@ You can see how we are using a structure to pass arguments to the layer.
    &nbsp;&nbsp;&nbsp;&nbsp; By default,`Dense()` will use `.dropout=1.0`.
    <br>
 5. **`.initializer`** - Specifies the type of initialization to be used for initializing the layer weights.
-   &nbsp;&nbsp;&nbsp;&nbsp;`.initializer="he"` - $He$ initialization will be used for weight initialization.
-   $$He = \sqrt{\frac{2}{n^{[l-1]}}}$$
-   &nbsp;&nbsp;&nbsp;&nbsp;`.initializer="xavier"` - $Xavier$ initialization will be used for weight initialization.
-   $$Xavier = \sqrt{\frac{1}{n^{[l-1]}}}$$
+   &nbsp;&nbsp;&nbsp;&nbsp;`.initializer="he"` - 'He' initialization will be used for weight initialization.
+   
+   <p align="center">
+   <img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/20.png" alt="matrix" height="80px" width="200px"></img>
+   </p>
+   
+   &nbsp;&nbsp;&nbsp;&nbsp;`.initializer="xavier"` - 'Xavier' initialization will be used for weight initialization.
+   
+   <p align="center">
+   <img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/21.png" alt="matrix" height="80px" width="200px"></img>
+   </p>
+   
    &nbsp;&nbsp;&nbsp;&nbsp;`.initializer="random"` - Weights will be intialized to random values using normal distribution.
-   $$W = randn(dims)$$
-   &nbsp;&nbsp;&nbsp;&nbsp;`.initializer="zeros"` - Weights will be set to zero. **Don't use this option**. It is just there to show that network fails to break symmetry when $$W = 0$$.
+   
+   <p align="center">
+   <img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/22.png" alt="matrix" height="30px" width="150px"></img>
+   </p>
+   
+   &nbsp;&nbsp;&nbsp;&nbsp;`.initializer="zeros"` - Weights will be set to zero. **Don't use this option**. It is just there to show that network fails to break symmetry when `W=0`.
    &nbsp;&nbsp;&nbsp;&nbsp; By default,`Dense()` will use `.initializer="he"`.
 
 _Example_:
@@ -938,41 +958,36 @@ In the above example, we are defining a Dense layer with 32 neurons/nodes. We ap
 **`Forward()`** :
 For the above example, the forward pass would be something like this :
 
-$$
-Z = W\ .\ X + b\\
-Z' = Dropout(Z,prob=0.5)\\
-A = ReLu(Z')
-$$
+<p align="center">
+<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/24.png" alt="matrix" height="140px" width="350px"></img>
+</p>
 
 **`Backward()`** :
 
 For the above example, the backward pass would be something like this :
 
-$$
-dZ = A'(Z')\ *\ dA\\
-dA = W^{[next\_layer]T}\ .\ dZ^{[next\_layer]}\\
-dW = dZ\ .\ X^T\\
-db = dZ
-$$
-
+<p align="center">
+  <img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/25.png" alt="matrix" height="150px" width="400px"></img>
+</p>
 _Note : the above backprop equations are just for illustrations. There may be dimension mismatches._
 
 The basic idea employed here is, if we are traversing the computation graph from bottom to top, the gradient flow would be somthing like this :
-For a function $f(x)$,
+For a function `f(x)`,
 
-1. We will find the $local\ gradients$ :
-   $$\frac{\delta f(x,y,z)}{\delta x}\ ,\ \frac{\delta f(x,y,z)}{\delta y}\ ,\ \frac{\delta f(x,y,z)}{\delta z}$$
-2. We will have a gradient from below called $global\ gradients$
+1. We will find the `local gradients` :
+   
+   <p align="center">
+   <img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/26.png" alt="matrix" height="70px" width="400px"></img>
+   </p>
+   
+2. We will have a gradient from below called `global gradients`.
 3. Using chain rule of calculus,
-   $$
-   d\theta = local\ gradient\ *\ global\ gradients\\
-   dx = \frac{\delta f(x,y,z)}{\delta x}\ *\ global\ gradients\\
-   dy = \frac{\delta f(x,y,z)}{\delta y}\ *\ global\ gradients\\
-   dz = \frac{\delta f(x,y,z)}{\delta z}\ *\ global\ gradients\\
-   global\ gradients = \delta f
-   $$
-
-Now $dx,\ dy,\ dz$ are gradients that are 'flowing' into inputs $x,\ y,\ and\ z$. Gradients $dx,\ dy,\ dz$ become a global gradient for functions present above $f(x)$. Remember, we are traversing the computation graph from last node to first node. That's why we are refering to gradients coming from below and flowing to above functions.
+   
+   <p align="center">
+   <img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/27.png" alt="matrix" height="250px" width="450px"></img>
+   </p>
+  
+Now dx, dy, dz are gradients that are 'flowing' into inputs x, y, and z. Gradients dx, dy, dz become a global gradient for functions present above f(x). Remember, we are traversing the computation graph from last node to first node. That's why we are refering to gradients coming from below and flowing to above functions.
 
 It's kind of difficult to explain this without a computation graph.
 
@@ -1244,7 +1259,9 @@ Setting learning rate correctly is important. For me, `lr > 4.65e-5` was working
 
 4. While organizing your training, val and test sets, remember that cDNN puts your features along rows. Meaning, it stacks your examples along columns and the rows will represent features.
 
-$$X\_train = \begin{bmatrix} f_11 & f_12 & \cdots & f_1n\\f_21 & f_22 & \cdots & f_2n\\\vdots & \vdots &  \ddots & \vdots\\f_m1 & f_m2 & \cdots & f_mn\end{bmatrix}$$
+<p align="center">
+<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/28.png" alt="matrix" height="150px" width="400px"></img>
+</p>
 
 Here, there are `n` examples stacked column wise and each example has `m` features which are stacked row wise.
 
