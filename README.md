@@ -1,4 +1,6 @@
-# cDNN
+<p align="center">
+  <strong>cDNN</strong>
+</p>
 
 **cDNN** is a Deep Learning Library written in C Programming Language. cDNN provides functions that can be used to create Artificial Neural Networks (ANN). These functions are designed to be as efficient as possible both in performance and memory.
 
