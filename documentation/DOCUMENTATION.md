@@ -827,6 +827,8 @@ We will look into how the gradients are calculated at the individual layers in t
 
 This layer is responsible for taking in the flattened datatset and feed it into the `Dense` layers.
 
+_Example_ :
+
 ```C
 Input(.layer_size=12288);
 ```
@@ -1087,28 +1089,60 @@ dARRAY * load_y_test(char * filename, int * dims);
 _Example_ :
 
 ```C
-int x_train_dims[] = {12288,100};
-int y_train_dims[] = {2,100};
-int x_cv_dims[] = {12288,100};
-int y_cv_dims[] = {2,100};
-int x_test_dims[] = {12288,100};
-int y_test_dims[] = {2,100};
+#include <cdnn.h>
 
-dARRAY * x_train = load_x_train("./data/X_train.t7",x_train_dims);
-dARRAY * y_train = load_y_train("./data/y_train.t7",y_train_dims);
-dARRAY * x_cv = load_x_cv("./data/X_cv.t7",x_cv_dims);
-dARRAY * y_cv = load_y_cv("./data/y_cv.t7",y_cv_dims);
-dARRAY * x_test = load_x_test("./data/X_test.t7",x_test_dims);
-dARRAY * y_test = load_y_test("./data/y_test.t7",y_test_dims);
+int main(){
+
+  Create_Model(); //used to create a Model object. Don't miss to include this.
+
+  int x_train_dims[] = {12288,100};
+  int y_train_dims[] = {2,100};
+  int x_cv_dims[] = {12288,100};
+  int y_cv_dims[] = {2,100};
+  int x_test_dims[] = {12288,100};
+  int y_test_dims[] = {2,100};
+
+  dARRAY * x_train = load_x_train("./data/X_train.t7",x_train_dims);
+  dARRAY * y_train = load_y_train("./data/y_train.t7",y_train_dims);
+  dARRAY * x_cv = load_x_cv("./data/X_cv.t7",x_cv_dims);
+  dARRAY * y_cv = load_y_cv("./data/y_cv.t7",y_cv_dims);
+  dARRAY * x_test = load_x_test("./data/X_test.t7",x_test_dims);
+  dARRAY * y_test = load_y_test("./data/y_test.t7",y_test_dims);
+
+  return 0;
+}
 ```
 
 The loaded dataset can be passed to the model as shown below. Here we are creating a 2-layer neural network.
 
 ```C
-Input(.layer_size=12288);
-Dense(.layer_size=64,.activation="relu",.initializer="he",.layer_type="hidden");
-Dense(.layer_size=2,.activation="softmax",.initializer="random",.layer_type="output");
-Model(.X_train=x_train,.y_train=y_train,.X_cv=x_cv,.y_cv=y_cv,.X_test=x_test,.y_test=y_test,.epochs=1000,.lr=3.67e-5,.optimizer="adam");
+#include <cdnn.h>
+
+int main(){
+
+  Create_Model();
+
+  int x_train_dims[] = {12288,100};
+  int y_train_dims[] = {2,100};
+  int x_cv_dims[] = {12288,100};
+  int y_cv_dims[] = {2,100};
+  int x_test_dims[] = {12288,100};
+  int y_test_dims[] = {2,100};
+
+  dARRAY * x_train = load_x_train("./data/X_train.t7",x_train_dims);
+  dARRAY * y_train = load_y_train("./data/y_train.t7",y_train_dims);
+  dARRAY * x_cv = load_x_cv("./data/X_cv.t7",x_cv_dims);
+  dARRAY * y_cv = load_y_cv("./data/y_cv.t7",y_cv_dims);
+  dARRAY * x_test = load_x_test("./data/X_test.t7",x_test_dims);
+  dARRAY * y_test = load_y_test("./data/y_test.t7",y_test_dims);
+
+  Input(.layer_size=12288);
+  Dense(.layer_size=64,.activation="relu",.initializer="he",.layer_type="hidden");
+  Dense(.layer_size=2,.activation="softmax",.initializer="random",.layer_type="output");
+  Model(.X_train=x_train,.y_train=y_train,.X_cv=x_cv,.y_cv=y_cv,.X_test=x_test,.y_test=y_test,.epochs=1000,.lr=3.67e-5,.optimizer="adam");
+
+  return 0;
+}
 ```
 
 #### 7. Training and Testing the Model
@@ -1120,12 +1154,21 @@ Model(.X_train=x_train,.y_train=y_train,.X_cv=x_cv,.y_cv=y_cv,.X_test=x_test,.y_
 _Example_ :
 
 ```C
-Input(.layer_size=12288);
-Dense(.layer_size=64,.activation="relu",.initializer="he",.layer_type="hidden");
-Dense(.layer_size=2,.activation="softmax",.initializer="random",.layer_type="output");
-Model(.X_train=x_train,.y_train=y_train,.X_cv=x_cv,.y_cv=y_cv,.X_test=x_test,.y_test=y_test,.epochs=1000,.lr=3.67e-5,.optimizer="adam");
+#include <cdnn.h>
 
-Fit();
+int main(){
+  ...
+  //include the statements for creating model obj and loading data set here.
+  ...
+  Input(.layer_size=12288);
+  Dense(.layer_size=64,.activation="relu",.initializer="he",.layer_type="hidden");
+  Dense(.layer_size=2,.activation="softmax",.initializer="random",.layer_type="output");
+  Model(.X_train=x_train,.y_train=y_train,.X_cv=x_cv,.y_cv=y_cv,.X_test=x_test,.y_test=y_test,.epochs=1000,.lr=3.67e-5,.optimizer="adam");
+
+  Fit();
+
+  return 0;
+}
 ```
 
 ##### 7. 2. Testing the Model
@@ -1135,6 +1178,8 @@ Fit();
 _Example_ :
 
 ```C
+...
+
 Input(.layer_size=12288);
 Dense(.layer_size=64,.activation="relu",.initializer="he",.layer_type="hidden");
 Dense(.layer_size=2,.activation="softmax",.initializer="random",.layer_type="output");
@@ -1146,12 +1191,24 @@ Test();
 
 ##### 7. 3. Testing on individual images
 
-`load_test_image()` can be used to load a test image in memory.
+`load_image()` can be used to load an image into memory.
 `Predict()` can be used for getting the model predictions.
+
+_Prototype_ :
+
+```C
+  dARRAY * Predict(dARRAY * image, int verbose)
+```
+
+verbose - If verbose=1, cDNN prints the output of model.
+
+Return value of `Predict()` is a pointer to the output of the model.
 
 _Example_ :
 
 ```C
+...
+
 Input(.layer_size=12288);
 Dense(.layer_size=64,.activation="relu",.initializer="he",.layer_type="hidden");
 Dense(.layer_size=2,.activation="softmax",.initializer="random",.layer_type="output");
@@ -1160,28 +1217,16 @@ Model(.X_train=x_train,.y_train=y_train,.X_cv=x_cv,.y_cv=y_cv,.X_test=x_test,.y_
 Fit();
 Test();
 
-dARRAY * test_img1 = load_test_image("test_img1.data");
-dARRAY * test_img2 = load_test_image("test_img2.data");
+dARRAY * test_img1 = load_image("test_img1.data");
+dARRAY * test_img2 = load_image("test_img2.data");
 
-Predict(test_img1);
-Predict(test_img2);
+dARRAY * img1_score = Predict(test_img1,1);
+dARRAY * img2_score = Predict(test_img2,1); //1 is for verbose
 ```
 
 #### 8. Plotting Model Metrics
 
-`Plot_scores()` can be used to plot the model metrics.
-
-_Example_ :
-
-```C
-Input(.layer_size=12288);
-Dense(.layer_size=64,.activation="relu",.initializer="he",.layer_type="hidden");
-Dense(.layer_size=2,.activation="softmax",.initializer="random",.layer_type="output");
-Model(.X_train=x_train,.y_train=y_train,.X_cv=x_cv,.y_cv=y_cv,.X_test=x_test,.y_test=y_test,.epochs=1000,.lr=3.67e-5,.optimizer="adam");
-
-Fit();
-Plot_score();
-```
+cDNN does not provide any plotting tools. However, the model metrics such as training loss, training accuracy and validation accuracy will be dumped to a file on disk by default. These can be read into memory in Python and using Matplotlib, we can visualize the curves.
 
 #### 9. Early Stopping
 
@@ -1189,13 +1234,13 @@ There is an option to run your model infinitely. Setting `.epochs=-1` runs the m
 
 #### 10. Additional Notes
 
-1. `Adam(), RMSProp() and Adagrad()` are powerful optimizers. If you have used a high learning rate, there is a possibility of getting `nan or inf` as the cost after a while during training.
+1. `Adam(), RMSProp() and Adagrad()` are powerful optimizers. If you have used a high learning rate, there is a possibility of getting `nan or inf` as the cost after a while during training. If you get it during training, just stop the training process as there's no point in continuing further. Reinitialize your `lr` to a smaller value and try again.
 
 Setting learning rate correctly is important. For me, `lr > 4.65e-5` was working well.
 
 2. Remember to set the `.layer_size` to be equal to the number of features you are using in training set.
 
-3. `Softmax()` outputs a tensor with `num_of_classes` elements. If you are trying to train say CIFAR-10, your output layer must have 10 as `.layer_size`. Otherwise you may get something else as the output.
+3. `Softmax()` outputs a tensor with `num_of_classes` elements. If you are trying to train say CIFAR-10, your output layer must have 10 as `.layer_size` as there are 10 classes in the dataset. Otherwise you may get something else as the output.
 
 4. While organizing your training, val and test sets, remember that cDNN puts your features along rows. Meaning, it stacks your examples along columns and the rows will represent features.
 
@@ -1204,3 +1249,4 @@ $$X\_train = \begin{bmatrix} f_11 & f_12 & \cdots & f_1n\\f_21 & f_22 & \cdots &
 Here, there are `n` examples stacked column wise and each example has `m` features which are stacked row wise.
 
 5. There are no pre-processing functions available in cDNN. Please do it in Python and extract the pixel values one by one if you are working with images and write it to a `.t7` file and then load it in using cDNN functions.
+6. Visualizing model metrics can be done in Python by reading the data present in the `./bin/` folder.
