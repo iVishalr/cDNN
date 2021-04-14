@@ -1,9 +1,7 @@
-*.png
 *.data
 *.out
 temp
 new_temp
-*.png
 *.zip
 *.t7
 *.dylib
