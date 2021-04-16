@@ -2,8 +2,6 @@
 <img src="https://github.com/iVishalr/cDNN/blob/main/documentation/images/logo.png" alt="matrix" height="170px" width="550px"></img>
 </p>
 
----
-
 ## Documentation
 
 cDNN provides functions that can be used to create Artificial Neural Networks (ANN). These functions are designed to be as efficient as possible both in performance and memory.
