@@ -4,7 +4,7 @@
 
 **cDNN** is a Deep Learning Library written in C Programming Language. cDNN provides functions that can be used to create Artificial Neural Networks (ANN). These functions are designed to be as efficient as possible both in performance and memory.
 
-#### Features
+## Features
 
 1. **cDNN** provides simple functions for creating ANNs.
 2. These functions are designed to achieve maximum performance possible on a cpu.
@@ -13,13 +13,13 @@
 5. cDNN uses a Static Computation Graphs (DAGs) to wireup your ANNs and to perform gradient calculations.
 6. The library also provides helper functions that can be used by the user to save models, print graphs and so on.
 
-#### Documentation
+## Documentation
 
 The documentation of cDNN is available [here](https://github.com/iVishalr/cDNN/blob/main/documentation/DOCUMENTATION.md). I have tried to document it as extensively as possible. Feel free to modify or correct it.
 
-#### More about cDNN
+## More about cDNN
 
-##### 1. Matrix Library
+### 1. Matrix Library
 
 This is the heart of the entire library. It provides basic matrix-matrix operations required for the basic functioning of neural networks. These functions are designed to be as efficient as possible without performance tradeoffs.
 
@@ -45,7 +45,7 @@ Consider the following matrix :
 The matrix has a shape `(3,3)`. The elements of the matrix would be stored in memory as follows :
 
 <p align="center">
-<img src="https://github.com/iVishalr/cDNN/blob/main/documentation/images/2.png" alt="matrix" height="50px" width="300px" ></img>
+<img src="https://github.com/iVishalr/cDNN/blob/main/documentation/images/2.png" alt="matrix" height="40px" width="350px" ></img>
 </p>
 
 `float * matrix` stores the above array and `int shape[2] = {3,3}`. The shape of the matrix helps us to know the dimensions of the matrix and helps to perform matrix-matrix operations accordingly.
@@ -75,13 +75,13 @@ Additional details are available in documentation.
 
 The things discussed above help us to create neural networks and perform gradient calculations.
 
-##### 2. Static Computation Graphs
+### 2. Static Computation Graphs
 
 cDNN uses a static computation graph to wireup your neural networks. Popular deep learning libraries like PyTorch, Tensorflow, Caffe ... go even further and use dynamic computation graphs. Dynamic graphs are difficult to implement hence, we will only use static graphs in this library.
 
 Fun fact, Tensorflow 1.0 used Static Computation Graphs. Tensorflow 2.0 introduced Dynamic Computation Graphs.
 
-##### 3. Performance
+### 3. Performance
 
 cDNN is as fast as Numpy or even faster than Numpy in some cases. This makes model training so much quicker and helps you iterate over models very quickly.
 
@@ -89,7 +89,7 @@ Major performance boost comes from implementing certain matrx-matrix functions l
 
 cDNN also uses automatic thread calculations and executes matrix operations in parallel that don't use BLAS to achieve parallelization, cDNN relies on OpenMP to aid in thread creation process and other thread issues like synchronization.
 
-#### Installation
+## Installation
 
 Requirements,
 
@@ -97,6 +97,8 @@ Requirements,
 2. ncurses
 3. Openblas
 4. OpenMP
+
+### Installing the Dependencies
 
 On Linux,
 
@@ -126,6 +128,8 @@ $ sudo make && sudo make install
 
 Installing OpenBLAS from their source will take a while. If you run into any errors while installing OpenBLAS, please refer to their [User Manual](https://github.com/xianyi/OpenBLAS/wiki/User-Manual).
 
+### Building cDNN
+
 After installing the dependecies, execute the following in terminal.
 
 ```bash
@@ -142,7 +146,7 @@ Note : Please do not change anything in `Makefile` of cDNN as you will be instal
 
 I know its a lot of work, but there's no way around it.
 
-#### Compiling
+## Compiling
 
 To compile a `test.c` file that uses cDNN, please type the following in terminal
 
@@ -161,7 +165,7 @@ Since the shared library depends on OpenBLAS's implementation of `cblas.h`, you 
 
 To run the program, execute `./a.out` or `./<name of your executable>`
 
-#### Examples
+## Examples
 
 ```C
 /*
@@ -226,13 +230,13 @@ Above file shows how to create a 5 layer neural network using cDNN library.
 
 Additional examples are available in the [Examples](https://github.com/iVishalr/cDNN/blob/main/examples) folder.
 
-#### Contributions
+## Contributions
 
 If you like this library and would like to make it better, you are free to do so. It takes a team effort to make things better. Hence I would love to have you on board.
 
 Avoid making commits directly to `main branch`. Create your own branch and make a pull request. After your pull request is approved, the changes you have made would be merged with the main code.
 
-#### License
+## License
 
 cDNN has a MIT-style license, as found in [LICENSE](https://github.com/iVishalr/cDNN/blob/main/LICENCE) file.
 
