@@ -204,15 +204,19 @@ int main(){
 
   Fit();
   Test();
+  Save_Model("./DOGS_VS_CATS.t7");
+  
+  int img_dims[] = {12288,1};
+  dARRAY * test_img1 = load_image("./test_img1.data",img_dims);
+  dARRAY * test_img2 = load_image("./test_img2.data",img_dims);
 
-  dARRAY * test_img1 = load_image("test_img1.data");
-  dARRAY * test_img2 = load_image("test_img2.data");
-
-  dARRAY * img1_score = Predict(test_img1);
-  dARRAY * img2_score = Predict(test_img2);
-
+  dARRAY * prediction1 = Predict(test_img1,1);
+  dARRAY * prediction2 = Predict(test_img2,1);
+  
   free2d(test_img1);
   free2d(test_img2);
+  free2d(prediction1);
+  free2d(prediction2);
 
   Destroy_Model();
 }
