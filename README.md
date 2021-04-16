@@ -110,7 +110,7 @@ $ sudo apt-get install libncurses-dev
 
 $ git clone https://github.com/xianyi/OpenBLAS.git
 $ cd OpenBlas
-$ sudo make && make install #This will take a while depending on your system speed. You may see some warnings along the way. Don't worry about it.
+$ sudo make && sudo make install #This will take a while depending on your system speed. You may see some warnings along the way. Don't worry about it.
 ```
 
 
@@ -121,7 +121,7 @@ $ brew install ncurses
 $ brew install gfortran
 $ git clone https://github.com/xianyi/OpenBLAS.git
 $ cd OpenBlas
-$ sudo make && make install
+$ sudo make && sudo make install
 ```
 
 Installing OpenBLAS from their source will take a while. If you run into any errors while installing OpenBLAS, please refer to their [User Manual](https://github.com/xianyi/OpenBLAS/wiki/User-Manual).
@@ -131,12 +131,12 @@ After installing the dependecies, execute the following in terminal.
 ```bash
 $ git clone https://github.com/iVishalr/cDNN.git
 $ cd cDNN
-$ sudo make && make install
+$ sudo make && sudo make install
 ```
 
 This will create a shared library in your system which allows you to use the fuctions in cDNN anywhere. You do not need to have the source code with you after the shared library has been created and stored in system.
 
-`$ sudo make && make install` will create a shared library according to the platform you are using and will place the library in `/usr/local/lib` and the include header files will be placed in `/usr/local/include`.
+`$ sudo make && sudo make install` will create a shared library according to the platform you are using and will place the library in `/usr/local/lib` and the include header files will be placed in `/usr/local/include`.
 
 Note : Please do not change anything in `Makefile` of cDNN as you will be installing in the standard directories where other shared libraries like `libc.so` and so on will be present. You may risk modifying/deleting other libraries in your system if you change things in `Makefile`.
 
