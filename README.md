@@ -101,8 +101,9 @@ Requirements,
 On Linux,
 
 ```bash
-$ sudo apt-get install ncurses
-$ sudo apt-get install openblas
+$ sudo apt install gcc
+$ sudo apt install ncurses
+$ sudo apt install openblas
 ```
 
 On macOS,
@@ -118,11 +119,11 @@ $ make install
 
 Installing OpenBLAS from their source will take a while. If you run into any errors while installing OpenBLAS, please refer to their [User Manual](https://github.com/xianyi/OpenBLAS/wiki/User-Manual).
 
-From Source,
+After installing the dependecies, execute the following in terminal.
 
 ```bash
-$ git clone https://github.com/iVishalr/cdnn
-$ cd cdnn-master
+$ git clone https://github.com/iVishalr/cDNN.git
+$ cd cDNN
 $ make && make install
 ```
 
