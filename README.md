@@ -158,7 +158,7 @@ Please keep the above LDFLAGS (`-lcdnn`,`-lopenblas`, ....) in the same order. O
 
 On macOS,
 ```bash
-$ gcc test.c -lcdnn -I /usr/local/include/ -L /usr/local/lib/ -I /opt/OpenBLAS/include/ -L /opt/OpenBLAS/lib/
+$ gcc test.c -lcdnn -lopenblas -lncurses -I /usr/local/include/ -L /usr/local/lib/ -I /opt/OpenBLAS/include/ -L /opt/OpenBLAS/lib/
 ```
 
 Since the shared library depends on OpenBLAS's implementation of `cblas.h`, you are requried to include its header files as well as its shared library.
