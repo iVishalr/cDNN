@@ -110,7 +110,7 @@ $ sudo apt-get install libncurses-dev
 
 $ git clone https://github.com/xianyi/OpenBLAS.git
 $ cd OpenBlas
-$ sudo make && make install
+$ sudo make && make install #This will take a while depending on your system speed. You may see some warnings along the way. Don't worry about it.
 ```
 
 
