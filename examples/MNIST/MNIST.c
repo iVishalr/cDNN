@@ -26,7 +26,7 @@ int main(){
     Dense(.layer_size=16,.activation="relu",.layer_type="hidden");
     Dense(.layer_size=10,.activation="softmax",.layer_type="output",.initializer="random");
     Model(.X_train=x_train,.y_train=y_train,.X_cv=x_val,.y_cv=y_val,.X_test=x_test,.y_test=y_test,\
-    .lr=3.67e-5,.optimizer="momentum",.epochs=1000,.checkpoint_every=100,.batch_size=55,.regularization="L2",.weight_decay=5e-4);
+    .lr=3.67e-5,.optimizer="momentum",.epochs=1000,.checkpoint_every=100,.batch_size=256,.regularization="L2",.weight_decay=5e-4);
     
     Load_Model("./MODEL.t7");
 
