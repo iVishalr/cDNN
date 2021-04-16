@@ -101,9 +101,9 @@ Requirements,
 On Linux,
 
 ```bash
-$ sudo apt install gcc
-$ sudo apt install ncurses
-$ sudo apt install openblas
+$ sudo apt-get install gcc
+$ sudo apt-get install libncurses-dev
+$ sudo apt-get install libopenblas-dev
 ```
 
 On macOS,
@@ -124,12 +124,12 @@ After installing the dependecies, execute the following in terminal.
 ```bash
 $ git clone https://github.com/iVishalr/cDNN.git
 $ cd cDNN
-$ make && make install
+$ sudo make && make install
 ```
 
 This will create a shared library in your system which allows you to use the fuctions in cDNN anywhere. You do not need to have the source code with you after the shared library has been created and stored in system.
 
-`$ make && make install` will create a shared library according to the platform you are using and will place the library in `/usr/local/lib` and the include header files will be placed in `/usr/local/include`.
+`$ sudo make && make install` will create a shared library according to the platform you are using and will place the library in `/usr/local/lib` and the include header files will be placed in `/usr/local/include`.
 
 Note : Please do not change anything in `Makefile` of cDNN as you will be installing in the standard directories where other shared libraries like `libc.so` and so on will be present. You may risk modifying/deleting other libraries in your system if you change things in `Makefile`.
 
