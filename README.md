@@ -146,6 +146,13 @@ I know its a lot of work, but there's no way around it.
 
 To compile a `test.c` file that uses cDNN, please type the following in terminal
 
+On Linux,
+```bash
+$ gcc test.c -lcdnn -lncurses -lopenblas -lgomp -I /usr/local/include -L /usr/local/lib -I /opt/OpenBLAS/include/ -L /opt/OpenBLAS/lib/ -lm
+```
+Please keep the above LDFLAGS (`-lcdnn`,`-lopenblas`, ....) in the same order. Otherwise test.c won't compile.
+
+On macOS,
 ```bash
 $ gcc test.c -lcdnn -I /usr/local/include/ -L /usr/local/lib/ -I /opt/OpenBLAS/include/ -L /opt/OpenBLAS/lib/
 ```
