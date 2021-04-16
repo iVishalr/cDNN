@@ -1,5 +1,5 @@
 <p align="center">
-  <strong>cDNN</strong>
+<img src="https://github.com/iVishalr/cDNN/blob/main/documentation/images/logo.png" alt="matrix" height="170px" width="550px"></img>
 </p>
 
 **cDNN** is a Deep Learning Library written in C Programming Language. cDNN provides functions that can be used to create Artificial Neural Networks (ANN). These functions are designed to be as efficient as possible both in performance and memory.
@@ -39,13 +39,13 @@ The elements of a matrix are stored in a RowMajor fashion in memory.
 Consider the following matrix :
 
 <p align="center">
-<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/1.png" alt="matrix" height="100px" width="200px" ></img>
+<img src="https://github.com/iVishalr/cDNN/blob/main/documentation/images/1.png" alt="matrix" height="100px" width="200px" ></img>
 </p>
 
 The matrix has a shape `(3,3)`. The elements of the matrix would be stored in memory as follows :
 
 <p align="center">
-<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/2.png" alt="matrix" height="50px" width="300px" ></img>
+<img src="https://github.com/iVishalr/cDNN/blob/main/documentation/images/2.png" alt="matrix" height="50px" width="300px" ></img>
 </p>
 
 `float * matrix` stores the above array and `int shape[2] = {3,3}`. The shape of the matrix helps us to know the dimensions of the matrix and helps to perform matrix-matrix operations accordingly.
@@ -224,7 +224,7 @@ int main(){
 
 Above file shows how to create a 5 layer neural network using cDNN library.
 
-Additional examples are available in the [Examples](https://github.com/iVishalr/cDNN/blob/main/examples) folder
+Additional examples are available in the [Examples](https://github.com/iVishalr/cDNN/blob/main/examples) folder.
 
 #### Contributions
 
