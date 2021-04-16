@@ -8,5 +8,6 @@
     "neural_net.h": "c",
     "utils.h": "c",
     "loss.h": "c"
-  }
+  },
+  "C_Cpp.errorSquiggles": "Disabled"
 }
