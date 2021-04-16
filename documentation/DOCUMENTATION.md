@@ -33,13 +33,13 @@ The elements of a matrix are stored in a RowMajor fashion in memory.
 Consider the following matrix :
 
 <p align="center">
-<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/1.png" alt="matrix" height="100px" width="200px"></img>
+<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/1.png" alt="matrix" height="90px" width="200px"></img>
 </p>
 
 The matrix has a shape `(3,3)`. The elements of the matrix would be stored in memory as follows :
 
 <p align="center">
-<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/2.png" alt="matrix" height="50px" width="400px"></img>
+<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/2.png" alt="matrix" height="40px" width="350px"></img>
 </p>
 
 `float * matrix` stores the above array and `int shape[2] = {3,3}`. The shape of the matrix helps us to know the dimensions of the matrix.
@@ -189,7 +189,7 @@ dARRAY * B = reshape(A,new_dims);
 
 _Output_ :
 
-<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/3.png" alt="reshape_output" height="100px" width="650px"></img>
+<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/3.png" alt="reshape_output" height="80px" width="550px"></img>
 
 ##### 1. 6. `size()`
 
@@ -238,7 +238,7 @@ dARRAY * C = add(A,B);
 
 _Output_ :
 
-<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/4.png" alt="matrix" height="100px" width="200px"></img>
+<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/4.png" alt="matrix" height="80px" width="150px"></img>
 
 _Example_ :
 
@@ -254,7 +254,7 @@ dARRAY * C = add(A,B);
 
 _Output_ :
 
-<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/5.png" alt="matrix" height="300px" width="650px"></img>
+<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/5.png" alt="matrix" height="250px" width="500px"></img>
 
 _Example_ :
 
@@ -270,7 +270,7 @@ dARRAY * C = add(A,B);
 
 _Output_ :
 
-<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/6.png" alt="matrix" height="300px" width="650px"></img>
+<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/6.png" alt="matrix" height="250px" width="500px"></img>
 
 ##### 1. 8. `subtract()`
 
@@ -300,7 +300,7 @@ dARRAY * C = subtract(A,B);
 
 _Output_ :
 
-<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/7.png" alt="matrix" height="300px" width="650px"></img>
+<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/7.png" alt="matrix" height="250px" width="500px"></img>
 
 ##### 1. 9. `multiply()`
 
@@ -328,7 +328,7 @@ dARRAY * C = multiply(A,B);
 
 _Output_ :
 
-<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/8.png" alt="matrix" height="300px" width="650px"></img>
+<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/8.png" alt="matrix" height="220px" width="600px"></img>
 
 ##### 1. 10. `divison()`
 
@@ -358,7 +358,7 @@ dARRAY * C = divison(A,B);
 
 _Output_ :
 
-<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/9.png" alt="matrix" height="300px" width="650px"></img>
+<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/9.png" alt="matrix" height="220px" width="600px"></img>
 
 ##### 1. 11. `addScalar()`
 
@@ -381,7 +381,7 @@ dARRAY * B = addScalar(A,10.0);
 
 _Output_ :
 
-<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/10.png" alt="matrix" height="200px" width="400px"></img>
+<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/10.png" alt="matrix" height="130px" width="350px"></img>
 
 ##### 1. 12. `subScalar()`
 
@@ -404,7 +404,7 @@ dARRAY * B = subScalar(A,10.0);
 
 _Output_ :
 
-<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/11.png" alt="matrix" height="200px" width="400px"></img>
+<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/11.png" alt="matrix" height="130px" width="350px"></img>
 
 ##### 1. 13. `mulScalar()`
 
@@ -427,7 +427,7 @@ dARRAY * B = mulScalar(A,10.0);
 
 _Output_ :
 
-<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/12.png" alt="matrix" height="200px" width="400px"></img>
+<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/12.png" alt="matrix" height="130px" width="350px"></img>
 
 ##### 1. 14. `divScalar()`
 
@@ -450,7 +450,7 @@ dARRAY * B = divScalar(A,10.0);
 
 _Output_ :
 
-<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/13.png" alt="matrix" height="200px" width="400px"></img>
+<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/13.png" alt="matrix" height="130px" width="350px"></img>
 
 ##### 1. 15. `power()`
 
@@ -879,7 +879,7 @@ You can see how we are using a structure to pass arguments to the layer.
 `Dense()` layer performs a linear transformation 
 
 <p align="center">
-<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/15.png" alt="matrix" height="50px" width="150px"></img>
+<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/15.png" alt="matrix" height="30px" width="100px"></img>
 </p>
 
 on its inputs (`X`). It also applies dropout if it is enabled and pass the result to an activation function (`A`).
@@ -894,30 +894,30 @@ on its inputs (`X`). It also applies dropout if it is enabled and pass the resul
    
    `.layer_type="output"` - the layer behaves as the last layer which is the output layer of the network.
    <br>
-3. **`.activation`** - Specifies the type of activation function ($A$) to use for the layer.
+3. **`.activation`** - Specifies the type of activation function (A) to use for the layer.
    
    `.activation="relu"` - tells layer to use the 'ReLu' Activation function.
    
    <p align="center">
-   <img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/16.png" alt="matrix" height="100px" width="200px"></img>
+   <img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/16.png" alt="matrix" height="80px" width="210px"></img>
    </p>
    
    `.activation="sigmoid"` - tells layer to use the 'sigmoid' Activation function.
    
    <p align="center">
-   <img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/17.png" alt="matrix" height="80px" width="200px"></img>
+   <img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/17.png" alt="matrix" height="60px" width="200px"></img>
    </p>
    
    `.activation="tanh"` - tells layer to use the 'tanh' Activation function.
    
    <p align="center">
-   <img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/18.png" alt="matrix" height="80px" width="200px"></img>
+   <img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/18.png" alt="matrix" height="60px" width="200px"></img>
    </p>
    
    `.activation="softmax"` - tells layer to apply a 'softmax' Activation function.
    
    <p align="center">
-   <img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/19.png" alt="matrix" height="80px" width="200px"></img>
+   <img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/19.png" alt="matrix" height="70px" width="200px"></img>
    </p>
    
    <br>
@@ -938,13 +938,13 @@ on its inputs (`X`). It also applies dropout if it is enabled and pass the resul
    `.initializer="he"` - 'He' initialization will be used for weight initialization.
    
    <p align="center">
-   <img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/20.png" alt="matrix" height="80px" width="200px"></img>
+   <img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/20.png" alt="matrix" height="80px" width="180px"></img>
    </p>
    
    `.initializer="xavier"` - 'Xavier' initialization will be used for weight initialization.
    
    <p align="center">
-   <img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/21.png" alt="matrix" height="80px" width="200px"></img>
+   <img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/21.png" alt="matrix" height="80px" width="180px"></img>
    </p>
    
    `.initializer="random"` - Weights will be intialized to random values using normal distribution.
@@ -966,10 +966,11 @@ Dense(.layer_size=32,.activation="relu",.layer_type="hidden",.dropout=0.5);
 In the above example, we are defining a Dense layer with 32 neurons/nodes. We apply `relu` activation and a dropout of 0.5.
 
 **`Forward()`** :
+
 For the above example, the forward pass would be something like this :
 
 <p align="center">
-<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/24.png" alt="matrix" height="140px" width="350px"></img>
+<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/24.png" alt="matrix" height="110px" width="250px"></img>
 </p>
 
 **`Backward()`** :
@@ -977,7 +978,7 @@ For the above example, the forward pass would be something like this :
 For the above example, the backward pass would be something like this :
 
 <p align="center">
-  <img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/25.png" alt="matrix" height="150px" width="400px"></img>
+  <img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/25.png" alt="matrix" height="120px" width="300px"></img>
 </p>
 
 *Note* : the above backprop equations are just for illustrations. There may be dimension mismatches.
@@ -995,7 +996,7 @@ For a function `f(x)`,
 3. Using chain rule of calculus,
    
    <p align="center">
-   <img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/27.png" alt="matrix" height="250px" width="450px"></img>
+   <img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/27.png" alt="matrix" height="230px" width="400px"></img>
    </p>
   
 Now dx, dy, dz are gradients that are 'flowing' into inputs x, y, and z. Gradients dx, dy, dz become a global gradient for functions present above f(x). Remember, we are traversing the computation graph from last node to first node. That's why we are refering to gradients coming from below and flowing to above functions.
@@ -1293,7 +1294,7 @@ Setting learning rate correctly is important. For me, `lr > 4.65e-5` was working
 4. While organizing your training, val and test sets, remember that cDNN puts your features along rows. Meaning, it stacks your examples along columns and the rows will represent features.
 
 <p align="center">
-<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/28.png" alt="matrix" height="150px" width="400px"></img>
+<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/28.png" alt="matrix" height="130px" width="350px"></img>
 </p>
 
 Here, there are `n` examples stacked column wise and each example has `m` features which are stacked row wise.
