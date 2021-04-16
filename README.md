@@ -102,9 +102,17 @@ On Linux,
 
 ```bash
 $ sudo apt-get install gcc
+$ sudo apt-get install gfortran  #important don't miss this!
+$ sudo apt-get install libomp-dev
 $ sudo apt-get install libncurses-dev
-$ sudo apt-get install libopenblas-dev
+
+# Downloading OpenBlas from Source. There's no other way to install OpenBlas in how cDNN wants it.
+
+$ git clone https://github.com/xianyi/OpenBLAS.git
+$ cd OpenBlas
+$ sudo make && make install
 ```
+
 
 On macOS,
 
@@ -112,9 +120,8 @@ On macOS,
 $ brew install ncurses
 $ brew install gfortran
 $ git clone https://github.com/xianyi/OpenBLAS.git
-$ cd <into OpenBLAS-master directory>
-$ make
-$ make install
+$ cd OpenBlas
+$ sudo make && make install
 ```
 
 Installing OpenBLAS from their source will take a while. If you run into any errors while installing OpenBLAS, please refer to their [User Manual](https://github.com/xianyi/OpenBLAS/wiki/User-Manual).
