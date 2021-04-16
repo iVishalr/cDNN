@@ -1,4 +1,6 @@
-# cDNN
+<p align="center">
+<img src="https://github.com/iVishalr/cDNN/blob/main/documentation/images/logo.png" alt="matrix" height="90px" width="200px"></img>
+</p>
 
 **cDNN** is a Deep Learning Library written in C Programming Language.
 
@@ -33,13 +35,13 @@ The elements of a matrix are stored in a RowMajor fashion in memory.
 Consider the following matrix :
 
 <p align="center">
-<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/1.png" alt="matrix" height="90px" width="200px"></img>
+<img src="https://github.com/iVishalr/cDNN/blob/main/documentation/images/1.png" alt="matrix" height="90px" width="200px"></img>
 </p>
 
 The matrix has a shape `(3,3)`. The elements of the matrix would be stored in memory as follows :
 
 <p align="center">
-<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/2.png" alt="matrix" height="40px" width="350px"></img>
+<img src="https://github.com/iVishalr/cDNN/blob/main/documentation/images/2.png" alt="matrix" height="40px" width="350px"></img>
 </p>
 
 `float * matrix` stores the above array and `int shape[2] = {3,3}`. The shape of the matrix helps us to know the dimensions of the matrix.
@@ -189,7 +191,7 @@ dARRAY * B = reshape(A,new_dims);
 
 _Output_ :
 
-<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/3.png" alt="reshape_output" height="80px" width="550px"></img>
+<img src="https://github.com/iVishalr/cDNN/blob/main/documentation/images/3.png" alt="reshape_output" height="80px" width="550px"></img>
 
 ##### 1. 6. `size()`
 
@@ -238,7 +240,7 @@ dARRAY * C = add(A,B);
 
 _Output_ :
 
-<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/4.png" alt="matrix" height="80px" width="150px"></img>
+<img src="https://github.com/iVishalr/cDNN/blob/main/documentation/images/4.png" alt="matrix" height="80px" width="150px"></img>
 
 _Example_ :
 
@@ -254,7 +256,7 @@ dARRAY * C = add(A,B);
 
 _Output_ :
 
-<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/5.png" alt="matrix" height="250px" width="500px"></img>
+<img src="https://github.com/iVishalr/cDNN/blob/main/documentation/images/5.png" alt="matrix" height="250px" width="500px"></img>
 
 _Example_ :
 
@@ -270,7 +272,7 @@ dARRAY * C = add(A,B);
 
 _Output_ :
 
-<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/6.png" alt="matrix" height="250px" width="500px"></img>
+<img src="https://github.com/iVishalr/cDNN/blob/main/documentation/images/6.png" alt="matrix" height="250px" width="500px"></img>
 
 ##### 1. 8. `subtract()`
 
@@ -300,7 +302,7 @@ dARRAY * C = subtract(A,B);
 
 _Output_ :
 
-<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/7.png" alt="matrix" height="250px" width="500px"></img>
+<img src="https://github.com/iVishalr/cDNN/blob/main/documentation/images/7.png" alt="matrix" height="250px" width="500px"></img>
 
 ##### 1. 9. `multiply()`
 
@@ -328,7 +330,7 @@ dARRAY * C = multiply(A,B);
 
 _Output_ :
 
-<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/8.png" alt="matrix" height="220px" width="600px"></img>
+<img src="https://github.com/iVishalr/cDNN/blob/main/documentation/images/8.png" alt="matrix" height="220px" width="600px"></img>
 
 ##### 1. 10. `divison()`
 
@@ -358,7 +360,7 @@ dARRAY * C = divison(A,B);
 
 _Output_ :
 
-<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/9.png" alt="matrix" height="220px" width="600px"></img>
+<img src="https://github.com/iVishalr/cDNN/blob/main/documentation/images/9.png" alt="matrix" height="220px" width="600px"></img>
 
 ##### 1. 11. `addScalar()`
 
@@ -381,7 +383,7 @@ dARRAY * B = addScalar(A,10.0);
 
 _Output_ :
 
-<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/10.png" alt="matrix" height="130px" width="350px"></img>
+<img src="https://github.com/iVishalr/cDNN/blob/main/documentation/images/10.png" alt="matrix" height="130px" width="350px"></img>
 
 ##### 1. 12. `subScalar()`
 
@@ -404,7 +406,7 @@ dARRAY * B = subScalar(A,10.0);
 
 _Output_ :
 
-<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/11.png" alt="matrix" height="130px" width="350px"></img>
+<img src="https://github.com/iVishalr/cDNN/blob/main/documentation/images/11.png" alt="matrix" height="130px" width="350px"></img>
 
 ##### 1. 13. `mulScalar()`
 
@@ -427,7 +429,7 @@ dARRAY * B = mulScalar(A,10.0);
 
 _Output_ :
 
-<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/12.png" alt="matrix" height="130px" width="350px"></img>
+<img src="https://github.com/iVishalr/cDNN/blob/main/documentation/images/12.png" alt="matrix" height="130px" width="350px"></img>
 
 ##### 1. 14. `divScalar()`
 
@@ -450,7 +452,7 @@ dARRAY * B = divScalar(A,10.0);
 
 _Output_ :
 
-<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/13.png" alt="matrix" height="130px" width="350px"></img>
+<img src="https://github.com/iVishalr/cDNN/blob/main/documentation/images/13.png" alt="matrix" height="130px" width="350px"></img>
 
 ##### 1. 15. `power()`
 
@@ -680,7 +682,7 @@ int template = permutation(5);
 
 _Output_ :
 
-<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/14.png" alt="matrix" height="30px" width="150px"></img>
+<img src="https://github.com/iVishalr/cDNN/blob/main/documentation/images/14.png" alt="matrix" height="30px" width="150px"></img>
 
 ##### 1. 25. `frobenius_norm()`
 
@@ -876,10 +878,10 @@ You can see how we are using a structure to pass arguments to the layer.
 
 ##### 4. 2. `Dense()`
 
-`Dense()` layer performs a linear transformation 
+`Dense()` layer performs a linear transformation
 
 <p align="center">
-<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/15.png" alt="matrix" height="30px" width="100px"></img>
+<img src="https://github.com/iVishalr/cDNN/blob/main/documentation/images/15.png" alt="matrix" height="30px" width="100px"></img>
 </p>
 
 on its inputs (`X`). It also applies dropout if it is enabled and pass the result to an activation function (`A`).
@@ -889,72 +891,75 @@ on its inputs (`X`). It also applies dropout if it is enabled and pass the resul
 1. **`.layer_size`** - Specifies number of nodes in the layer.
    <br>
 2. **`.layer_type`** - Specifies the type of `Dense` layer used.
-   
+
    `.layer_type="hidden"` - the dense layer behaves as a hidden layer in the network.
-   
+
    `.layer_type="output"` - the layer behaves as the last layer which is the output layer of the network.
    <br>
+
 3. **`.activation`** - Specifies the type of activation function (A) to use for the layer.
-   
+
    `.activation="relu"` - tells layer to use the 'ReLu' Activation function.
-   
+
    <p align="center">
-   <img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/16.png" alt="matrix" height="80px" width="210px"></img>
+   <img src="https://github.com/iVishalr/cDNN/blob/main/documentation/images/16.png" alt="matrix" height="80px" width="210px"></img>
    </p>
-   
+
    `.activation="sigmoid"` - tells layer to use the 'sigmoid' Activation function.
-   
+
    <p align="center">
-   <img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/17.png" alt="matrix" height="60px" width="200px"></img>
+   <img src="https://github.com/iVishalr/cDNN/blob/main/documentation/images/17.png" alt="matrix" height="60px" width="200px"></img>
    </p>
-   
+
    `.activation="tanh"` - tells layer to use the 'tanh' Activation function.
-   
+
    <p align="center">
-   <img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/18.png" alt="matrix" height="60px" width="200px"></img>
+   <img src="https://github.com/iVishalr/cDNN/blob/main/documentation/images/18.png" alt="matrix" height="60px" width="200px"></img>
    </p>
-   
+
    `.activation="softmax"` - tells layer to apply a 'softmax' Activation function.
-   
+
    <p align="center">
-   <img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/19.png" alt="matrix" height="70px" width="200px"></img>
+   <img src="https://github.com/iVishalr/cDNN/blob/main/documentation/images/19.png" alt="matrix" height="70px" width="200px"></img>
    </p>
-   
+
    <br>
+
 4. **`.dropout`** - Specifies the dropout to be used in the layer.
-   
+
    `.dropout=1.0` - No dropout will be applied.
-   
+
    `.dropout=0.5` - Specifies that there is a 50% chance of dropping out certain nodes in the layer.
-   
-   `.dropout=x` - Specifies that there is a x\*100% chance of dropping out certain nodes in the layer.  
-    
-    `x` must be within 0.0 and 1.0
-   
+
+   `.dropout=x` - Specifies that there is a x\*100% chance of dropping out certain nodes in the layer.
+
+   `x` must be within 0.0 and 1.0
+
    By default,`Dense()` will use `.dropout=1.0`.
    <br>
+
 5. **`.initializer`** - Specifies the type of initialization to be used for initializing the layer weights.
-   
+
    `.initializer="he"` - 'He' initialization will be used for weight initialization.
-   
+
    <p align="center">
-   <img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/20.png" alt="matrix" height="80px" width="180px"></img>
+   <img src="https://github.com/iVishalr/cDNN/blob/main/documentation/images/20.png" alt="matrix" height="80px" width="180px"></img>
    </p>
-   
+
    `.initializer="xavier"` - 'Xavier' initialization will be used for weight initialization.
-   
+
    <p align="center">
-   <img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/21.png" alt="matrix" height="80px" width="180px"></img>
+   <img src="https://github.com/iVishalr/cDNN/blob/main/documentation/images/21.png" alt="matrix" height="80px" width="180px"></img>
    </p>
-   
+
    `.initializer="random"` - Weights will be intialized to random values using normal distribution.
-   
+
    <p align="center">
-   <img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/22.png" alt="matrix" height="30px" width="150px"></img>
+   <img src="https://github.com/iVishalr/cDNN/blob/main/documentation/images/22.png" alt="matrix" height="30px" width="150px"></img>
    </p>
-   
+
    `.initializer="zeros"` - Weights will be set to zero. **Don't use this option**. It is just there to show that network fails to break symmetry when `W=0`.
-   
+
    By default,`Dense()` will use `.initializer="he"`.
 
 _Example_:
@@ -970,7 +975,7 @@ In the above example, we are defining a Dense layer with 32 neurons/nodes. We ap
 For the above example, the forward pass would be something like this :
 
 <p align="center">
-<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/24.png" alt="matrix" height="110px" width="250px"></img>
+<img src="https://github.com/iVishalr/cDNN/blob/main/documentation/images/24.png" alt="matrix" height="110px" width="250px"></img>
 </p>
 
 **`Backward()`** :
@@ -978,27 +983,27 @@ For the above example, the forward pass would be something like this :
 For the above example, the backward pass would be something like this :
 
 <p align="center">
-  <img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/25.png" alt="matrix" height="120px" width="300px"></img>
+  <img src="https://github.com/iVishalr/cDNN/blob/main/documentation/images/25.png" alt="matrix" height="120px" width="300px"></img>
 </p>
 
-*Note* : the above backprop equations are just for illustrations. There may be dimension mismatches.
+_Note_ : the above backprop equations are just for illustrations. There may be dimension mismatches.
 
 The basic idea employed here is, if we are traversing the computation graph from bottom to top, the gradient flow would be somthing like this :
 For a function `f(x)`,
 
 1. We will find the `local gradients` :
-   
+
    <p align="center">
-   <img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/26.png" alt="matrix" height="70px" width="400px"></img>
+   <img src="https://github.com/iVishalr/cDNN/blob/main/documentation/images/26.png" alt="matrix" height="70px" width="400px"></img>
    </p>
-   
+
 2. We will have a gradient from below called `global gradients`.
 3. Using chain rule of calculus,
-   
+
    <p align="center">
-   <img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/27.png" alt="matrix" height="230px" width="400px"></img>
+   <img src="https://github.com/iVishalr/cDNN/blob/main/documentation/images/27.png" alt="matrix" height="230px" width="400px"></img>
    </p>
-  
+
 Now dx, dy, dz are gradients that are 'flowing' into inputs x, y, and z. Gradients dx, dy, dz become a global gradient for functions present above f(x). Remember, we are traversing the computation graph from last node to first node. That's why we are refering to gradients coming from below and flowing to above functions.
 
 It's kind of difficult to explain this without a computation graph.
@@ -1018,51 +1023,51 @@ This layer is responsible for putting the model together. Basically it combines 
 7. **`.epochs`** - Specifies the number of epochs the model must perform.
 8. **`.batch_size`** - Specifies the batch_size for the model.
 9. **`.optimizer`** - Specifies the optimizer to be used for training.
-   
+
    `.optimizer="adam"` - Uses the Adam optimization for parameter updates.
-   
+
    `.optimizer="adagrad"` - Uses the Adagrad optimization for parameter updates.
-   
+
    `.optimizer="rmsprop"` - Uses the RMSProp optimization for parameter updates.
-   
+
    `.optimizer="momentum"` - Uses the Momentum optimization for parameter updates.
-   
+
    `.optimizer="sgd"` - Uses the Gradient Descent optimization for parameter updates.
-   
+
    By default, `.optimizer="adam"`.
-   
+
 10. **`.regularization`** - Specifies the type of regularization to be used for training.
-    
+
     `.regularization="L1"` - Uses the L1 regularization for training.
-    
+
     `.regularization="L2"` - Uses the L2 regularization for training.
-    
+
     By default, `.regularization="L2"`.
-    
+
 11. **`.weight_decay`** - Specifies the regularization strength for training.
 12. **`.lr`** - Specifies the learning rate for training.
 13. **`.beta`** - Specifies the decay value that will be used during parameter updates.
-    
+
     By default, `.beta=0.9`.
-    
+
 14. **`.beta1`** - Specifies the decay value that will be used for first order moment calculations during parameter updates.
-    
+
     By default, `.beta1=0.9`.
-    
+
 15. **`.beta2`** - Specifies the decay value that will be used for second order moment calculations during parameter updates.
-    
+
     By default, `.beta2=0.999`.
-    
+
 16. **`.loss`** - Specifies the loss function to be used for training.
-    
+
     `.loss="cross_entropy_loss"` - Uses the CrossEntropyLoss function for training.
-    
+
     `.loss="MSELoss"` - Uses the MSELoss function for training.
-    
+
     By default, `.loss="cross_entropy_loss"`.
-    
+
 17. **`.checkpoint_every`** - Specifies how often (in epochs) the model must be saved.
-    
+
     By default, `.checkpoint_every=2500`. (2500th epoch).
 
 All the above arguments except `.X_train,y_train` are optional arguments. To achieve this functionality, we use structures to accept the arguments from the user and pass it to the model. The user cannot remember all the arguments that must be provided hence this method is the only suitable way.
@@ -1294,7 +1299,7 @@ Setting learning rate correctly is important. For me, `lr > 4.65e-5` was working
 4. While organizing your training, val and test sets, remember that cDNN puts your features along rows. Meaning, it stacks your examples along columns and the rows will represent features.
 
 <p align="center">
-<img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/28.png" alt="matrix" height="130px" width="350px"></img>
+<img src="https://github.com/iVishalr/cDNN/blob/main/documentation/images/28.png" alt="matrix" height="130px" width="350px"></img>
 </p>
 
 Here, there are `n` examples stacked column wise and each example has `m` features which are stacked row wise.
