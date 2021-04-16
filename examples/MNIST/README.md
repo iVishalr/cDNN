@@ -16,6 +16,6 @@ Training Set : 55,000 images
 Validation Set : 5000 images
 Test Set : 10,000 images.
 
-Data set is available to download [here](http://yann.lecun.com/exdb/mnist/).
+Data set is available to download [here](http://yann.lecun.com/exdb/mnist/). I have also included the extracted dataset in the `./data/` folder.
 
 The data set has been preprocess using the `Preprocess.ipynb` notebook and train,validation and test sets were created and stored in their respective files.
