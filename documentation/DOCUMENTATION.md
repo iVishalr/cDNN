@@ -889,29 +889,32 @@ on its inputs (`X`). It also applies dropout if it is enabled and pass the resul
 1. **`.layer_size`** - Specifies number of nodes in the layer.
    <br>
 2. **`.layer_type`** - Specifies the type of `Dense` layer used.
-   &nbsp;&nbsp;&nbsp;&nbsp;`.layer_type="hidden"` the dense layer behaves as a hidden layer in the network.
-   &nbsp;&nbsp;&nbsp;&nbsp;`.layer_type="output"` the layer behaves as the last layer which is the output layer of the network.
+   
+   `.layer_type="hidden"` - the dense layer behaves as a hidden layer in the network.
+   
+   `.layer_type="output"` - the layer behaves as the last layer which is the output layer of the network.
    <br>
 3. **`.activation`** - Specifies the type of activation function ($A$) to use for the layer.
-   &nbsp;&nbsp;&nbsp;&nbsp;`.activation="relu"` - tells layer to use the 'ReLu' Activation function.
+   
+   `.activation="relu"` - tells layer to use the 'ReLu' Activation function.
    
    <p align="center">
    <img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/16.png" alt="matrix" height="100px" width="200px"></img>
    </p>
    
-   &nbsp;&nbsp;&nbsp;&nbsp;`.activation="sigmoid"` - tells layer to use the 'sigmoid' Activation function.
+   `.activation="sigmoid"` - tells layer to use the 'sigmoid' Activation function.
    
    <p align="center">
    <img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/17.png" alt="matrix" height="80px" width="200px"></img>
    </p>
    
-   &nbsp;&nbsp;&nbsp;&nbsp;`.activation="tanh"` - tells layer to use the 'tanh' Activation function.
+   `.activation="tanh"` - tells layer to use the 'tanh' Activation function.
    
    <p align="center">
    <img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/18.png" alt="matrix" height="80px" width="200px"></img>
    </p>
    
-   &nbsp;&nbsp;&nbsp;&nbsp;`.activation="softmax"` - tells layer to apply a 'softmax' Activation function.
+   `.activation="softmax"` - tells layer to apply a 'softmax' Activation function.
    
    <p align="center">
    <img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/19.png" alt="matrix" height="80px" width="200px"></img>
@@ -919,33 +922,40 @@ on its inputs (`X`). It also applies dropout if it is enabled and pass the resul
    
    <br>
 4. **`.dropout`** - Specifies the dropout to be used in the layer.
-   &nbsp;&nbsp;&nbsp;&nbsp;`.dropout=1.0` - No dropout will be applied.
-   &nbsp;&nbsp;&nbsp;&nbsp;`.dropout=0.5` - Specifies that there is a 50% chance of dropping out certain nodes in the layer.
-   &nbsp;&nbsp;&nbsp;&nbsp;`.dropout=x` - Specifies that there is a x\*100% chance of dropping out certain nodes in the layer.  
-    &nbsp;&nbsp;&nbsp;&nbsp;`x` must be within 0.0 and 1.0
-   &nbsp;&nbsp;&nbsp;&nbsp; By default,`Dense()` will use `.dropout=1.0`.
+   
+   `.dropout=1.0` - No dropout will be applied.
+   
+   `.dropout=0.5` - Specifies that there is a 50% chance of dropping out certain nodes in the layer.
+   
+   `.dropout=x` - Specifies that there is a x\*100% chance of dropping out certain nodes in the layer.  
+    
+    `x` must be within 0.0 and 1.0
+   
+   By default,`Dense()` will use `.dropout=1.0`.
    <br>
 5. **`.initializer`** - Specifies the type of initialization to be used for initializing the layer weights.
-   &nbsp;&nbsp;&nbsp;&nbsp;`.initializer="he"` - 'He' initialization will be used for weight initialization.
+   
+   `.initializer="he"` - 'He' initialization will be used for weight initialization.
    
    <p align="center">
    <img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/20.png" alt="matrix" height="80px" width="200px"></img>
    </p>
    
-   &nbsp;&nbsp;&nbsp;&nbsp;`.initializer="xavier"` - 'Xavier' initialization will be used for weight initialization.
+   `.initializer="xavier"` - 'Xavier' initialization will be used for weight initialization.
    
    <p align="center">
    <img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/21.png" alt="matrix" height="80px" width="200px"></img>
    </p>
    
-   &nbsp;&nbsp;&nbsp;&nbsp;`.initializer="random"` - Weights will be intialized to random values using normal distribution.
+   `.initializer="random"` - Weights will be intialized to random values using normal distribution.
    
    <p align="center">
    <img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/22.png" alt="matrix" height="30px" width="150px"></img>
    </p>
    
-   &nbsp;&nbsp;&nbsp;&nbsp;`.initializer="zeros"` - Weights will be set to zero. **Don't use this option**. It is just there to show that network fails to break symmetry when `W=0`.
-   &nbsp;&nbsp;&nbsp;&nbsp; By default,`Dense()` will use `.initializer="he"`.
+   `.initializer="zeros"` - Weights will be set to zero. **Don't use this option**. It is just there to show that network fails to break symmetry when `W=0`.
+   
+   By default,`Dense()` will use `.initializer="he"`.
 
 _Example_:
 
@@ -969,7 +979,8 @@ For the above example, the backward pass would be something like this :
 <p align="center">
   <img src="https://github.com/iVishalr/cDNN/blob/main/examples/images/25.png" alt="matrix" height="150px" width="400px"></img>
 </p>
-_Note : the above backprop equations are just for illustrations. There may be dimension mismatches._
+
+*Note* : the above backprop equations are just for illustrations. There may be dimension mismatches.
 
 The basic idea employed here is, if we are traversing the computation graph from bottom to top, the gradient flow would be somthing like this :
 For a function `f(x)`,
@@ -1006,29 +1017,51 @@ This layer is responsible for putting the model together. Basically it combines 
 7. **`.epochs`** - Specifies the number of epochs the model must perform.
 8. **`.batch_size`** - Specifies the batch_size for the model.
 9. **`.optimizer`** - Specifies the optimizer to be used for training.
-   &nbsp;&nbsp;&nbsp;&nbsp; `.optimizer="adam"` - Uses the $Adam$ optimization for parameter updates.
-   &nbsp;&nbsp;&nbsp;&nbsp; `.optimizer="adagrad"` - Uses the $Adagrad$ optimization for parameter updates.
-   &nbsp;&nbsp;&nbsp;&nbsp; `.optimizer="rmsprop"` - Uses the $RMSProp$ optimization for parameter updates.
-   &nbsp;&nbsp;&nbsp;&nbsp; `.optimizer="momentum"` - Uses the $Momentum$ optimization for parameter updates.
-   &nbsp;&nbsp;&nbsp;&nbsp; `.optimizer="sgd"` - Uses the $Gradient\ Descent$ optimization for parameter updates.
+   
+   `.optimizer="adam"` - Uses the Adam optimization for parameter updates.
+   
+   `.optimizer="adagrad"` - Uses the Adagrad optimization for parameter updates.
+   
+   `.optimizer="rmsprop"` - Uses the RMSProp optimization for parameter updates.
+   
+   `.optimizer="momentum"` - Uses the Momentum optimization for parameter updates.
+   
+   `.optimizer="sgd"` - Uses the Gradient Descent optimization for parameter updates.
+   
    By default, `.optimizer="adam"`.
+   
 10. **`.regularization`** - Specifies the type of regularization to be used for training.
-    &nbsp;&nbsp;&nbsp;&nbsp; `.regularization="L1"` - Uses the $L1$ regularization for training.
-    &nbsp;&nbsp;&nbsp;&nbsp; `.regularization="L2"` - Uses the $L2$ regularization for training.
+    
+    `.regularization="L1"` - Uses the L1 regularization for training.
+    
+    `.regularization="L2"` - Uses the L2 regularization for training.
+    
     By default, `.regularization="L2"`.
+    
 11. **`.weight_decay`** - Specifies the regularization strength for training.
 12. **`.lr`** - Specifies the learning rate for training.
 13. **`.beta`** - Specifies the decay value that will be used during parameter updates.
+    
     By default, `.beta=0.9`.
+    
 14. **`.beta1`** - Specifies the decay value that will be used for first order moment calculations during parameter updates.
+    
     By default, `.beta1=0.9`.
+    
 15. **`.beta2`** - Specifies the decay value that will be used for second order moment calculations during parameter updates.
+    
     By default, `.beta2=0.999`.
+    
 16. **`.loss`** - Specifies the loss function to be used for training.
-    &nbsp;&nbsp;&nbsp;&nbsp; `.loss="cross_entropy_loss"` - Uses the $CrossEntropyLoss$ function for training.
-    &nbsp;&nbsp;&nbsp;&nbsp; `.loss="MSELoss"` - Uses the $MSELoss$ function for training.
+    
+    `.loss="cross_entropy_loss"` - Uses the CrossEntropyLoss function for training.
+    
+    `.loss="MSELoss"` - Uses the MSELoss function for training.
+    
     By default, `.loss="cross_entropy_loss"`.
+    
 17. **`.checkpoint_every`** - Specifies how often (in epochs) the model must be saved.
+    
     By default, `.checkpoint_every=2500`. (2500th epoch).
 
 All the above arguments except `.X_train,y_train` are optional arguments. To achieve this functionality, we use structures to accept the arguments from the user and pass it to the model. The user cannot remember all the arguments that must be provided hence this method is the only suitable way.
@@ -1061,13 +1094,13 @@ Model(...) Model((Model_args){\
 After the model has been trained, the model paramters can be saved by using the following function.
 
 ```C
-save_model(char * filename)
+Save_Model(char * filename)
 ```
 
 _Example_ :
 
 ```C
-save_model("./model/DOGS_VS_CATS.t7");
+Save_Model("./model/DOGS_VS_CATS.t7");
 ```
 
 Please use `.t7` format for loading and saving model.
@@ -1077,13 +1110,13 @@ Please use `.t7` format for loading and saving model.
 A trained model can be loaded in by using the following function.
 
 ```C
-load_model(char * filename)
+Load_Model(char * filename)
 ```
 
 _Example_ :
 
 ```C
-load_model("./model/DOGS_VS_CATS.t7");
+Load_Model("./model/DOGS_VS_CATS.t7");
 ```
 
 Please use `.t7` format for loading and saving model.
