@@ -56,6 +56,7 @@ void printComputation_Graph(Computation_Graph * G){
 }
 
 Computation_Graph * destroy_Graph(Computation_Graph * G){
+  signal(SIGSEGV,segfault_handler);
   Computation_Graph * temp = m->graph;
   Computation_Graph * prev;
   while(temp!=NULL){
@@ -106,7 +107,6 @@ Computation_Graph * destroy_Graph(Computation_Graph * G){
     else if(prev->type==LOSS){
       loss_layer * layer = prev->LOSS;
       if(layer->grad_out!=NULL) free2d(layer->grad_out);
-      // if(layer->gnd_truth!=NULL) free2d(layer->gnd_truth);
       prev->prev_layer = NULL;
       free(layer);
       layer = NULL;

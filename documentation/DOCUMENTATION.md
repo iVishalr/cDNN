@@ -902,7 +902,7 @@ on its inputs (`X`). It also applies dropout if it is enabled and pass the resul
    <p align="center">
    <img src="https://github.com/iVishalr/cDNN/blob/main/documentation/images/16.png" alt="matrix" height="80px" width="210px"></img>
    </p>
-   
+
    _Note_ : Please use `.initializer="he"` when using ReLu activation function.
 
    `.activation="sigmoid"` - tells layer to use the 'sigmoid' Activation function.
@@ -916,7 +916,7 @@ on its inputs (`X`). It also applies dropout if it is enabled and pass the resul
    <p align="center">
    <img src="https://github.com/iVishalr/cDNN/blob/main/documentation/images/18.png" alt="matrix" height="60px" width="200px"></img>
    </p>
-   
+
    _Note_ : Please use `.initializer="xavier"` when using tanh activation function.
 
    `.activation="softmax"` - tells layer to apply a 'softmax' Activation function.
@@ -924,9 +924,9 @@ on its inputs (`X`). It also applies dropout if it is enabled and pass the resul
    <p align="center">
    <img src="https://github.com/iVishalr/cDNN/blob/main/documentation/images/19.png" alt="matrix" height="70px" width="200px"></img>
    </p>
-   
+
    _Note_ : Please use `.initializer="random"` when using Softmax activation function.
-   
+
    <br>
 
 4. **`.dropout`** - Specifies the dropout to be used in the layer.
@@ -1288,7 +1288,7 @@ cDNN does not provide any plotting tools. However, the model metrics such as tra
 
 #### 9. Early Stopping
 
-There is an option to run your model infinitely. Setting `.epochs=-1` runs the model forever. To stop training, press `CTRL + C`. cDNN will ask you if you want to save the model or not. Please follow the menu options to save the model and to give it a name.
+There is an option to run your model infinitely. Setting `.epochs=-1` runs the model forever. To stop training, press `CTRL + C`. cDNN will save your model by default. Please delete it if you don't want to save it.
 
 #### 10. Additional Notes
 

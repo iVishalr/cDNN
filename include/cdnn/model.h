@@ -76,11 +76,12 @@ extern "C"{
   void Test();
   void Load_Model(char * filename);
   void Save_Model(char * filename);
-  void early_stopping_handler(int num);
+  void early_stopping_handler();
   void create_mini_batches();
   void dump_to_file(float * arr ,char * filename,char * mode);
   void dump_image(dARRAY * images,char * filename);
   dARRAY * load_image(char * filename,int * dims);
+  void segfault_handler();
   void (Destroy_Model)();
 #ifdef __cplusplus
 }

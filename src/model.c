@@ -335,9 +335,15 @@ void __fit__(){
         dump_to_file(train_cost_arr,"./bin/cost.data","ab+");
         dump_to_file(train_acc_arr,"./bin/train_acc.data","ab+");
         if(m->x_cv!=NULL || m->Y_cv!=NULL)
-      dump_to_file(val_acc_arr,"./bin/val_acc.data","wb+");
+          dump_to_file(val_acc_arr,"./bin/val_acc.data","wb+");
         flag_cost=1;
       }
+    }
+    if(!flag_cost){
+      dump_to_file(train_cost_arr,"./bin/cost.data","ab+");
+      dump_to_file(train_acc_arr,"./bin/train_acc.data","ab+");
+      if(m->x_cv!=NULL || m->Y_cv!=NULL)
+        dump_to_file(val_acc_arr,"./bin/val_acc.data","wb+");
     }
     i++;
     if(m->num_iter==-1) iterations = i;
@@ -360,56 +366,17 @@ void Fit(){
   __fit__();
 }
 
-void early_stopping_handler(int num){
-  while(1){
-    printf("\nYou have stopped the training process! Would you like to save the model? [Y/N] : ");
-    char ch = (char)getchar();
-    if(ch=='Y' || ch=='y'){
-      while(1){
-        cleanSTDIN();
-        printf("Would you like to specify a name for your model? [Y/N] : ");
-        char choice = (char)getchar();
-        if(choice=='Y' || choice=='y'){
-          char name[100];
-          cleanSTDIN();
-          printf("Enter a name [Please use xxx.t7 as the filename] : "); 
-          scanf("%s",name);
-          __save_model__(name);
-          break;
-        }
-        else if(choice=='N' || choice=='n'){
-          cleanSTDIN();
-          time_t rawtime;
-          struct tm * timeinfo;
+void early_stopping_handler(){
+  printf("\nModel Saved!\n");
+  time_t rawtime;
+  struct tm * timeinfo;
 
-          time ( &rawtime );
-          timeinfo = localtime ( &rawtime );
-      
-          char buffer[1024];
-          snprintf(buffer,sizeof(buffer),"model_%s.t7",asctime (timeinfo));
-          __save_model__(buffer);
-          break;
-        }
-        else{
-          printf("Invalid Option entered!\n");
-          sleep_my(1000);
-          continue;
-        }
-      }
-      break;
-    }
-    else if(ch=='N' || ch=='n'){
-      cleanSTDIN();
-      printf("Model not saved!\n");
-      break;
-    }
-    else{
-      printf("Invalid Option entered!\n");
-      sleep_my(1000);
-      cleanSTDIN();
-      continue;
-    }
-  }
+  time ( &rawtime );
+  timeinfo = localtime ( &rawtime );
+
+  char buffer[1024];
+  snprintf(buffer,sizeof(buffer),"model_%s.t7",asctime (timeinfo));
+  __save_model__(buffer);
   Destroy_Model();
   exit(EXIT_SUCCESS);  
 }
@@ -551,7 +518,7 @@ void Load_Model(char * filename){
 
 void __save_model__(char * filename){
   if(strstr(filename,".t7")==NULL){
-    printf("\033[1;31mFileExtension Error : \033[93mPlease use \".t7\" extension only. Other extensions are not supported currently.\033[0m\n");
+    printf("\033[1;31mFileExtension Error : \033[93m%s uses a different extension. Please use \".t7\" extension only. Other extensions are not supported currently.\033[0m\n",filename);
     exit(EXIT_FAILURE);
   }
   FILE * fp = NULL;
@@ -925,7 +892,12 @@ void (Create_Model)(){
   m->output_size = 0;
 }
 
+void segfault_handler(){
+  exit(EXIT_SUCCESS);
+}
+
 void (Destroy_Model)(){
+  signal(SIGSEGV,segfault_handler);
   destroy_Graph(m->graph);
   if(m->x_cv!=NULL)
   free2d(m->x_cv);
