@@ -4,13 +4,13 @@ int main(){
   
   Create_Model();
   
-  int x_train_dims[] = {12288,100};
-  int x_cv_dims[] = {12288,100};
-  int x_test_dims[] = {12288,100};
+  int x_train_dims[] = {12288,20000};
+  int x_cv_dims[] = {12288,2000};
+  int x_test_dims[] = {12288,2000};
   
-  int y_train_dims[] = {2,100};
-  int y_cv_dims[] = {2,100};
-  int y_test_dims[] = {2,100};
+  int y_train_dims[] = {2,20000};
+  int y_cv_dims[] = {2,2000};
+  int y_test_dims[] = {2,2000};
   
   dARRAY * x_train = load_x_train("./data/X_train.t7",x_train_dims);
   dARRAY * x_cv = load_x_cv("./data/X_cv.t7",x_cv_dims);
@@ -27,7 +27,7 @@ int main(){
   Dense(.layer_size=16,.activation="relu",.layer_type="hidden");
   Dense(.layer_size=2,.activation="softmax",.initializer="random",.layer_type="output");
   Model(.X_train=x_train,.y_train=y_train,.X_cv=x_cv,.y_cv=y_cv,.X_test=NULL,.y_test=NULL,\
-        .epochs=100,.lr=4.67e-5,.optimizer="rmsprop",.checkpoint_every=-1,.batch_size=32);
+        .epochs=100,.lr=4.67e-5,.optimizer="adam",.checkpoint_every=-1,.batch_size=256);
   
   Load_Model("test.t7");
   
