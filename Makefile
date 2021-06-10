@@ -22,8 +22,8 @@ ifeq "$(PLATFORM)" "Darwin"
 endif
 ifeq "$(PLATFORM)" "Linux"
     SHARED_SUFFIX=so
-	INCLUDE_DIR=/usr/include/
-	INSTALL_DIR=/usr/lib/
+    INCLUDE_DIR=/usr/include/
+    INSTALL_DIR=/usr/lib/
 endif
 
 
