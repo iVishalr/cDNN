@@ -111,7 +111,7 @@ $ sudo apt-get install libncurses-dev
 # Downloading OpenBlas from Source. There's no other way to install OpenBlas in how cDNN wants it.
 
 $ git clone https://github.com/xianyi/OpenBLAS.git
-$ cd OpenBlas
+$ cd OpenBLAS
 $ sudo make && sudo make install #This will take a while depending on your system speed. You may see some warnings along the way. Don't worry about it.
 ```
 
@@ -121,7 +121,7 @@ On macOS,
 $ brew install ncurses
 $ brew install gfortran
 $ git clone https://github.com/xianyi/OpenBLAS.git
-$ cd OpenBlas
+$ cd OpenBLAS
 $ sudo make && sudo make install
 ```
 
