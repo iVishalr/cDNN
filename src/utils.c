@@ -1023,8 +1023,12 @@ void cleanSTDIN() {
 */
 void get_safe_nn_threads(){
   int num_cpu_cores = sysconf(_SC_NPROCESSORS_CONF);
-  if(num_cpu_cores<=16){
+
+  if(num_cpu_cores<=4){
     nn_threads = num_cpu_cores*2;
+  }
+  else if(num_cpu_cores>=8){
+    nn_threads = num_cpu_cores/2;
   }
   else nn_threads = num_cpu_cores;
 }

@@ -1,6 +1,6 @@
 CC=gcc
-CFLAGS=-Wall -Wrestrict -O3 -I ./include/ -funroll-loops -O3 -fopenmp -Ofast -ffp-contract=fast --fast-math -I /opt/OpenBLAS/include/ -fpic
-LDFLAGS=-lm -L/opt/OpenBLAS/lib -lopenblas -lncurses -lgomp
+CFLAGS=-Wall -Wrestrict -O3 -I ./include/ -funroll-loops -fopenmp -Ofast -ffp-contract=fast --fast-math -I /opt/OpenBLAS/include/ -fpic
+LDFLAGS=-L /opt/OpenBLAS/lib -lopenblas -lncurses -lgomp -lm
 
 SRC=src
 BUILD=build
@@ -15,14 +15,17 @@ PLATFORM=$(shell uname -s)
 SHARED_SUFFIX=dll
 LIB_NAME=cdnn
 
+INSTALL_DIR=/usr/local/lib
+
 ifeq "$(PLATFORM)" "Darwin"
     SHARED_SUFFIX=dylib
 endif
 ifeq "$(PLATFORM)" "Linux"
     SHARED_SUFFIX=so
+	INCLUDE_DIR=/usr/include/
+	INSTALL_DIR=/usr/lib/
 endif
 
-INSTALL_DIR=/usr/local/lib
 
 all: 
 	@if ! test -d $(BUILD); \
@@ -31,6 +34,7 @@ all:
 	@if ! test -d bin; \
 		then echo "\033[93msetting up bin directory...\033[0m"; mkdir -p bin; \
   	fi;
+	@export OPENBLAS_NUM_THREADS=2
 	@$(MAKE) project
 
 project: $(OBJECTS)
