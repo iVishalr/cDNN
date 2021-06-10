@@ -115,7 +115,6 @@ $ cd OpenBlas
 $ sudo make && sudo make install #This will take a while depending on your system speed. You may see some warnings along the way. Don't worry about it.
 ```
 
-
 On macOS,
 
 ```bash
@@ -151,12 +150,16 @@ I know its a lot of work, but there's no way around it.
 To compile a `test.c` file that uses cDNN, please type the following in terminal
 
 On Linux,
+
 ```bash
-$ gcc test.c -lcdnn -lncurses -lopenblas -lgomp -I /usr/local/include -L /usr/local/lib -I /opt/OpenBLAS/include/ -L /opt/OpenBLAS/lib/ -lm
+$ export OPENBLAS_NUM_THREADS=2
+$ gcc -I /usr/include/ -I /opt/OpenBLAS/include/ test.c -lcdnn -lgomp -lncurses -lopenblas -L /usr/lib/ -L /opt/OpenBLAS/lib/ -lm
 ```
+
 Please keep the above LDFLAGS (`-lcdnn`,`-lopenblas`, ....) in the same order. Otherwise test.c won't compile.
 
 On macOS,
+
 ```bash
 $ gcc test.c -lcdnn -lopenblas -lncurses -I /usr/local/include/ -L /usr/local/lib/ -I /opt/OpenBLAS/include/ -L /opt/OpenBLAS/lib/
 ```
@@ -209,14 +212,14 @@ int main(){
   Fit();
   Test();
   Save_Model("./DOGS_VS_CATS.t7");
-  
+
   int img_dims[] = {12288,1};
   dARRAY * test_img1 = load_image("./test_img1.data",img_dims);
   dARRAY * test_img2 = load_image("./test_img2.data",img_dims);
 
   dARRAY * prediction1 = Predict(test_img1,1);
   dARRAY * prediction2 = Predict(test_img2,1);
-  
+
   free2d(test_img1);
   free2d(test_img2);
   free2d(prediction1);
@@ -239,4 +242,3 @@ Avoid making commits directly to `main branch`. Create your own branch and make 
 ## License
 
 cDNN has a MIT-style license, as found in [LICENSE](https://github.com/iVishalr/cDNN/blob/main/LICENSE) file.
-
