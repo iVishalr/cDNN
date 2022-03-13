@@ -13,12 +13,12 @@ dARRAY * forward_pass_softmax(){
   free2d(exp_sub_max);
   free2d(div_factor);
   exp_sub_max = div_factor = NULL; 
-  
+
   return softmax_outf;
 }
 
 dARRAY * backward_pass_softmax(){
-  //not used as it is wrong. backward pass of sigmoid is difficult to implement
+  //not used as it is wrong. backward pass of sofftmax is difficult to implement
   dARRAY * softmax_outb = NULL;
   dARRAY * temp = NULL;
   dARRAY * one = NULL;

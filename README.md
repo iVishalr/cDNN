@@ -100,7 +100,7 @@ Requirements,
 
 ### Installing the Dependencies
 
-*Note : OpenBLAS errors out during build in macOS for some reason. Hence cDNN may not be able to run on macOS. However, if you are able to build OpenBLAS on your system, please let me know.*
+_Note : OpenBLAS errors out during build in macOS for some reason. Hence cDNN may not be able to run on macOS. However, if you are able to build OpenBLAS on your system, please let me know._
 
 On Linux,
 
@@ -117,7 +117,7 @@ $ cd OpenBLAS
 $ sudo make && sudo make install #This will take a while depending on your system speed. You may see some warnings along the way. Don't worry about it.
 ```
 
-On macOS, 
+On macOS,
 
 ```bash
 $ brew install ncurses
@@ -154,7 +154,7 @@ To compile a `test.c` file that uses cDNN, please type the following in terminal
 On Linux,
 
 ```bash
-$ export OPENBLAS_NUM_THREADS=2
+$ export OPENBLAS_NUM_THREADS=4 # set to 2 if you have less cores
 $ gcc -I /usr/include/ -I /opt/OpenBLAS/include/ test.c -lcdnn -lgomp -lncurses -lopenblas -L /usr/lib/ -L /opt/OpenBLAS/lib/ -lm
 ```
 
