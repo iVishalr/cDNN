@@ -100,8 +100,6 @@ Requirements,
 
 ### Installing the Dependencies
 
-_Note : OpenBLAS errors out during build in macOS for some reason. Hence cDNN may not be able to run on macOS. However, if you are able to build OpenBLAS on your system, please let me know._
-
 On Linux,
 
 ```bash
